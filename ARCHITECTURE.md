@@ -44,3 +44,5 @@ Aktuelle `SAVE_VERSION`: 1. Seit Tag 1 gibt es das optionale Feld `player.weapon
 ## Veröffentlichung
 
 Ein PR von `claude/day-NNN` wird von `.github/workflows/nightly-gate.yml` geprüft und gemergt, danach taggt der Workflow `day-NNN` und startet den Deploy. `.github/workflows/deploy.yml` baut die Seite aus `main` und legt für jeden Tag eine spielbare Kopie unter `day/NNN/` an. Fehlschläge lassen die Live-Seite unverändert.
+
+Grenzen pro PR: 1000 geänderte Zeilen außerhalb von `content/`, `tests/` und Doku. Bis 3000 nur mit `Big-Change: #N` in der PR-Beschreibung und einem `ja`-Kommentar von Chris auf dem `big-change`-Issue. Der Workflow schließt das Issue nach dem Merge.

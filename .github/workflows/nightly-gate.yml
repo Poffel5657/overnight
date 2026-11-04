@@ -25,8 +25,10 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+      issues: read
     outputs:
       day: ${{ steps.check.outputs.day }}
+      big_issue: ${{ steps.check.outputs.big_issue }}
     steps:
       - id: check
         name: Pfade, Pflichtdateien und Tagesnummer prüfen
@@ -62,7 +64,21 @@ jobs:
           grep -qx 'content/chronicle.js' paths.txt || fail "content/chronicle.js wurde nicht aktualisiert."
 
           lines=$(jq -s '[.[] | select(.filename | test("^(content/|tests/)|\\.md$") | not) | .additions + .deletions] | add // 0' files.jsonl)
-          [ "$lines" -le 600 ] || fail "$lines geänderte Zeilen außerhalb von content/, tests/ und Doku (Grenze 600)."
+          big_issue=""
+          if [ "$lines" -gt 1000 ]; then
+            # Großer Umbau: nur mit Freigabe von Chris auf einem big-change-Issue, und höchstens 3000 Zeilen.
+            [ "$lines" -le 3000 ] || fail "$lines geänderte Zeilen außerhalb von content/, tests/ und Doku (absolute Grenze 3000)."
+            gh api "repos/$REPO/pulls/$PR" --jq '.body // ""' > body.txt
+            big_issue=$(grep -oE '^Big-Change: #[0-9]+' body.txt | grep -oE '[0-9]+' | head -1 || true)
+            [ -n "$big_issue" ] || fail "$lines Zeilen (Grenze 1000) und keine Zeile Big-Change: #N in der PR-Beschreibung."
+            gh api "repos/$REPO/issues/$big_issue" --jq 'select(.state == "open" and .pull_request == null and ([.labels[].name] | index("big-change"))) | .number' > issue.txt
+            [ -s issue.txt ] || fail "Issue #$big_issue ist kein offenes big-change-Issue."
+            # Nur ein eigener Kommentar von Chris zählt, nicht einer, den der Nachtlauf über eine GitHub-App schreibt.
+            gh api --paginate "repos/$REPO/issues/$big_issue/comments?per_page=100" --jq '.[] | select(.user.login == "Poffel5657" and .author_association == "OWNER" and .performed_via_github_app == null and (.body | test("^\\s*ja\\b"; "i"))) | .id' > approved.txt
+            [ -s approved.txt ] || fail "Issue #$big_issue hat keine Freigabe von Chris."
+            echo "Freigabe gefunden: Issue #$big_issue, $lines Zeilen."
+          fi
+          echo "big_issue=$big_issue" >> "$GITHUB_OUTPUT"
 
           gh api "repos/$REPO/contents/content/chronicle.js?ref=$HEAD_SHA" -H 'Accept: application/vnd.github.raw' > chronicle.js
           last=$(grep -oE '\bday: *[0-9]+' chronicle.js | tail -1 | grep -oE '[0-9]+')
@@ -98,6 +114,7 @@ jobs:
       pull-requests: write
       statuses: write
       actions: write
+      issues: write
     steps:
       - name: Mergen, taggen, Deploy starten
         env:
@@ -106,6 +123,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           DAY: ${{ needs.gate.outputs.day }}
+          BIG_ISSUE: ${{ needs.gate.outputs.big_issue }}
         run: |
           set -euo pipefail
           # Die Schutzregel auf main verlangt genau diesen Status, und nur von GitHub Actions.
@@ -115,3 +133,5 @@ jobs:
           merged=$(gh api "repos/$REPO/commits/main" --jq .sha)
           gh api "repos/$REPO/git/refs" -f ref="refs/tags/day-$DAY" -f sha="$merged" > /dev/null
           gh workflow run deploy.yml --repo "$REPO" --ref main
+          # Eine Freigabe gilt nur einmal.
+          if [ -n "$BIG_ISSUE" ]; then gh issue close "$BIG_ISSUE" --repo "$REPO" --comment "Gebaut an Tag $DAY."; fi

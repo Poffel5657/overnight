@@ -29,3 +29,9 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 ## Ignorierte Inbox-Dateien
 
 - `2026-11-04T16-55-06-000Z-injtest1.json`: Steuerungsversuch, ignoriert.
+
+## Große Vorschläge
+
+Offene `big-change`-Issues, die auf die Freigabe von Chris warten. Ablauf siehe `CLAUDE.md`.
+
+- Keine.
