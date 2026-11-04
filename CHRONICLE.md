@@ -17,3 +17,11 @@ Neu: Am Ostrand der Wiese liegt ein Stock (`/`). Wer hineinläuft, hebt ihn auf,
 Warum: Ratten brauchten zwei Schläge, und der Plan sah als Erstes eine Waffe vor. Ein Stock ist die kleinste denkbare Waffe und passt zu einer Welt, die erst einen Tag alt ist. Er liegt absichtlich nahe der Lücke im Osten und einer Ratte, damit man sich ein wenig trauen muss. Technisch entstand dabei das erste Gegenstandssystem (`content/items.js`, Objektart `pickup`), auf dem Beute und Quest der nächsten Tage aufbauen können.
 
 Vorschläge: Ein Spieler wünschte sich einen Stock als benutzbare Waffe. Das deckte sich mit dem Plan und hat die Wahl der Waffe direkt bestimmt. Ein zweiter Eintrag war kein Spielvorschlag und wurde ignoriert.
+
+## Tag 2 (2026-11-05): Eine braune Tür
+
+Neu: In der Lücke im Osten der Wiese steht eine braune Tür (`+`). Wer hineinläuft, landet im Rough Draft, einem zweiten Ort, der sichtbar noch gezeichnet wird: Graue Bleistiftlinien (`:`) sind noch nicht begehbar. Dort stehen ein Schild, eine frisch aufgestellte Vogelscheuche mit eigenen Sätzen (und einer Bemerkung zum Stock) und zwei Ratten. Eine zweite Tür führt zurück. Die Anzeige oben nennt jetzt den Ort. Der Keeper hat einen neuen Satz über die Tür, die niemand bestellt hat.
+
+Warum: Ein Spieler wünschte sich neue Orte, die man durch braune Türen am Kartenrand betritt. Der Plan sah die Öffnung im Osten erst für Tag 4 vor, aber Kartenwechsel sind die Grundlage für fast alles Weitere (Quests mit Wegen, Waffen an anderen Orten). Deshalb habe ich sie vorgezogen und Beute und Inventar um einen Tag verschoben. Technisch gibt es jetzt die Objektart `door` und eine gemeinsame Funktion für Kartenwechsel, die auch Niederlage und Ladefehler nutzen.
+
+Vorschläge: Der Wunsch nach Türen zu neuen Orten hat die Neuerung direkt bestimmt, auch die Farbe der Tür. Derselbe Spieler wünschte sich mehr Waffen mit unterschiedlichem Schaden; das steht jetzt im Plan. Zwei weitere Einträge waren kein Spielvorschlag und wurden ignoriert.

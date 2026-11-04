@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "draft",
+  "player": { "x": 6, "y": 6, "hp": 9, "maxHp": 10, "atk": 1, "weapon": "stick" },
+  "turn": 140,
+  "flags": { "talk": { "keeper": 6, "scarecrow": 2 }, "taken": { "stick": true }, "heard": { "keeper:stick": true } },
+  "stats": { "kills": 8, "faints": 1 },
+  "lastSeenDay": 2
+}

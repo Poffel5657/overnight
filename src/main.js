@@ -5,6 +5,7 @@ import { loadSave, saveKey, writeSave } from './save.js';
 import { setupSuggestions } from './suggest.js';
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
+import { MAPS } from '../content/world.js';
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
@@ -28,7 +29,9 @@ function refresh() {
   draw(state);
   const { hp, maxHp } = state.player;
   const weapon = ITEMS[state.player.weapon];
-  $('hp-label').textContent = weapon ? `HP ${hp}/${maxHp} · ${weapon.name}` : `HP ${hp}/${maxHp}`;
+  const parts = [MAPS[state.map].name, `HP ${hp}/${maxHp}`];
+  if (weapon) parts.push(weapon.name);
+  $('hp-label').textContent = parts.join(' · ');
   $('hp-bar').style.width = `${(hp / maxHp) * 100}%`;
   $('hp-bar').classList.toggle('low', hp <= maxHp * 0.3);
   $('log').replaceChildren(
