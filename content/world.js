@@ -30,10 +30,18 @@ export const MAPS = {
           "The well fixes most things. The rats are not one of the things it fixes.",
           "If you know what should exist tomorrow, write it down. Sometimes the Nightwright listens.",
         ],
+        // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
+        itemLines: {
+          stick: "Is that a stick? It wasn't there yesterday. Rats respect a good stick. Mostly.",
+        },
       },
       {
         id: 'sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 10, y: 8,
         text: 'OVERNIGHT. Population: you. Yesterday this sign did not exist.',
+      },
+      {
+        id: 'stick', kind: 'pickup', item: 'stick', name: 'Stick', glyph: '/', color: '#b98a52', x: 20, y: 8,
+        text: 'You pick up a stick. It is very straight, as if someone made it on purpose last night.',
       },
       {
         id: 'well', kind: 'well', name: 'Well', glyph: 'O', color: '#6fb1e0', x: 14, y: 2,
