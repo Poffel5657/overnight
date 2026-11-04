@@ -19,9 +19,10 @@ jobs:
       contents: read
       pages: write
       id-token: write
+      deployments: read
     environment:
       name: github-pages
-      url: ${{ steps.pages.outputs.page_url }}
+      url: ${{ steps.first.outputs.page_url || steps.second.outputs.page_url || steps.third.outputs.page_url }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -41,5 +42,35 @@ jobs:
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site
-      - id: pages
+      # Pages lehnt einen Deploy ab, solange ein älterer als "in Arbeit" gilt. Dank concurrency läuft
+      # kein anderer Deploy von uns, ein solcher Eintrag ist also verwaist und darf abgebrochen werden.
+      - id: first
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+      - if: steps.first.outcome == 'failure'
+        name: Verwaiste Deploys abbrechen und warten
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          for sha in $(gh api "repos/$REPO/deployments?environment=github-pages&per_page=5" --jq '.[].sha' | sort -u); do
+            [ "$sha" = "$GITHUB_SHA" ] || gh api -X POST "repos/$REPO/pages/deployments/$sha/cancel" --silent || true
+          done
+          sleep 90
+      - id: second
+        if: steps.first.outcome == 'failure'
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        continue-on-error: true
+      - if: steps.second.outcome == 'failure'
+        name: Noch einmal abbrechen und länger warten
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          for sha in $(gh api "repos/$REPO/deployments?environment=github-pages&per_page=5" --jq '.[].sha' | sort -u); do
+            [ "$sha" = "$GITHUB_SHA" ] || gh api -X POST "repos/$REPO/pages/deployments/$sha/cancel" --silent || true
+          done
+          sleep 180
+      - id: third
+        if: steps.second.outcome == 'failure'
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
