@@ -47,6 +47,10 @@ jobs:
           behind=$(gh api "repos/$REPO/compare/$BASE_REF...$HEAD_SHA" --jq .behind_by)
           [ "$behind" = "0" ] || fail "Branch ist nicht auf dem aktuellen main aufgebaut."
 
+          # Keine privaten Adressen in die öffentliche Historie.
+          bad=$(gh api --paginate "repos/$REPO/pulls/$PR/commits?per_page=100" --jq '.[] | .commit.author.email, .commit.committer.email' | grep -vE '@users\.noreply\.github\.com$|^noreply@github\.com$' || true)
+          [ -z "$bad" ] || fail "Commit ohne Noreply-Adresse."
+
           gh api --paginate "repos/$REPO/pulls/$PR/files?per_page=100" --jq '.[]' > files.jsonl
           jq -r '.filename, (.previous_filename // empty)' files.jsonl | sort -u > paths.txt
 
@@ -106,7 +110,8 @@ jobs:
           set -euo pipefail
           # Die Schutzregel auf main verlangt genau diesen Status, und nur von GitHub Actions.
           gh api "repos/$REPO/statuses/$HEAD_SHA" -f state=success -f context=overnight-gate -f description="Gate und Tests bestanden" > /dev/null
-          gh pr merge "$PR" --repo "$REPO" --squash --delete-branch --match-head-commit "$HEAD_SHA"
-          merged=$(gh pr view "$PR" --repo "$REPO" --json mergeCommit --jq .mergeCommit.oid)
+          # Rebase statt Squash: Squash würde den Klarnamen und die Mail des Kontos als Autor eintragen.
+          gh pr merge "$PR" --repo "$REPO" --rebase --delete-branch --match-head-commit "$HEAD_SHA"
+          merged=$(gh api "repos/$REPO/commits/main" --jq .sha)
           gh api "repos/$REPO/git/refs" -f ref="refs/tags/day-$DAY" -f sha="$merged" > /dev/null
           gh workflow run deploy.yml --repo "$REPO" --ref main
