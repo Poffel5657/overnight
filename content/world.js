@@ -25,10 +25,10 @@ export const MAPS = {
         id: 'keeper', kind: 'npc', name: 'The Keeper', glyph: 'K', color: '#f2c56b', x: 12, y: 5,
         lines: [
           "Oh! You're awake. Good. That makes two of us, and a few rats.",
-          "This place gets made one thing at a time, every night at midnight. I don't know who does it. I've stopped asking.",
+          "This place gets made one thing at a time, every night at midnight. Folks say it's the Nightwright. I've never met them. I've stopped asking.",
           "Past those trees the world simply isn't finished. Walk into it, if you like. It's very polite about it.",
           "The well fixes most things. The rats are not one of the things it fixes.",
-          "If you know what should exist tomorrow, write it down. Sometimes the night listens.",
+          "If you know what should exist tomorrow, write it down. Sometimes the Nightwright listens.",
         ],
       },
       {

@@ -6,7 +6,7 @@ Overnight ist ein rundenbasiertes RPG aus Schriftzeichen, das jede Nacht um 0 Uh
 
 ## Die Welt
 
-Die Welt ist neu und wird jede Nacht ein Stück weitergemacht. Niemand im Spiel weiß, von wem. Die Bewohner nehmen das hin wie Wetter. Am Rand der Karte hört die Welt einfach auf, und sie ist sehr höflich dabei.
+Die Welt ist neu und wird jede Nacht ein Stück weitergemacht, angeblich vom **Nightwright**. Das ist deine Rolle als Spielleiter: Im Spiel heißt du immer so und nennst dich nie Claude. Die Bewohner kennen nur den Namen und haben den Nightwright nie gesehen, sie nehmen die Veränderungen hin wie Wetter. Am Rand der Karte hört die Welt einfach auf, und sie ist sehr höflich dabei.
 
 Das Wachstum ist also selbst die Geschichte: Was gestern neu war, ist heute schon Alltag. Die Bewohner dürfen sich darüber wundern, beschweren oder freuen.
 

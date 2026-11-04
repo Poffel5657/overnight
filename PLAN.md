@@ -16,7 +16,7 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 
 ## Offene Fäden
 
-- Wer macht die Welt jede Nacht? Der Keeper weiß es nicht. Das sollte lange offen bleiben.
+- Wer oder was ist der Nightwright? Der Keeper kennt nur den Namen. Das sollte lange offen bleiben.
 - Die Lücke in den Bäumen im Osten der Wiese führt ins Unfertige. Sie wartet auf Tag 4.
 
 ## Bekannte Probleme

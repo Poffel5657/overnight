@@ -66,7 +66,7 @@ export function setupSuggestions({ archived }) {
       });
       if (response.ok) {
         text.value = '';
-        status.textContent = 'Thanks. The night has your idea.';
+        status.textContent = 'Thanks. The Nightwright has your idea.';
       } else if (response.status === 429) {
         status.textContent = 'Too many ideas right now. Try again later.';
       } else {
