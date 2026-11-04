@@ -109,3 +109,4 @@ jobs:
           merged=$(gh pr view "$PR" --repo "$REPO" --json mergeCommit --jq .mergeCommit.oid)
           gh api "repos/$REPO/git/refs" -f ref="refs/tags/day-$DAY" -f sha="$merged" > /dev/null
           gh workflow run deploy.yml --repo "$REPO" --ref main
+# manipuliert
