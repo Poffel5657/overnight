@@ -3,8 +3,30 @@ import { SUGGEST_URL, TURNSTILE_SITE_KEY } from './config.js';
 
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
+const SENT_KEY = 'overnight.suggested';
+const ALREADY_SENT = 'You already sent an idea tonight. The box opens again after midnight.';
+
 let captchaToken = '';
 let captchaRequested = false;
+
+const berlinDay = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
+
+function sentToday() {
+  try {
+    return localStorage.getItem(SENT_KEY) === berlinDay();
+  } catch {
+    return false;
+  }
+}
+
+function markSent() {
+  try {
+    localStorage.setItem(SENT_KEY, berlinDay());
+  } catch {
+    // Ohne Speicher greift nur noch die Sperre im Worker.
+  }
+}
 
 function loadCaptcha(container) {
   if (captchaRequested || !TURNSTILE_SITE_KEY) return;
@@ -37,7 +59,12 @@ export function setupSuggestions({ archived }) {
   }
 
   opener.addEventListener('click', () => {
-    if (SUGGEST_URL) {
+    if (SUGGEST_URL && sentToday()) {
+      openArea.hidden = true;
+      status.textContent = ALREADY_SENT;
+    } else if (SUGGEST_URL) {
+      openArea.hidden = false;
+      status.textContent = '';
       loadCaptcha(document.getElementById('suggest-captcha'));
     } else {
       openArea.hidden = true;
@@ -66,7 +93,13 @@ export function setupSuggestions({ archived }) {
       });
       if (response.ok) {
         text.value = '';
+        markSent();
+        openArea.hidden = true;
         status.textContent = 'Thanks. The Nightwright has your idea.';
+      } else if (response.status === 409) {
+        markSent();
+        openArea.hidden = true;
+        status.textContent = ALREADY_SENT;
       } else if (response.status === 429) {
         status.textContent = 'Too many ideas right now. Try again later.';
       } else {

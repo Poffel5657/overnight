@@ -5,7 +5,11 @@ compatibility_date = "2026-10-01"
 [vars]
 INBOX_REPO = "Poffel5657/overnight-inbox"
 
-# Geheim per `wrangler secret put`: GITHUB_TOKEN, TURNSTILE_SECRET
+# Geheim per `wrangler secret put`: GITHUB_TOKEN, TURNSTILE_SECRET, IP_HASH_SECRET
+
+[[kv_namespaces]]
+binding = "SUBMISSIONS"
+id = "418ebacb23c94dc9bfe2c47ebdfc9755"
 
 [[ratelimits]]
 name = "LIMIT_PER_PERSON"

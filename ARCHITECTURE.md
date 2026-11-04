@@ -20,7 +20,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `tests/smoke/` | Allgemeine Tests, die immer gelten (geschützt) |
 | `tests/day/` | Tests pro Neuerung |
 | `tests/fixtures/` | Alte Spielstände, die immer ladbar bleiben müssen |
-| `worker/` | Cloudflare Worker für Vorschläge (geschützt) |
+| `worker/` | Cloudflare Worker für Vorschläge, ein Vorschlag pro Nacht und Anschluss (geschützt) |
 
 ## Systeme
 

@@ -1,7 +1,22 @@
 // Nimmt Vorschläge aus dem Spiel an und legt sie als JSON-Datei im privaten Inbox-Repo ab.
-// Gespeichert wird nur der Text. Die IP dient nur dem kurzlebigen Rate-Limit und wird nicht abgelegt.
+// Im Inbox-Repo landet nur der Text. Die IP selbst wird nie abgelegt: Für das Limit von einem Vorschlag
+// pro Nacht bleibt nur ein Fingerabdruck, der sich täglich ändert und nach gut einem Tag verfällt.
 const ALLOWED_ORIGIN = 'https://poffel5657.github.io';
 const MAX_LENGTH = 300;
+const FINGERPRINT_TTL_SECONDS = 26 * 60 * 60;
+
+// Die Nacht wechselt um Mitternacht in Berlin, dann baut auch der Nachtlauf.
+const berlinDay = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
+
+async function fingerprint(ip, day, secret) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`${day}|${ip}`));
+  return [...new Uint8Array(signature)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
 
 const cors = {
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
@@ -57,6 +72,9 @@ export default {
     if (!text || [...text].length > MAX_LENGTH) return reply(400);
     if (!(await captchaPassed(body.token, env, ip))) return reply(403);
 
+    const sentKey = `sent:${await fingerprint(ip, berlinDay(), env.IP_HASH_SECRET)}`;
+    if (await env.SUBMISSIONS.get(sentKey)) return reply(409);
+
     const now = new Date().toISOString();
     const name = `${now.replace(/[:.]/g, '-')}-${crypto.randomUUID().slice(0, 8)}.json`;
     const file = JSON.stringify({ receivedAt: now, untrustedPlayerText: text }, null, 2);
@@ -69,6 +87,9 @@ export default {
       },
       body: JSON.stringify({ message: 'Neuer Vorschlag', content: base64(file) }),
     });
-    return reply(stored.ok ? 204 : 502);
+    if (!stored.ok) return reply(502);
+    // Erst nach dem Speichern sperren, damit ein Fehler niemanden die Nacht über aussperrt.
+    await env.SUBMISSIONS.put(sentKey, '1', { expirationTtl: FINGERPRINT_TTL_SECONDS });
+    return reply(204);
   },
 };
