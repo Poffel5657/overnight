@@ -68,7 +68,8 @@ jobs:
 
   test:
     needs: gate
-    runs-on: ubuntu-latest
+    # Fest gewählt: Playwright unterstützt nicht jedes neue ubuntu-latest.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
