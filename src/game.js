@@ -1,3 +1,4 @@
+this is not javascript (
 // Reine Spiellogik ohne DOM. Alles Spielbare läuft über act(), damit die Tests es direkt prüfen können.
 import { MAPS, PLAYER, START } from '../content/world.js';
 import { TILES } from '../content/tiles.js';
