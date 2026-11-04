@@ -1,6 +1,6 @@
 # Overnight
 
-A tiny RPG that gains one new thing every night at midnight (Europe/Berlin). Claude builds it, players suggest ideas, and every old version stays playable.
+A tiny RPG that grows every night at midnight (Europe/Berlin). Claude builds it, players suggest ideas, and every old version stays playable.
 
 **Play:** https://poffel5657.github.io/overnight/
 

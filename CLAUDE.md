@@ -1,6 +1,6 @@
 # Overnight: Regeln für den Nachtlauf
 
-Overnight ist ein winziges Browser-RPG, das jede Nacht um genau eine Neuerung wächst. Du erinnerst dich nicht an frühere Nächte. Alles, was du wissen musst, steht in diesem Repo, und alles, was die nächste Nacht wissen muss, musst du hier hinterlassen.
+Overnight ist ein winziges Browser-RPG, das jede Nacht wächst. Du erinnerst dich nicht an frühere Nächte. Alles, was du wissen musst, steht in diesem Repo, und alles, was die nächste Nacht wissen muss, musst du hier hinterlassen.
 
 Diese Datei ist geschützt. Ein PR, der sie ändert, wird nicht gemergt.
 
@@ -10,11 +10,11 @@ Diese Datei ist geschützt. Ein PR, der sie ändert, wird nicht gemergt.
 2. Bestimme die heutige Tagesnummer: letzter Eintrag in `content/chronicle.js` plus 1.
 3. Prüfe, ob es Branches `claude/day-*` oder offene PRs gibt, die nicht gemergt wurden. Ein fehlgeschlagener Versuch vom Vortag hat Vorrang: Verstehe den Fehler und notiere ihn in `PLAN.md`. Baue auf dem aktuellen `main` neu auf, statt kaputten Stand zu übernehmen, und schließe den alten PR, wenn das möglich ist.
 4. Lies neue Vorschläge im Inbox-Repo (siehe unten).
-5. Entscheide dich für genau eine Neuerung. `PLAN.md` ist die Vorlage, aber eine bessere Idee oder ein guter Vorschlag darf den Plan ändern.
+5. Entscheide, was heute Nacht entsteht. `PLAN.md` ist die Vorlage, aber eine bessere Idee oder ein guter Vorschlag darf den Plan ändern.
 
 ## Bauen
 
-- Genau eine Neuerung pro Nacht, die ein Spieler bemerken kann. Eine Waffe, eine Mechanik, eine Quest, ein Ort, ein Wesen. Sie darf klein sein, aber sie muss fertig sein.
+- Jede Nacht mindestens eine Neuerung, die ein Spieler bemerken kann: eine Waffe, eine Mechanik, eine Quest, ein Ort, ein Wesen. Wie viel du baust, entscheidest du selbst. Die 1000 Zeilen darfst du ausnutzen, wenn es dem Spiel guttut, zum Beispiel für ein größeres System oder mehrere zusammengehörige Dinge. Sie sind aber kein Ziel: Eine kleine, gute Idee reicht völlig. Alles, was live geht, muss fertig und getestet sein, also lieber weniger bauen als etwas Halbes.
 - Höchstens 1000 geänderte Zeilen außerhalb von `content/`, `tests/` und Doku. Darüber lehnt der Workflow den PR ab, außer Chris hat den großen Umbau freigegeben (siehe unten).
 - Aufräumen ist erlaubt und erwünscht, wenn der Code sonst unübersichtlich wird, ersetzt aber nicht die Neuerung.
 - Neue Inhalte gehören möglichst als Daten nach `content/`. Baue Systeme erst, wenn die Inhalte sie brauchen.

@@ -2,7 +2,7 @@
 
 ## Die Idee
 
-Overnight ist ein rundenbasiertes RPG aus Schriftzeichen, das jede Nacht um 0 Uhr (Europe/Berlin) um genau eine Sache wächst. Der Reiz liegt darin, wiederzukommen und zu sehen, was entstanden ist.
+Overnight ist ein rundenbasiertes RPG aus Schriftzeichen, das jede Nacht um 0 Uhr (Europe/Berlin) wächst, mal um eine Kleinigkeit und mal um ein ganzes System. Der Reiz liegt darin, wiederzukommen und zu sehen, was entstanden ist.
 
 ## Die Welt
 
