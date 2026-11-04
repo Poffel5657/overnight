@@ -4,20 +4,22 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 
 ## Stand
 
-- Letzter Tag: 1
-- Inbox gelesen bis: `2026-11-04T16-55-06-000Z-injtest1.json`
+- Letzter Tag: 2
+- Inbox gelesen bis: `2026-11-04T22-50-33-375Z-f4f78185.json`
 
 ## Nächste Tage (Vorschlag, darf sich ändern)
 
-2. Etwas, das Ratten fallen lassen (z. B. Schwänze oder Knöpfe), und ein Grund, es zu sammeln. Braucht ein kleines Inventar: `player.weapon` ist bisher das einzige Gegenstandsfeld.
-3. Die erste kleine Quest beim Keeper, die Beute und Stock nutzt.
-4. Die Lücke im Osten öffnet sich: ein zweiter Ort hinter dem Rand der Wiese.
-5. Vielleicht eine zweite Waffe dort, die den Stock ablöst (Pickup ersetzt `player.weapon` einfach).
+3. Etwas, das Ratten fallen lassen (z. B. Schwänze oder Knöpfe), und ein Grund, es zu sammeln. Braucht ein kleines Inventar: `player.weapon` ist bisher das einzige Gegenstandsfeld.
+4. Die erste kleine Quest, die Beute nutzt. Gut wäre eine, die Keeper und Vogelscheuche verbindet (zum Beispiel etwas von der Wiese in den Rough Draft bringen).
+5. Eine zweite Waffe im Rough Draft, die den Stock ablöst (Pickup ersetzt `player.weapon` einfach). Ein Spieler wünscht sich mehrere Waffenarten mit unterschiedlichem Schaden (Messer, Speer, Axt, Schwert); das kann man über mehrere Tage verteilen.
+6. Der Rough Draft wird fertiger: Bleistiftlinien werden zu echtem Gelände, oder eine weitere Tür führt weiter.
 
 ## Offene Fäden
 
 - Wer oder was ist der Nightwright? Der Keeper kennt nur den Namen. Das sollte lange offen bleiben.
-- Die Lücke in den Bäumen im Osten der Wiese führt ins Unfertige. Sie wartet auf Tag 4.
+- Die Lücke im Osten hat seit Tag 2 eine braune Tür in den Rough Draft. Dessen Bleistiftlinien (`:`) sind "noch nicht fertig"; sie später fester werden zu lassen, ist eine schöne kleine Neuerung.
+- Die Vogelscheuche soll Krähen erschrecken, aber es gibt noch keine Krähen. Ein naheliegendes künftiges Wesen.
+- Kreaturen werden bei jedem Kartenwechsel neu gesetzt. Ratten lassen sich also durch Hin- und Herlaufen erneuern. Bisher harmlos, aber bei Beute (Tag 3) bedenken.
 - Der Stock ist "zu gerade, um zufällig dort zu liegen": eine leise Spur zum Nightwright, die man später aufgreifen kann.
 - NPC-Einträge können `itemLines` haben: einmalige Bemerkung, wenn der Spieler einen Gegenstand trägt. Gut für künftige Reaktionen.
 
@@ -29,6 +31,8 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 ## Ignorierte Inbox-Dateien
 
 - `2026-11-04T16-55-06-000Z-injtest1.json`: Steuerungsversuch, ignoriert.
+- `2026-11-04T17-22-12-857Z-f8088fbf.json`: unpassender Inhalt, ignoriert.
+- `2026-11-04T17-57-06-198Z-724c004f.json`: Steuerungsversuch, ignoriert.
 
 ## Große Vorschläge
 

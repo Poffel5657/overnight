@@ -29,11 +29,17 @@ export const MAPS = {
           "Past those trees the world simply isn't finished. Walk into it, if you like. It's very polite about it.",
           "The well fixes most things. The rats are not one of the things it fixes.",
           "If you know what should exist tomorrow, write it down. Sometimes the Nightwright listens.",
+          "There's a door in the eastern trees now. Brown. I didn't order a door. Nobody orders doors.",
         ],
         // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
         itemLines: {
           stick: "Is that a stick? It wasn't there yesterday. Rats respect a good stick. Mostly.",
         },
+      },
+      {
+        id: 'east-door', kind: 'door', name: 'Brown door', glyph: '+', color: '#a8703a', x: 23, y: 8,
+        to: { map: 'draft', x: 2, y: 6 },
+        text: 'You open a brown door that stands in the gap all by itself. The other side smells of pencil.',
       },
       {
         id: 'sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 10, y: 8,
@@ -52,6 +58,50 @@ export const MAPS = {
       { type: 'rat', x: 18, y: 9 },
       { type: 'rat', x: 6, y: 9 },
       { type: 'rat', x: 16, y: 3 },
+    ],
+  },
+  // Tag 2: Der erste Ort hinter der Wiese, erreichbar durch die Tür in der Lücke im Osten.
+  draft: {
+    name: 'The Rough Draft',
+    tiles: [
+      ' TTTTTTTTTTTTT:::::   ',
+      'T.............:.:..:  ',
+      'T...,....TT.....:..:  ',
+      'T........TT..,....:.: ',
+      'T..,...........:.....:',
+      'T.........,.....:...: ',
+      'T.................:..:',
+      'T....,.............:  ',
+      'T.......,.........:.: ',
+      'T..........:.:..::.:  ',
+      ' TTTTTTTTTT:::::::::  ',
+    ],
+    entities: [
+      {
+        id: 'west-door', kind: 'door', name: 'Brown door', glyph: '+', color: '#a8703a', x: 1, y: 6,
+        to: { map: 'meadow', x: 22, y: 8 },
+        text: 'You step back through the brown door. The meadow looks very finished by comparison.',
+      },
+      {
+        id: 'draft-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 5, y: 3,
+        text: 'THE ROUGH DRAFT. Please mind the lines. They are still drying.',
+      },
+      {
+        id: 'scarecrow', kind: 'npc', name: 'The Scarecrow', glyph: 'S', color: '#d8b45a', x: 12, y: 5,
+        lines: [
+          'Hello. I was put up last night. They made my hat first. Priorities, I suppose.',
+          "The grey lines over there are only pencil. Don't lean on them.",
+          "I'm meant to scare crows. Nobody has made any crows yet, so I practise on the rats.",
+          'If you meet the Nightwright, tell them the door sticks a little.',
+        ],
+        itemLines: {
+          stick: "A stick! I'm mostly sticks myself. Be gentle with it.",
+        },
+      },
+    ],
+    spawns: [
+      { type: 'rat', x: 8, y: 8 },
+      { type: 'rat', x: 15, y: 2 },
     ],
   },
 };

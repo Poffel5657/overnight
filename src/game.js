@@ -60,6 +60,14 @@ function spawnCreatures(mapId) {
   }));
 }
 
+// Wechselt die Karte. Kreaturen der neuen Karte erscheinen frisch, nie auf dem Ankunftsfeld.
+function enterMap(s, mapId, x, y) {
+  s.map = mapId;
+  s.player.x = x;
+  s.player.y = y;
+  s.creatures = spawnCreatures(mapId).filter((c) => !(c.x === x && c.y === y));
+}
+
 // saved: migrierter Spielstand aus save.js oder null für ein neues Spiel.
 // Kreaturen werden nie gespeichert, sonst könnten sie nach einem Update in neuem Gelände stecken.
 export function createGame({ saved = null, seed = Date.now() } = {}) {
@@ -87,12 +95,7 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
   }
   s.creatures = spawnCreatures(s.map);
   // Die Welt kann sich über Nacht geändert haben: Spieler notfalls zurück an den Start setzen.
-  if (!isStandable(s, s.player.x, s.player.y)) {
-    s.map = START.map;
-    s.player.x = START.x;
-    s.player.y = START.y;
-    s.creatures = spawnCreatures(s.map);
-  }
+  if (!isStandable(s, s.player.x, s.player.y)) enterMap(s, START.map, START.x, START.y);
   s.creatures = s.creatures.filter((c) => !(c.x === s.player.x && c.y === s.player.y));
   return s;
 }
@@ -124,6 +127,11 @@ export const INTERACTIONS = {
     log(s, e.text, 'new-tonight');
     log(s, `You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
   },
+  // Türen führen auf eine andere Karte: to = { map, x, y } ist das Ankunftsfeld.
+  door(s, e) {
+    enterMap(s, e.to.map, e.to.x, e.to.y);
+    log(s, e.text);
+  },
   well(s, e) {
     s.player.hp = s.player.maxHp;
     log(s, e.text);
@@ -148,13 +156,8 @@ function hurtPlayer(s, def) {
   log(s, `The ${def.name} bites you.`, 'danger');
   if (s.player.hp <= 0) {
     s.stats.faints += 1;
-    s.map = START.map;
-    s.player.x = START.x;
-    s.player.y = START.y;
     s.player.hp = s.player.maxHp;
-    s.creatures = spawnCreatures(s.map).filter(
-      (c) => !(c.x === s.player.x && c.y === s.player.y),
-    );
+    enterMap(s, START.map, START.x, START.y);
     log(s, 'Everything goes dark. You wake up in your bed, as if it were a new day.', 'danger');
     return true;
   }

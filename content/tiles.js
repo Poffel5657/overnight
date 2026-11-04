@@ -19,5 +19,9 @@ export const TILES = {
     name: 'water', glyph: '~', fg: '#6fb1e0', bg: '#14304a', walkable: false,
     bump: 'The pond is cold, and nobody has invented swimming yet.',
   },
+  ':': {
+    name: 'sketch', glyph: ':', fg: '#8a8fa8', bg: '#181a24', walkable: false,
+    bump: "This part is only sketched in. It won't hold your weight yet.",
+  },
   'B': { name: 'bed', glyph: '=', fg: '#e0705f', bg: '#2a2219', walkable: true },
 };
