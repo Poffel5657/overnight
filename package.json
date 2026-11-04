@@ -1,0 +1,12 @@
+{
+  "name": "overnight",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node tests/smoke/serve.mjs",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

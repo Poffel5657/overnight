@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "meadow",
+  "player": { "x": 8, "y": 8, "hp": 6, "maxHp": 10, "atk": 1 },
+  "turn": 42,
+  "flags": { "talk": { "keeper": 2 } },
+  "stats": { "kills": 3, "faints": 1 },
+  "lastSeenDay": 0
+}

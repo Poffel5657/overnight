@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'none'; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'">
+  <title>Overnight</title>
+  <meta name="description" content="A tiny RPG that gains one new thing every night at midnight.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <h1>Overnight</h1>
+      <p id="day-label" class="day"></p>
+    </header>
+
+    <p id="archive-note" class="archive-note" hidden></p>
+
+    <canvas id="world" aria-label="Game world. Use the arrow keys or the on-screen buttons to move."></canvas>
+
+    <div class="hud">
+      <div class="hp" id="hp-label"></div>
+      <div class="hp-track"><div id="hp-bar" class="hp-fill"></div></div>
+    </div>
+
+    <ol id="log" class="log" aria-live="polite"></ol>
+
+    <div class="pad" aria-label="Movement">
+      <button data-action="up" aria-label="Move up">↑</button>
+      <button data-action="left" aria-label="Move left">←</button>
+      <button data-action="wait" aria-label="Wait one turn">·</button>
+      <button data-action="right" aria-label="Move right">→</button>
+      <button data-action="down" aria-label="Move down">↓</button>
+    </div>
+
+    <nav class="actions">
+      <button id="open-chronicle">Chronicle</button>
+      <button id="open-suggest">Suggest for tomorrow</button>
+    </nav>
+
+    <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait.</p>
+  </main>
+
+  <dialog id="chronicle-dialog">
+    <h2>Chronicle</h2>
+    <p>Everything that has ever appeared, and the night it appeared. Every old version stays playable.</p>
+    <ol id="chronicle-list" class="chronicle" reversed></ol>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <dialog id="suggest-dialog">
+    <h2>What should exist tomorrow?</h2>
+    <div id="suggest-open">
+      <p>Claude builds this game one thing per night and reads every idea. It picks what fits, so yours may show up in some form, or not at all.</p>
+      <label for="suggest-text">Your idea (one thing, 300 characters at most)</label>
+      <textarea id="suggest-text" maxlength="300" rows="4"></textarea>
+      <div class="trap" aria-hidden="true">
+        <label for="suggest-website">Leave this empty</label>
+        <input id="suggest-website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <div id="suggest-captcha"></div>
+      <p class="fineprint">Only your text is stored, without your name or IP address. Please don't include personal details.</p>
+      <button id="suggest-send">Send idea</button>
+    </div>
+    <p id="suggest-status" role="status"></p>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+</body>
+</html>
