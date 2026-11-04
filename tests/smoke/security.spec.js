@@ -3,8 +3,8 @@ import { expect, test } from '@playwright/test';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-// Einzige erlaubte Richtlinie. Beim Anbinden des Workers wird nur connect-src angepasst.
-const EXPECTED_CSP = "default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'none'; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'";
+// Einzige erlaubte Richtlinie. connect-src erlaubt nur den eigenen Vorschlags-Worker.
+const EXPECTED_CSP = "default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src https://overnight-suggestions.overnight-rpg.workers.dev; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'";
 
 const NETWORK_ALLOWED = new Set(['src/suggest.js', 'src/config.js']);
 
