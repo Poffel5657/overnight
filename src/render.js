@@ -1,7 +1,7 @@
 // Zeichnet die Welt als Schriftzeichen auf das Canvas.
 import { MAPS } from '../content/world.js';
 import { CREATURES } from '../content/creatures.js';
-import { tileAt } from './game.js';
+import { tileAt, visibleEntities } from './game.js';
 
 // Auf schmalen Bildschirmen wird ein kleinerer Ausschnitt gezeigt, damit die Zeichen lesbar bleiben.
 const NARROW = window.innerWidth < 600;
@@ -54,7 +54,7 @@ export function createRenderer(canvas) {
     const figure = (x, y, glyph, color) =>
       cell(x - camX, y - camY, glyph, color, tileAt(s.map, x, y).bg);
 
-    for (const e of map.entities) figure(e.x, e.y, e.glyph, e.color);
+    for (const e of visibleEntities(s)) figure(e.x, e.y, e.glyph, e.color);
     for (const c of s.creatures) {
       if (c.respawnAt === null) {
         const def = CREATURES[c.type];

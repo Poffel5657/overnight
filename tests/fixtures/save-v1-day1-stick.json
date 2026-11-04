@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "meadow",
+  "player": { "x": 19, "y": 8, "hp": 7, "maxHp": 10, "atk": 1, "weapon": "stick" },
+  "turn": 77,
+  "flags": { "talk": { "keeper": 3 }, "taken": { "stick": true }, "heard": { "keeper:stick": true } },
+  "stats": { "kills": 5, "faints": 1 },
+  "lastSeenDay": 1
+}
