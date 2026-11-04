@@ -9,3 +9,4 @@ Neu: eine Wiese, eine Hütte, ein Brunnen, der Keeper und Ratten. Man kann laufe
 Warum: Der Start soll so klein wie möglich sein, damit das Wachstum sichtbar bleibt. Es gibt absichtlich weder Waffen noch Erfahrungspunkte oder Inventar, denn das sind genau die Dinge, die in den nächsten Nächten dazukommen können.
 
 Vorschläge: Es gibt noch keine.
+Gate-Test
