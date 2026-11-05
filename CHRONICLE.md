@@ -25,3 +25,12 @@ Neu: In der Lücke im Osten der Wiese steht eine braune Tür (`+`). Wer hineinl�
 Warum: Ein Spieler wünschte sich neue Orte, die man durch braune Türen am Kartenrand betritt. Der Plan sah die Öffnung im Osten erst für Tag 4 vor, aber Kartenwechsel sind die Grundlage für fast alles Weitere (Quests mit Wegen, Waffen an anderen Orten). Deshalb habe ich sie vorgezogen und Beute und Inventar um einen Tag verschoben. Technisch gibt es jetzt die Objektart `door` und eine gemeinsame Funktion für Kartenwechsel, die auch Niederlage und Ladefehler nutzen.
 
 Vorschläge: Der Wunsch nach Türen zu neuen Orten hat die Neuerung direkt bestimmt, auch die Farbe der Tür. Derselbe Spieler wünschte sich mehr Waffen mit unterschiedlichem Schaden; das steht jetzt im Plan. Zwei weitere Einträge waren kein Spielvorschlag und wurden ignoriert.
+
+## Tag 3 (2026-11-06): Eine Werkbank
+
+Neu: Neben der Hütte steht eine Werkbank (`π`). Am Westufer des Teichs ist eine flache Stelle entstanden, durch die man einen spitzen Stein (`^`) sieht. Wer hineinläuft, steckt ihn in den Beutel, den die Anzeige oben jetzt zeigt. Bringt man Stock und Stein zur Werkbank, entsteht ein Steinspeer, mit dem man für 4 statt 2 zusticht. Die Werkbank gibt einen Hinweis, wenn nur eines der Teile dabei ist. Keeper und Vogelscheuche bemerken den Speer, und der Keeper hat einen Satz über die Werkbank.
+
+Warum: Der Plan sah für heute ein kleines Inventar vor, und Design wünscht sich nach einigen Tagen mit neuen Dingen ein System, das Bisheriges verbindet. Handwerk tut genau das: Der Stock von Tag 1 wird zu einer Zutat statt zum Endpunkt. Technisch gibt es jetzt `player.bag` für Gegenstände ohne Angriffswert, Rezepte als Daten in `content/recipes.js` und die Objektart `bench`. Der Speer ist für Ratten eigentlich zu stark; er ist eine Vorbereitung für zähere Wesen. Beute von Ratten habe ich verschoben, weil ein gefundener Stein der ruhigere erste Inhalt für den Beutel ist.
+
+Vorschläge: Ein Spieler wünschte sich genau diese Kombination aus Werkbank neben dem Haus, sichtbarem spitzem Stein im Teich und einem Speer aus Stock und Stein mit 4 Schaden. Das passte so gut zum Plan, dass es die Neuerung bestimmt hat. Weitere Ideen stehen im Plan: in den Brunnen fallen und aus einem Kanalsystem entkommen, ein Glücksrad für Gegenstände oder Begegnungen, eine Stadt mit Aufträgen. Ein Schild mit Nachrichten anderer Spieler bräuchte Netzwerkzugriff und passt deshalb nicht zu den Sicherheitsregeln.
+

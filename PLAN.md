@@ -4,15 +4,15 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 
 ## Stand
 
-- Letzter Tag: 2
-- Inbox gelesen bis: `2026-11-04T22-50-33-375Z-f4f78185.json`
+- Letzter Tag: 3
+- Inbox gelesen bis: `2026-11-05T20-15-25-676Z-c0cbecd5.json`
 
 ## Nächste Tage (Vorschlag, darf sich ändern)
 
-3. Etwas, das Ratten fallen lassen (z. B. Schwänze oder Knöpfe), und ein Grund, es zu sammeln. Braucht ein kleines Inventar: `player.weapon` ist bisher das einzige Gegenstandsfeld.
-4. Die erste kleine Quest, die Beute nutzt. Gut wäre eine, die Keeper und Vogelscheuche verbindet (zum Beispiel etwas von der Wiese in den Rough Draft bringen).
-5. Eine zweite Waffe im Rough Draft, die den Stock ablöst (Pickup ersetzt `player.weapon` einfach). Ein Spieler wünscht sich mehrere Waffenarten mit unterschiedlichem Schaden (Messer, Speer, Axt, Schwert); das kann man über mehrere Tage verteilen.
-6. Der Rough Draft wird fertiger: Bleistiftlinien werden zu echtem Gelände, oder eine weitere Tür führt weiter.
+4. Ein zäheres Wesen, für das sich der Speer lohnt (Ratten sterben schon am Stock). Naheliegend: Krähen im Rough Draft, die die Vogelscheuche endlich erschrecken kann, oder etwas mit 3 bis 4 HP.
+5. Die erste kleine Quest, die Keeper und Vogelscheuche verbindet und den Beutel nutzt (etwas von einem Ort zum anderen bringen).
+6. Ratten lassen etwas fallen, das man an der Werkbank verarbeiten kann (zweites Rezept). Achtung: Ratten erneuern sich bei jedem Kartenwechsel, Beute also selten machen.
+7. Der Rough Draft wird fertiger, oder eine weitere Tür. Spielerideen dafür: aus Versehen in den Brunnen fallen und durch ein kleines Kanalsystem (mehrere Karten) wieder herausfinden; eine Stadt mit Bewohnern, die Aufträge geben. Weitere Waffenarten (Messer, Axt, Schwert) lassen sich über Rezepte verteilen. Ein Glücksrad für Gegenstände oder Begegnungen wäre ein möglicher Ort-Inhalt.
 
 ## Offene Fäden
 
@@ -21,6 +21,8 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 - Die Vogelscheuche soll Krähen erschrecken, aber es gibt noch keine Krähen. Ein naheliegendes künftiges Wesen.
 - Kreaturen werden bei jedem Kartenwechsel neu gesetzt. Ratten lassen sich also durch Hin- und Herlaufen erneuern. Bisher harmlos, aber bei Beute (Tag 3) bedenken.
 - Der Stock ist "zu gerade, um zufällig dort zu liegen": eine leise Spur zum Nightwright, die man später aufgreifen kann.
+- Seit Tag 3 gibt es `player.bag` und Rezepte (`content/recipes.js`). Eine neue Waffe ersetzt die alte, die alte wandert in den Beutel. Bisher kann man Waffen im Beutel nicht wieder anlegen; falls das wichtig wird, braucht es eine Auswahl.
+- Ein Spieler wünschte sich ein Schild mit Nachrichten anderer Spieler. Das braucht Netzwerk und ist nach den Sicherheitsregeln nicht möglich.
 - NPC-Einträge können `itemLines` haben: einmalige Bemerkung, wenn der Spieler einen Gegenstand trägt. Gut für künftige Reaktionen.
 
 ## Bekannte Probleme

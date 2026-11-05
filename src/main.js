@@ -31,6 +31,7 @@ function refresh() {
   const weapon = ITEMS[state.player.weapon];
   const parts = [MAPS[state.map].name, `HP ${hp}/${maxHp}`];
   if (weapon) parts.push(weapon.name);
+  if (state.player.bag.length) parts.push(`bag: ${state.player.bag.map((id) => ITEMS[id].name).join(', ')}`);
   $('hp-label').textContent = parts.join(' · ');
   $('hp-bar').style.width = `${(hp / maxHp) * 100}%`;
   $('hp-bar').classList.toggle('low', hp <= maxHp * 0.3);

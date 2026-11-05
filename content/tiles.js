@@ -19,6 +19,8 @@ export const TILES = {
     name: 'water', glyph: '~', fg: '#6fb1e0', bg: '#14304a', walkable: false,
     bump: 'The pond is cold, and nobody has invented swimming yet.',
   },
+  // Seit Tag 3: flache Stelle am Teich, durch die man den spitzen Stein sieht.
+  's': { name: 'shallows', glyph: '~', fg: '#9fd0ee', bg: '#1d4560', walkable: true },
   ':': {
     name: 'sketch', glyph: ':', fg: '#8a8fa8', bg: '#181a24', walkable: false,
     bump: "This part is only sketched in. It won't hold your weight yet.",

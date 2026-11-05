@@ -14,7 +14,8 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `src/suggest.js`, `src/config.js` | Vorschlagsformular und Einstellungen (geschützt) |
 | `content/tiles.js` | Geländetypen |
 | `content/creatures.js` | Kreaturentypen |
-| `content/items.js` | Gegenstände (bisher nur Waffen mit `atk`-Bonus und `hitVerb`) |
+| `content/items.js` | Gegenstände: mit `atk` (und `hitVerb`) eine Waffe, ohne `atk` ein Ding für den Beutel |
+| `content/recipes.js` | Rezepte für die Werkbank: `needs`, `makes`, `text`, `hint` |
 | `content/world.js` | Karten, Objekte, Spawns, Spielerwerte, Startpunkt |
 | `content/chronicle.js` | Chronik im Spiel, der letzte Eintrag legt die Tageszahl fest |
 | `tests/smoke/` | Allgemeine Tests, die immer gelten (geschützt) |
@@ -25,7 +26,8 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 ## Systeme
 
 - **Züge:** `act()` nimmt `up`, `down`, `left`, `right` oder `wait`. Reihenfolge beim Laufen: Kreatur angreifen, sonst Objekt benutzen, sonst laufen. Gegen nicht begehbares Gelände zu laufen kostet keine Runde.
-- **Objekte:** Einträge in `entities` einer Karte. `kind` wählt das Verhalten aus `INTERACTIONS` in `src/game.js`. Bisher: `npc`, `sign`, `well`, `pickup`, `door`. `door` hat `to: { map, x, y }` und wechselt über `enterMap()` die Karte; das Ankunftsfeld muss begehbar und frei sein (Test in `tests/day/002-door.spec.js`). `pickup` mit `item` legt den Gegenstand als `player.weapon` an und setzt `flags.taken[id]`; `visibleEntities(s)` blendet aufgenommene Objekte aus (Logik und Zeichnen nutzen es). `npc` kann `itemLines` haben: eine einmalige Bemerkung, sobald der Spieler den Gegenstand trägt (gemerkt in `flags.heard`).
+- **Objekte:** Einträge in `entities` einer Karte. `kind` wählt das Verhalten aus `INTERACTIONS` in `src/game.js`. Bisher: `npc`, `sign`, `well`, `pickup`, `door`. `door` hat `to: { map, x, y }` und wechselt über `enterMap()` die Karte; das Ankunftsfeld muss begehbar und frei sein (Test in `tests/day/002-door.spec.js`). `pickup` mit `item` gibt den Gegenstand über `giveItem()` (Waffe nach `player.weapon`, die alte Waffe in den Beutel; sonst nach `player.bag`) und setzt `flags.taken[id]`; `bench` baut das erste Rezept, für das `hasItem()` alles findet, verbraucht die Zutaten und gibt das Ergebnis; `visibleEntities(s)` blendet aufgenommene Objekte aus (Logik und Zeichnen nutzen es). `npc` kann `itemLines` haben: eine einmalige Bemerkung, sobald der Spieler den Gegenstand trägt (gemerkt in `flags.heard`).
+- **Gelände:** Objekte müssen auf begehbaren Feldern stehen (Smoke-Test). Für Dinge "im Wasser" gibt es deshalb die begehbare flache Stelle `s` (seit Tag 3).
 - **Angriff:** Immer `attackOf(s)` verwenden, das ist `player.atk` plus Bonus der Waffe.
 - **Kreaturen:** `ai` wählt das Verhalten aus `AI_BEHAVIOURS` in `src/game.js`. Bisher: `skulk`. Besiegte Kreaturen kommen nach `respawnTurns` zurück, wenn der Spieler weit genug weg ist.
 - **Zufall:** Immer `random(s)` aus `src/game.js` verwenden, nie `Math.random()`, sonst sind Tests nicht wiederholbar.
@@ -36,7 +38,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 
 `localStorage` unter `overnight.save`, Archivversionen unter `overnight.save.dayNNN`. Gespeichert werden `version`, `map`, `player`, `turn`, `flags`, `stats`, `lastSeenDay`. Kreaturen werden absichtlich nicht gespeichert. Steht der Spieler nach einem Update auf einem nicht begehbaren Feld, kommt er zurück zum Start.
 
-Aktuelle `SAVE_VERSION`: 1. Seit Tag 1 gibt es das optionale Feld `player.weapon` (fehlt es, gilt `null`) und die Flags `taken` und `heard`. Das ist abwärtskompatibel, daher keine neue Version; Fixture `save-v1-day1-stick.json`. Seit Tag 2 kann `map` auch `draft` sein, ebenfalls ohne neue Version; Fixture `save-v1-day2-draft.json`.
+Aktuelle `SAVE_VERSION`: 1. Seit Tag 1 gibt es das optionale Feld `player.weapon` (fehlt es, gilt `null`) und die Flags `taken` und `heard`. Das ist abwärtskompatibel, daher keine neue Version; Fixture `save-v1-day1-stick.json`. Seit Tag 2 kann `map` auch `draft` sein, ebenfalls ohne neue Version; Fixture `save-v1-day2-draft.json`. Seit Tag 3 gibt es das optionale Feld `player.bag` (Liste von Gegenstands-IDs; fehlt es, gilt `[]`, unbekannte IDs werden beim Laden verworfen), ohne neue Version; Fixture `save-v1-day3-bag.json`.
 
 ## Testschnittstelle
 

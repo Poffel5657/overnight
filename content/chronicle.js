@@ -19,4 +19,10 @@ export const CHRONICLE = [
     title: 'A brown door',
     text: 'A door now stands in the gap in the eastern trees. Behind it: the Rough Draft, a place still being drawn.',
   },
+  {
+    day: 3,
+    date: '2026-11-06',
+    title: 'A workbench',
+    text: 'A workbench stands by the hut, and a pointed rock glints in the pond shallows. Together with the stick, they make a stone spear.',
+  },
 ];

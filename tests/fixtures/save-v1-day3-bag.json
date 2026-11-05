@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "meadow",
+  "player": { "x": 11, "y": 6, "hp": 10, "maxHp": 10, "atk": 1, "weapon": "stick", "bag": ["pointy-rock"] },
+  "turn": 210,
+  "flags": { "talk": { "keeper": 7 }, "taken": { "stick": true, "pointy-rock": true }, "heard": { "keeper:stick": true } },
+  "stats": { "kills": 11, "faints": 1 },
+  "lastSeenDay": 3
+}

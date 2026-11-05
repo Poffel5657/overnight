@@ -4,6 +4,7 @@ import { TILES } from '../content/tiles.js';
 import { CREATURES } from '../content/creatures.js';
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
+import { RECIPES } from '../content/recipes.js';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const LOG_LIMIT = 50;
@@ -37,6 +38,21 @@ export const entityAt = (s, x, y) =>
   visibleEntities(s).find((e) => e.x === x && e.y === y);
 
 export const attackOf = (s) => s.player.atk + (ITEMS[s.player.weapon]?.atk ?? 0);
+// Gegenstände: Waffen (mit atk) liegen in player.weapon, alles andere in player.bag.
+export const hasItem = (s, id) => s.player.weapon === id || s.player.bag.includes(id);
+function takeItem(s, id) {
+  if (s.player.weapon === id) s.player.weapon = null;
+  else s.player.bag.splice(s.player.bag.indexOf(id), 1);
+}
+// Eine neue Waffe ersetzt die alte, die alte wandert in den Beutel und geht nie verloren.
+function giveItem(s, id) {
+  if (ITEMS[id].atk === undefined) {
+    s.player.bag.push(id);
+    return;
+  }
+  if (s.player.weapon) s.player.bag.push(s.player.weapon);
+  s.player.weapon = id;
+}
 
 export const creatureAt = (s, x, y) =>
   s.creatures.find((c) => c.respawnAt === null && c.x === x && c.y === y);
@@ -75,7 +91,7 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     seed: seed | 0,
     map: START.map,
     player: {
-      x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null,
+      x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null, bag: [],
     },
     turn: 0,
     flags: {},
@@ -91,6 +107,8 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     s.flags = saved.flags ?? {};
     s.stats = { ...s.stats, ...saved.stats };
     s.lastSeenDay = saved.lastSeenDay ?? null;
+    if (!Array.isArray(s.player.bag)) s.player.bag = [];
+    s.player.bag = s.player.bag.filter((id) => ITEMS[id]);
     s.player.hp = Math.min(Math.max(s.player.hp, 1), s.player.maxHp);
   }
   s.creatures = spawnCreatures(s.map);
@@ -123,9 +141,23 @@ export const INTERACTIONS = {
   pickup(s, e) {
     const item = ITEMS[e.item];
     (s.flags.taken ??= {})[e.id] = true;
-    s.player.weapon = e.item;
+    giveItem(s, e.item);
     log(s, e.text, 'new-tonight');
-    log(s, `You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
+    if (item.atk !== undefined) log(s, `You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
+  },
+  // Werkbank: baut das erste Rezept aus content/recipes.js, für das der Spieler alles dabeihat.
+  bench(s, e) {
+    const recipe = RECIPES.find((r) => r.needs.every((id) => hasItem(s, id)));
+    if (!recipe) {
+      const partial = RECIPES.find((r) => r.needs.some((id) => hasItem(s, id)));
+      log(s, partial ? partial.hint : e.text);
+      return;
+    }
+    for (const id of recipe.needs) takeItem(s, id);
+    giveItem(s, recipe.makes);
+    const made = ITEMS[recipe.makes];
+    log(s, recipe.text, 'new-tonight');
+    if (made.atk !== undefined) log(s, `You now ${made.hitVerb} things for ${attackOf(s)} damage.`);
   },
   // Türen führen auf eine andere Karte: to = { map, x, y } ist das Ankunftsfeld.
   door(s, e) {
