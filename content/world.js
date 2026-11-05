@@ -12,7 +12,7 @@ export const MAPS = {
       '    T....,.......,.T     ',
       '   T...###.........,.T   ',
       '  T....#B#.........~~.T  ',
-      '  T.,..#.#........~~~~T  ',
+      '  T.,..#.#........s~~~T  ',
       '  T....#.#.........~~.T  ',
       '  T....#.#.....,......T  ',
       '   T....................  ',
@@ -30,11 +30,21 @@ export const MAPS = {
           "The well fixes most things. The rats are not one of the things it fixes.",
           "If you know what should exist tomorrow, write it down. Sometimes the Nightwright listens.",
           "There's a door in the eastern trees now. Brown. I didn't order a door. Nobody orders doors.",
+          "Someone put a workbench by your hut. It hums when you bring it two things that belong together.",
         ],
         // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
         itemLines: {
           stick: "Is that a stick? It wasn't there yesterday. Rats respect a good stick. Mostly.",
+          'stone-spear': "A spear! Now we're a settlement with a weapons industry. Don't tell the rats.",
         },
+      },
+      {
+        id: 'bench', kind: 'bench', name: 'Workbench', glyph: 'π', color: '#c49a6c', x: 10, y: 6,
+        text: 'A workbench, still smelling of sawdust. It has nothing to work on.',
+      },
+      {
+        id: 'pointy-rock', kind: 'pickup', item: 'pointy-rock', name: 'Pointed rock', glyph: '^', color: '#c8ccd4', x: 18, y: 5,
+        text: 'You fish a pointed rock out of the shallows. It was always there, apparently. You just never looked.',
       },
       {
         id: 'east-door', kind: 'door', name: 'Brown door', glyph: '+', color: '#a8703a', x: 23, y: 8,
@@ -96,6 +106,7 @@ export const MAPS = {
         ],
         itemLines: {
           stick: "A stick! I'm mostly sticks myself. Be gentle with it.",
+          'stone-spear': "Is that a stick with a rock on it? Please don't introduce me to the workbench.",
         },
       },
     ],
