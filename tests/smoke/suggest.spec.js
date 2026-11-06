@@ -8,6 +8,7 @@ const open = async (page) => {
   await page.route('https://challenges.cloudflare.com/**', (route) => route.abort());
   await page.goto('/?seed=7');
   await page.waitForFunction(() => window.__overnight);
+  await page.click('[aria-controls="panel-shape"]');
   await page.click('#open-suggest');
 };
 

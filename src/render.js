@@ -15,6 +15,8 @@ export function createRenderer(canvas, { glow = () => false } = {}) {
   const scale = Math.max(window.devicePixelRatio || 1, 1);
   canvas.width = VIEW_COLS * CELL * scale;
   canvas.height = VIEW_ROWS * CELL * scale;
+  // Seitenverhältnis für das CSS, damit die Karte den Rahmen füllt, ohne verzerrt zu werden.
+  canvas.style.setProperty('--map-ratio', `${VIEW_COLS} / ${VIEW_ROWS}`);
   const ctx = canvas.getContext('2d');
   ctx.scale(scale, scale);
   ctx.textAlign = 'center';

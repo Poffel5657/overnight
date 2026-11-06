@@ -19,80 +19,91 @@
     <header class="statusbar">
       <h1 class="brand">OVERNIGHT<span class="cursor" aria-hidden="true">█</span></h1>
       <p id="day-label" class="day"></p>
+
+      <nav class="menus" aria-label="Menu">
+        <div class="menu">
+          <button class="menu-button" aria-expanded="false" aria-controls="panel-tonight">Tonight</button>
+          <section id="panel-tonight" class="menu-panel window" hidden>
+            <h2 class="window-title">[ TONIGHT ]</h2>
+            <p>What the Nightwright made last night.</p>
+            <p id="tonight-title" class="tonight-title"></p>
+            <p id="tonight-text"></p>
+          </section>
+        </div>
+        <div id="shape" class="menu">
+          <button class="menu-button" aria-expanded="false" aria-controls="panel-shape">Shape tomorrow</button>
+          <section id="panel-shape" class="menu-panel window" hidden>
+            <h2 class="window-title">[ SHAPE TOMORROW ]</h2>
+            <p>The Nightwright builds at midnight and reads what you send.</p>
+            <dl class="menu-list">
+              <dt><button id="open-suggest">Suggest</button></dt>
+              <dd>Write one idea for something that should exist tomorrow.</dd>
+              <dt><button id="open-vote">Vote</button></dt>
+              <dd>Give an old idea a second chance. The favourite gets built.</dd>
+            </dl>
+          </section>
+        </div>
+        <div class="menu">
+          <button class="menu-button" aria-expanded="false" aria-controls="panel-archive">Archive</button>
+          <section id="panel-archive" class="menu-panel window" hidden>
+            <h2 class="window-title">[ ARCHIVE ]</h2>
+            <p>Every night is kept, and every old version stays playable.</p>
+            <dl class="menu-list">
+              <dt><button id="open-chronicle">Chronicle</button></dt>
+              <dd>Everything that ever appeared, night by night.</dd>
+              <dt><a id="open-timelapse" class="button" href="timelapse/">Timelapse</a></dt>
+              <dd>Watch the world grow, one picture per night.</dd>
+            </dl>
+          </section>
+        </div>
+      </nav>
+
       <p class="countdown"><span id="countdown-label">NEXT BUILD</span> <span id="countdown">--:--:--</span></p>
       <button id="crt-toggle" class="toggle" aria-pressed="true">CRT: ON</button>
     </header>
 
     <p id="archive-note" class="archive-note" hidden></p>
 
-    <div class="layout">
-      <div class="play">
-        <section class="window window-map">
-          <h2 class="window-title">[ MAP ] <span id="map-name" class="window-sub"></span></h2>
+    <section id="event-box" class="event-box" hidden>
+      <p><span class="event-label">[ EVENT ]</span> <span id="event-title" class="event-title"></span> <span id="event-together" class="event-together"></span></p>
+      <p><span id="event-text"></span> <span id="event-mine" class="event-mine"></span></p>
+      <p id="event-reward" class="fineprint"></p>
+    </section>
+
+    <div class="play">
+      <section class="window window-map">
+        <h2 class="window-title">[ MAP ] <span id="map-name" class="window-sub"></span></h2>
+        <div class="map-frame">
           <canvas id="world" aria-label="Game world. Use the arrow keys or the on-screen buttons to move."></canvas>
-        </section>
-
-        <div class="hud">
-          <p id="hp-label" class="visually-hidden"></p>
-          <p id="hp-meter" class="hp-meter" aria-hidden="true"></p>
-          <p id="items" class="chips" aria-hidden="true"></p>
         </div>
+      </section>
 
-        <section class="window window-log">
-          <h2 class="window-title">[ LOG ]</h2>
-          <ol id="log" class="log" aria-live="polite"></ol>
-        </section>
-
-        <div class="pad" aria-label="Movement">
-          <button data-action="up" aria-label="Move up">↑</button>
-          <button data-action="left" aria-label="Move left">←</button>
-          <button data-action="wait" aria-label="Wait one turn">·</button>
-          <button data-action="right" aria-label="Move right">→</button>
-          <button data-action="down" aria-label="Move down">↓</button>
+      <div class="hud">
+        <p id="hp-label" class="visually-hidden"></p>
+        <p id="hp-meter" class="hp-meter" aria-hidden="true"></p>
+        <p id="items" class="chips" aria-hidden="true"></p>
+        <div id="rate-box" class="rate-box" hidden>
+          <span id="rate-question"></span>
+          <button data-rate="up" aria-label="I liked it">GOOD</button>
+          <button data-rate="down" aria-label="Not for me">MEH</button>
+          <span id="rate-status" role="status"></span>
         </div>
-
-        <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait.</p>
       </div>
 
-      <aside class="side">
-        <section id="tonight" class="window">
-          <h2 class="window-title">[ TONIGHT ]</h2>
-          <p id="tonight-title" class="tonight-title"></p>
-          <p id="tonight-text"></p>
-          <div id="rate-box" class="rate-box" hidden>
-            <span id="rate-question"></span>
-            <button data-rate="up" aria-label="I liked it">GOOD</button>
-            <button data-rate="down" aria-label="Not for me">MEH</button>
-            <span id="rate-status" role="status"></span>
-          </div>
-        </section>
+      <section class="window window-log">
+        <h2 class="window-title">[ LOG ]</h2>
+        <ol id="log" class="log" aria-live="polite"></ol>
+      </section>
 
-        <section id="event-box" class="window event-box" hidden>
-          <h2 class="window-title">[ EVENT ] <span id="event-title" class="window-sub"></span></h2>
-          <p id="event-text"></p>
-          <p id="event-reward" class="fineprint"></p>
-          <p id="event-together" class="event-together"></p>
-          <p id="event-mine" class="event-mine"></p>
-        </section>
+      <div class="pad" aria-label="Movement">
+        <button data-action="up" aria-label="Move up">↑</button>
+        <button data-action="left" aria-label="Move left">←</button>
+        <button data-action="wait" aria-label="Wait one turn">·</button>
+        <button data-action="right" aria-label="Move right">→</button>
+        <button data-action="down" aria-label="Move down">↓</button>
+      </div>
 
-        <section id="shape" class="window">
-          <h2 class="window-title">[ SHAPE TOMORROW ]</h2>
-          <p>The Nightwright builds at midnight. Tell it what should exist, or give an old idea a second chance.</p>
-          <div class="buttons">
-            <button id="open-suggest">Suggest</button>
-            <button id="open-vote">Vote</button>
-          </div>
-        </section>
-
-        <section class="window">
-          <h2 class="window-title">[ ARCHIVE ]</h2>
-          <p>Every night stays playable.</p>
-          <div class="buttons">
-            <button id="open-chronicle">Chronicle</button>
-            <a id="open-timelapse" class="button" href="timelapse/">Timelapse</a>
-          </div>
-        </section>
-      </aside>
+      <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait.</p>
     </div>
   </main>
 

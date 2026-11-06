@@ -1,4 +1,4 @@
-/* Overnight: Retro-Terminal. Farben nur über die Tokens hier, neue Bereiche als .window (siehe ARCHITECTURE.md). */
+/* Overnight: Retro-Terminal. Farben nur über die Tokens hier, neue Bereiche als .window oder Menü (siehe ARCHITECTURE.md). */
 
 @font-face {
   font-family: 'VT323';
@@ -52,15 +52,20 @@ a { color: var(--accent); }
 /* ---------- Rahmen der Seite ---------- */
 
 .shell {
-  max-width: 1200px;
+  /* Die Seite ist genau einen Bildschirm hoch, die Karte nimmt sich den Rest. */
+  height: 100vh;
+  height: 100dvh;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .statusbar {
+  position: relative;
+  z-index: 40;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -88,12 +93,25 @@ a { color: var(--accent); }
   color: var(--accent);
 }
 
-.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
-.play, .side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.play { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
 
-@media (min-width: 960px) {
-  .layout { grid-template-columns: minmax(0, 1fr) 330px; }
+/* ---------- Menüs in der Kopfzeile ---------- */
+
+.menus { display: flex; flex-wrap: wrap; gap: 2px 6px; }
+.menu-button { font-size: 20px; }
+.menu-button[aria-expanded="true"] { background: var(--accent); color: var(--bg); text-shadow: none; }
+.menu-button[aria-expanded="true"]::before, .menu-button[aria-expanded="true"]::after { color: var(--bg); }
+.menu-panel.window {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 12px;
+  width: min(440px, calc(100% - 24px));
+  background: var(--panel);
 }
+.crt-on .menu-panel { box-shadow: 0 0 24px rgba(0, 0, 0, 0.8), 0 0 14px var(--glow-soft); }
+.menu-list { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: baseline; }
+.menu-list dt { margin: 0; }
+.menu-list dd { margin: 0; color: var(--muted); }
 
 /* ---------- Fenster ---------- */
 
@@ -116,25 +134,31 @@ a { color: var(--accent); }
 }
 .window-sub { color: var(--bright); }
 
-.window-map { padding: 0; }
-.window-map .window-title { margin: 0; }
+.window-map { flex: 1; min-height: 140px; padding: 0; display: flex; flex-direction: column; background: #07060a; }
+.window-map .window-title { margin: 0; background: var(--panel); }
+/* Die Karte füllt den Rahmen, so groß es geht, ohne verzerrt zu werden. --map-ratio setzt render.js. */
+.map-frame { flex: 1; min-height: 0; container-type: size; display: flex; align-items: center; justify-content: center; }
 canvas {
   display: block;
-  width: 100%;
+  aspect-ratio: var(--map-ratio, 25 / 13);
+  width: min(100cqw, calc(100cqh * var(--map-ratio, 25 / 13)));
   height: auto;
   background: #07060a;
 }
 
 /* ---------- Anzeige unter der Karte ---------- */
 
-.hud { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.hud { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
 .hp-meter { margin: 0; font-size: 24px; color: var(--good); white-space: pre; }
 .hp-meter.low { color: var(--danger); }
 .chips { margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { padding: 0 6px; border: 1px solid var(--line); color: var(--bright); }
 .chip-kind { color: var(--muted); }
 
-.log { list-style: none; margin: 0; padding: 0; min-height: 6.25em; }
+.window-log { flex: none; }
+/* Feste Höhe, die neueste Zeile steht immer unten; lange Zeilen schieben ältere hinaus. */
+.log { list-style: none; margin: 0; padding: 0; height: 5em; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.log li { flex: none; }
 .log li { color: var(--muted); }
 .log li::before { content: '> '; color: var(--line); }
 .log li:last-child { color: var(--bright); }
@@ -200,25 +224,26 @@ button:disabled { opacity: 0.5; cursor: default; background: transparent; color:
 
 /* Handy: Der erste Bildschirm ist das Spiel. Kürzeres Log, kompaktere Statusleiste. */
 @media (max-width: 959px) {
-  .shell { padding: 8px; gap: 8px; }
+  .shell { padding: 8px; gap: 6px; }
   .brand { font-size: 26px; }
   .statusbar { gap: 2px 14px; padding: 4px 10px; }
   .play { gap: 8px; }
-  /* Feste Höhe für drei Zeilen, die neueste steht immer unten; lange Zeilen schieben ältere hinaus. */
-  .log { height: 3.75em; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
-  .log li { flex: none; }
+  .log { height: 3.75em; }
+  .menu-button { font-size: 18px; }
   .pad { grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(3, 58px); }
 }
 
-/* ---------- Seitenleiste ---------- */
+/* ---------- Kleine Anzeigen ---------- */
 
 .tonight-title { color: var(--bright); }
-.rate-box { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); color: var(--muted); }
+.rate-box { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin-left: auto; color: var(--muted); }
 .rate-box button { font-size: 20px; }
 
-.event-box { border-color: var(--accent); }
+.event-box { flex: none; padding: 4px 12px; border: 1px solid var(--accent); background: var(--panel); }
+.event-box p { margin: 0; }
+.event-label, .event-title { color: var(--accent); }
 .event-together { color: var(--bright); }
-.event-mine { color: var(--good); margin: 0; }
+.event-mine { color: var(--good); }
 
 /* ---------- Dialoge ---------- */
 

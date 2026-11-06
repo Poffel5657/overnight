@@ -99,6 +99,34 @@ function refresh() {
   drawLog();
 }
 
+// Menüs in der Kopfzeile: eins zur Zeit offen, schließt bei Klick daneben, Escape oder Auswahl.
+function setupMenus() {
+  const buttons = [...document.querySelectorAll('.menu-button')];
+  const panelOf = (button) => $(button.getAttribute('aria-controls'));
+  const close = () => {
+    for (const button of buttons) {
+      button.setAttribute('aria-expanded', 'false');
+      panelOf(button).hidden = true;
+    }
+  };
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      const open = button.getAttribute('aria-expanded') !== 'true';
+      close();
+      button.setAttribute('aria-expanded', String(open));
+      panelOf(button).hidden = !open;
+    });
+    // Ein Punkt im Menü öffnet einen Dialog oder eine Seite, danach braucht es das Menü nicht mehr.
+    for (const item of panelOf(button).querySelectorAll('button, a')) item.addEventListener('click', close);
+  }
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.target.closest('.menu')) close();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') close();
+  });
+}
+
 function setupTonight() {
   const latest = CHRONICLE.at(-1);
   $('tonight-title').textContent = `Day ${latest.day}: ${latest.title}`;
@@ -185,6 +213,7 @@ setupCrt((on) => { glow = on; draw(state); });
 setupCountdown({ latestDate: CHRONICLE.at(-1).date, archived: Boolean(archivedDay) });
 setupBoot({ day: currentDay(), title: CHRONICLE.at(-1).title });
 setupTonight();
+setupMenus();
 setupArchiveNote();
 setupChronicle();
 setupSuggestions({ archived: Boolean(archivedDay) });

@@ -45,6 +45,7 @@ test('Der Dialog zeigt alle Ideen und schickt die Wahl mit Zettelnummer', async 
   }));
   await page.goto('/?seed=7');
   await page.waitForFunction(() => window.__overnight);
+  await page.click('[aria-controls="panel-shape"]');
   await page.click('#open-vote');
   await expect(page.locator('.vote-option')).toHaveCount(BALLOT.options.length);
   await page.locator('.vote-option').first().click();
@@ -58,6 +59,7 @@ test('Nach einer Stimme heute bleibt der Dialog zu', async ({ page }) => {
   test.skip(BALLOT.options.length === 0, 'Leerer Zettel');
   await page.addInitScript((day) => localStorage.setItem('overnight.voted', day), today());
   await open(page);
+  await page.click('[aria-controls="panel-shape"]');
   await page.click('#open-vote');
   await expect(page.locator('#vote-send')).toBeHidden();
   await expect(page.locator('#vote-status')).toContainText('already voted');
@@ -66,6 +68,7 @@ test('Nach einer Stimme heute bleibt der Dialog zu', async ({ page }) => {
 test('Ohne Auswahl wird nichts geschickt', async ({ page }) => {
   test.skip(BALLOT.options.length === 0, 'Leerer Zettel');
   await open(page);
+  await page.click('[aria-controls="panel-shape"]');
   await page.click('#open-vote');
   await page.click('#vote-send');
   await expect(page.locator('#vote-status')).toHaveText('Pick one idea first.');
