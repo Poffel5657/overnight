@@ -6,6 +6,8 @@ import { setupSuggestions } from './suggest.js';
 import { setupVoting } from './vote.js';
 import { setupEvent } from './event.js';
 import { setupRating } from './rate.js';
+import { setupChat } from './chat.js';
+import { CONTACT_EMAIL } from './config.js';
 import { crtEnabled, reducedMotion, setupBoot, setupCountdown, setupCrt } from './terminal.js';
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
@@ -122,7 +124,7 @@ function setupLogToggle() {
 
 // Menüs in der Kopfzeile: eins zur Zeit offen, schließt bei Klick daneben, Escape oder Auswahl.
 function setupMenus() {
-  const buttons = [...document.querySelectorAll('.menu-button')];
+  const buttons = [...document.querySelectorAll('.menu-button[aria-controls]')];
   const panelOf = (button) => $(button.getAttribute('aria-controls'));
   const close = () => {
     for (const button of buttons) {
@@ -243,6 +245,13 @@ setupCountdown({ latestDate: CHRONICLE.at(-1).date, archived: Boolean(archivedDa
 setupBoot({ day: currentDay(), title: CHRONICLE.at(-1).title });
 setupTonight();
 setupMenus();
+setupChat({ archived: Boolean(archivedDay) });
+if (CONTACT_EMAIL) {
+  $('contact-email').href = `mailto:${CONTACT_EMAIL}`;
+  $('contact-email-note').textContent = CONTACT_EMAIL;
+  $('contact-email-row').hidden = false;
+  $('contact-email-note').hidden = false;
+}
 setupLogToggle();
 setupArchiveNote();
 setupChronicle();

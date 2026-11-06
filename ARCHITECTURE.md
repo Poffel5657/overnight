@@ -30,6 +30,9 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `tests/smoke/` | Allgemeine Tests, die immer gelten (geschützt) |
 | `tests/day/` | Tests pro Neuerung |
 | `tests/fixtures/` | Alte Spielstände, die immer ladbar bleiben müssen |
+| `src/chat.js` | Chat-Dialog: liest per WebSocket, Schreiben mit Tagesticket nach Captcha (geschützt) |
+| `worker/chat.js` | Chatraum als Durable Object: Verlauf (200), Wortfilter, keine Links, Rate-Limit, Melden (3 Meldungen verstecken), Admin (geschützt) |
+| `tools/chat-admin.mjs` | Moderation für Chris: `list`, `hide <id>`, `mute <name>` (Schlüssel nur lokal, geschützt) |
 | `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/`, `POST /rate` Bewertungen unter `ratings/`, `POST /event` Event-Beiträge unter `events/` im Inbox-Repo (ohne Captcha, Zähler in KV für die Anzeige); je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
 
 ## Oberfläche

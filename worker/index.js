@@ -2,6 +2,11 @@
 // Im Inbox-Repo landet nur der Text bzw. die Stimme. Die IP selbst wird nie abgelegt: Für das Limit von
 // einem Vorschlag und einer Stimme pro Nacht bleibt nur ein Fingerabdruck, der sich täglich ändert und
 // nach gut einem Tag verfällt.
+import { ChatRoom, nameFor } from './chat.js';
+
+// Der Chatraum ist ein Durable Object; Cloudflare findet die Klasse über diesen Export.
+export { ChatRoom };
+
 const ALLOWED_ORIGIN = 'https://poffel5657.github.io';
 const MAX_LENGTH = 300;
 const FINGERPRINT_TTL_SECONDS = 26 * 60 * 60;
@@ -132,11 +137,59 @@ async function addToTally(env, ballot, choice) {
 
 const PATHS = { '': KINDS.suggestion, '/vote': KINDS.vote, '/event': KINDS.event, '/rate': KINDS.rating };
 
+// Chat-Ticket: "Tag.Fingerabdruck.Signatur". Wer es hat, darf heute schreiben.
+const ticketSignature = (fp, day, env) => fingerprint(`ticket:${fp}`, day, env.IP_HASH_SECRET);
+
+async function readTicket(ticket, env) {
+  const [day, fp, signature] = String(ticket ?? '').split('.');
+  if (!day || !/^[0-9a-f]{64}$/.test(fp ?? '') || day !== berlinDay()) return null;
+  return signature === await ticketSignature(fp, day, env) ? fp : null;
+}
+
+async function handleChat(request, env, path, url) {
+  const room = env.CHAT.get(env.CHAT.idFromName('main'));
+
+  // Moderation: nur mit dem geheimen Admin-Schlüssel, nicht aus dem Browser.
+  if (path === '/chat/admin' && request.method === 'POST') {
+    if (!env.CHAT_ADMIN_KEY || request.headers.get('X-Admin-Key') !== env.CHAT_ADMIN_KEY) return reply(403);
+    return room.fetch(new Request('https://chat/admin', { method: 'POST', body: await request.text() }));
+  }
+
+  if (request.headers.get('Origin') !== ALLOWED_ORIGIN) return reply(403);
+
+  // Schreibrecht für heute: Captcha lösen, Ticket bekommen.
+  if (path === '/chat/ticket' && request.method === 'POST') {
+    const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+    const perPerson = await env.LIMIT_PER_PERSON.limit({ key: ip });
+    if (!perPerson.success) return reply(429);
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return reply(400);
+    }
+    if (!(await captchaPassed(body?.token, env, ip))) return reply(403);
+    const day = berlinDay();
+    const fp = await fingerprint(ip, day, env.IP_HASH_SECRET);
+    return json({ ticket: `${day}.${fp}.${await ticketSignature(fp, day, env)}`, name: nameFor(fp) });
+  }
+
+  // Verbindung zum Raum. Ohne gültiges Ticket nur lesen.
+  if (path === '/chat' && request.headers.get('Upgrade') === 'websocket') {
+    const fp = await readTicket(url.searchParams.get('ticket'), env);
+    const headers = new Headers(request.headers);
+    headers.set('X-Chat-Fp', fp ?? '');
+    return room.fetch(new Request(request.url, { headers }));
+  }
+  return reply(404);
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return reply(204);
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
+    if (path === '/chat' || path.startsWith('/chat/')) return handleChat(request, env, path, url);
 
     // Zwischenstand eines Stimmzettels, öffentlich lesbar. Nur Anzeige, maßgeblich sind die Dateien.
     if (request.method === 'GET' && path === '/vote') {

@@ -5,7 +5,7 @@ compatibility_date = "2026-10-01"
 [vars]
 INBOX_REPO = "Poffel5657/overnight-inbox"
 
-# Geheim per `wrangler secret put`: GITHUB_TOKEN, TURNSTILE_SECRET, IP_HASH_SECRET
+# Geheim per `wrangler secret put`: GITHUB_TOKEN, TURNSTILE_SECRET, IP_HASH_SECRET, CHAT_ADMIN_KEY
 
 [[kv_namespaces]]
 binding = "SUBMISSIONS"
@@ -20,3 +20,12 @@ simple = { limit = 3, period = 60 }
 name = "LIMIT_OVERALL"
 namespace_id = "1002"
 simple = { limit = 30, period = 60 }
+
+# Chatraum: ein Durable Object mit SQLite-Speicher (im kostenlosen Plan nur so möglich).
+[[durable_objects.bindings]]
+name = "CHAT"
+class_name = "ChatRoom"
+
+[[migrations]]
+tag = "v1-chat"
+new_sqlite_classes = ["ChatRoom"]

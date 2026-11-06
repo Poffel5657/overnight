@@ -4,9 +4,9 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 // Einzige erlaubte Richtlinie. connect-src erlaubt nur den eigenen Vorschlags-Worker.
-const EXPECTED_CSP = "default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://overnight-suggestions.overnight-rpg.workers.dev; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'";
+const EXPECTED_CSP = "default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://overnight-suggestions.overnight-rpg.workers.dev wss://overnight-suggestions.overnight-rpg.workers.dev; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'";
 
-const NETWORK_ALLOWED = new Set(['src/suggest.js', 'src/vote.js', 'src/event.js', 'src/rate.js', 'src/config.js']);
+const NETWORK_ALLOWED = new Set(['src/suggest.js', 'src/vote.js', 'src/event.js', 'src/rate.js', 'src/chat.js', 'src/config.js']);
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {
   const path = join(dir, name);

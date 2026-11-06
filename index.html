@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://overnight-suggestions.overnight-rpg.workers.dev; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://overnight-suggestions.overnight-rpg.workers.dev wss://overnight-suggestions.overnight-rpg.workers.dev; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'">
   <title>Overnight</title>
   <meta name="description" content="A tiny RPG that grows every night at midnight.">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -56,6 +56,22 @@
               <dd>Everything that ever appeared, night by night.</dd>
               <dt><a id="open-timelapse" class="button" href="timelapse/">Timelapse</a></dt>
               <dd>Watch the world grow, one picture per night.</dd>
+            </dl>
+          </section>
+        </div>
+        <button id="open-chat" class="menu-button">Chat</button>
+        <div class="menu">
+          <button class="menu-button" aria-expanded="false" aria-controls="panel-contact">Contact</button>
+          <section id="panel-contact" class="menu-panel window" hidden>
+            <h2 class="window-title">[ CONTACT ]</h2>
+            <p>Something broken, a question, or something in the chat that should not be there? Tell the person who runs Overnight.</p>
+            <dl class="menu-list">
+              <dt><a class="button" href="https://github.com/Poffel5657/overnight/issues" target="_blank" rel="noopener">Issues</a></dt>
+              <dd>Report a problem on GitHub.</dd>
+              <dt><a class="button" href="https://github.com/Poffel5657" target="_blank" rel="noopener">GitHub</a></dt>
+              <dd>Who runs this.</dd>
+              <dt id="contact-email-row" hidden><a id="contact-email" class="button" href="#">Email</a></dt>
+              <dd id="contact-email-note" hidden></dd>
             </dl>
           </section>
         </div>
@@ -135,6 +151,24 @@
       <button id="suggest-send">Send idea</button>
     </div>
     <p id="suggest-status" role="status"></p>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <dialog id="chat-dialog" class="window chat-dialog">
+    <h2 class="window-title">[ CHAT ]</h2>
+    <p class="fineprint">Anonymous chat for everyone in this world. Names change every night. Be kind; no links. Press [ ! ] to report a message, three reports hide it.</p>
+    <ol id="chat-list" class="chat-list" aria-live="polite"></ol>
+    <p id="chat-status" class="chat-status" role="status"></p>
+    <p id="chat-name" class="chat-me-line"></p>
+    <div id="chat-compose" class="chat-compose" hidden>
+      <label for="chat-input" class="visually-hidden">Message</label>
+      <input id="chat-input" type="text" maxlength="200" autocomplete="off" placeholder="say something…">
+      <button id="chat-send">Send</button>
+    </div>
+    <div id="chat-join" hidden>
+      <div id="chat-captcha"></div>
+      <button id="chat-join-button">Join the chat</button>
+    </div>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 
