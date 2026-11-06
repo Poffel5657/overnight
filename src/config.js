@@ -3,4 +3,4 @@
 export const SUGGEST_URL = 'https://overnight-suggestions.overnight-rpg.workers.dev/';
 export const TURNSTILE_SITE_KEY = '0x4AAAAAAFznckAcW6AXPo2B';
 // Kontaktadresse im Menü CONTACT. Leer: Es gibt nur die GitHub-Links.
-export const CONTACT_EMAIL = '';
+export const CONTACT_EMAIL = 'FoxForgeSupport@gmail.com';

@@ -1,5 +1,6 @@
 // Chat im Spiel: Lesen ohne Ticket, Beitreten mit Captcha, Schreiben, Melden. WebSocket ist nachgebaut.
 import { expect, test } from '@playwright/test';
+import { CONTACT_EMAIL } from '../../src/config.js';
 
 const fakeSocket = () => {
   window.__sockets = [];
@@ -84,10 +85,15 @@ test('Chat: lesen, beitreten, schreiben, melden', async ({ page }) => {
   await expect(page.locator('#chat-compose')).toBeVisible();
 });
 
-test('Kontakt: GitHub-Links, ohne Adresse keine E-Mail', async ({ page }) => {
+test('Kontakt: GitHub-Links und, falls eingetragen, die E-Mail-Adresse', async ({ page }) => {
   await page.goto('/?seed=7');
   await page.waitForFunction(() => window.__overnight);
   await page.click('[aria-controls="panel-contact"]');
   await expect(page.locator('#panel-contact a[href*="github.com/Poffel5657/overnight/issues"]')).toBeVisible();
-  await expect(page.locator('#contact-email-row')).toBeHidden();
+  if (CONTACT_EMAIL) {
+    await expect(page.locator('#contact-email')).toHaveAttribute('href', `mailto:${CONTACT_EMAIL}`);
+    await expect(page.locator('#contact-email-note')).toHaveText(CONTACT_EMAIL);
+  } else {
+    await expect(page.locator('#contact-email-row')).toBeHidden();
+  }
 });
