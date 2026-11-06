@@ -156,6 +156,9 @@ canvas {
 .chip-kind { color: var(--muted); }
 
 .window-log { flex: none; }
+.window-log .window-title { display: flex; align-items: baseline; gap: 10px; }
+.log-peek { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--bright); font-size: 18px; visibility: hidden; }
+.log-toggle { display: none; margin-left: auto; font-size: 18px; }
 /* Feste Höhe, die neueste Zeile steht immer unten; lange Zeilen schieben ältere hinaus. */
 .log { list-style: none; margin: 0; padding: 0; height: 5em; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
 .log li { flex: none; }
@@ -200,16 +203,21 @@ button:disabled { opacity: 0.5; cursor: default; background: transparent; color:
 
 .toggle { font-size: 18px; }
 
-/* Steuerkreuz: nur auf Touchgeräten und schmalen Bildschirmen. */
+/* Steuerkreuz: nur auf Touchgeräten und schmalen Bildschirmen, halbdurchsichtig über der Karte. */
 .pad {
   display: none;
-  grid-template-columns: repeat(3, 64px);
-  grid-template-rows: repeat(3, 64px);
-  gap: 6px;
-  justify-content: center;
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 5;
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(3, 52px);
+  gap: 4px;
+  opacity: 0.6;
   touch-action: manipulation;
 }
-.pad button { font-size: 30px; border: 1px solid var(--line); background: var(--panel); }
+.pad:active, .pad:focus-within { opacity: 0.85; }
+.pad button { font-size: 26px; padding: 0; border: 1px solid var(--accent); background: rgba(11, 9, 6, 0.55); }
 .pad button::before, .pad button::after { content: none; }
 .pad [data-action="up"] { grid-area: 1 / 2; }
 .pad [data-action="left"] { grid-area: 2 / 1; }
@@ -220,6 +228,17 @@ button:disabled { opacity: 0.5; cursor: default; background: transparent; color:
 @media (pointer: coarse), (max-width: 959px) {
   .pad { display: grid; }
   .hint { display: none; }
+  .log-toggle { display: inline-block; }
+  /* Eingeklappt bleibt nur die Titelleiste mit der neuesten Zeile; am PC gibt es das nicht. */
+  .window-log.collapsed .log { display: none; }
+  .window-log.collapsed .window-title { margin-bottom: -12px; border-bottom: 0; }
+  .window-log.collapsed .log-peek { visibility: visible; }
+}
+
+/* Kleine Handys: kleineres Steuerkreuz, damit es nicht die halbe Karte verdeckt. */
+@media (max-width: 400px), (max-height: 700px) {
+  .pad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); gap: 3px; right: 6px; bottom: 6px; }
+  .pad button { font-size: 20px; }
 }
 
 /* Handy: Der erste Bildschirm ist das Spiel. Kürzeres Log, kompaktere Statusleiste. */
@@ -230,7 +249,7 @@ button:disabled { opacity: 0.5; cursor: default; background: transparent; color:
   .play { gap: 8px; }
   .log { height: 3.75em; }
   .menu-button { font-size: 18px; }
-  .pad { grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(3, 58px); }
+  .window-map { min-height: 220px; }
 }
 
 /* ---------- Kleine Anzeigen ---------- */

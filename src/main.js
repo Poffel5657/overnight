@@ -97,6 +97,26 @@ function refresh() {
   draw(state);
   drawHud();
   drawLog();
+  $('log-peek').textContent = state.log.at(-1)?.text ?? '';
+}
+
+// Am Handy lässt sich das Log einklappen, damit die Karte mehr Platz hat. Die Wahl bleibt gespeichert.
+function setupLogToggle() {
+  const KEY = 'overnight.log';
+  const button = $('log-toggle');
+  const apply = (collapsed) => {
+    $('log-window').classList.toggle('collapsed', collapsed);
+    button.textContent = collapsed ? 'Show' : 'Hide';
+    button.setAttribute('aria-expanded', String(!collapsed));
+  };
+  let collapsed = false;
+  try { collapsed = localStorage.getItem(KEY) === 'hidden'; } catch { /* ohne Speicher offen */ }
+  apply(collapsed);
+  button.addEventListener('click', () => {
+    collapsed = !collapsed;
+    try { localStorage.setItem(KEY, collapsed ? 'hidden' : 'shown'); } catch { /* egal */ }
+    apply(collapsed);
+  });
 }
 
 // Menüs in der Kopfzeile: eins zur Zeit offen, schließt bei Klick daneben, Escape oder Auswahl.
@@ -214,6 +234,7 @@ setupCountdown({ latestDate: CHRONICLE.at(-1).date, archived: Boolean(archivedDa
 setupBoot({ day: currentDay(), title: CHRONICLE.at(-1).title });
 setupTonight();
 setupMenus();
+setupLogToggle();
 setupArchiveNote();
 setupChronicle();
 setupSuggestions({ archived: Boolean(archivedDay) });

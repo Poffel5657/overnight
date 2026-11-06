@@ -47,7 +47,7 @@ test('index.html lädt nur erlaubte Dateien und hat die erwartete CSP', () => {
     .toEqual(['<script type="module" src="src/main.js">']);
   expect(html.match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1].trim()).toBe('');
   expect([...html.matchAll(/<link\b[^>]*href="([^"]+)"/g)].map(([, href]) => href).sort())
-    .toEqual(['data:,', 'style.css']);
+    .toEqual(['icon-180.png', 'icon.svg', 'style.css']);
   expect(html).not.toMatch(/<(iframe|object|embed|base|img)\b/i);
   expect(html).not.toMatch(/\son[a-z]+\s*=/i);
 });

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Overnight: Mondsichel aus Pixeln im Bernstein-CRT-Look -->
+  <defs>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="scan" width="4" height="3" patternUnits="userSpaceOnUse">
+      <rect y="2" width="4" height="1" fill="#000" opacity=".38"/>
+    </pattern>
+    <radialGradient id="vignette" cx=".5" cy=".5" r=".72">
+      <stop offset=".5" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".65"/>
+    </radialGradient>
+    <radialGradient id="screen" cx=".45" cy=".4" r=".8">
+      <stop offset="0" stop-color="#1e1509"/>
+      <stop offset="1" stop-color="#0b0906"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#screen)"/>
+  <g filter="url(#glow)">
+    <path fill="#ffb347" d="M19.00 12.50h3.25v3.25h-3.25zM22.25 12.50h3.25v3.25h-3.25zM15.75 15.75h3.25v3.25h-3.25zM19.00 15.75h3.25v3.25h-3.25zM12.50 19.00h3.25v3.25h-3.25zM15.75 19.00h3.25v3.25h-3.25zM19.00 19.00h3.25v3.25h-3.25zM9.25 22.25h3.25v3.25h-3.25zM12.50 22.25h3.25v3.25h-3.25zM15.75 22.25h3.25v3.25h-3.25zM19.00 22.25h3.25v3.25h-3.25zM9.25 25.50h3.25v3.25h-3.25zM12.50 25.50h3.25v3.25h-3.25zM15.75 25.50h3.25v3.25h-3.25zM19.00 25.50h3.25v3.25h-3.25zM9.25 28.75h3.25v3.25h-3.25zM12.50 28.75h3.25v3.25h-3.25zM15.75 28.75h3.25v3.25h-3.25zM19.00 28.75h3.25v3.25h-3.25zM9.25 32.00h3.25v3.25h-3.25zM12.50 32.00h3.25v3.25h-3.25zM15.75 32.00h3.25v3.25h-3.25zM19.00 32.00h3.25v3.25h-3.25zM9.25 35.25h3.25v3.25h-3.25zM12.50 35.25h3.25v3.25h-3.25zM15.75 35.25h3.25v3.25h-3.25zM19.00 35.25h3.25v3.25h-3.25zM22.25 35.25h3.25v3.25h-3.25zM9.25 38.50h3.25v3.25h-3.25zM12.50 38.50h3.25v3.25h-3.25zM15.75 38.50h3.25v3.25h-3.25zM19.00 38.50h3.25v3.25h-3.25zM22.25 38.50h3.25v3.25h-3.25zM25.50 38.50h3.25v3.25h-3.25zM12.50 41.75h3.25v3.25h-3.25zM15.75 41.75h3.25v3.25h-3.25zM19.00 41.75h3.25v3.25h-3.25zM22.25 41.75h3.25v3.25h-3.25zM25.50 41.75h3.25v3.25h-3.25zM28.75 41.75h3.25v3.25h-3.25zM32.00 41.75h3.25v3.25h-3.25zM41.75 41.75h3.25v3.25h-3.25zM45.00 41.75h3.25v3.25h-3.25zM12.50 45.00h3.25v3.25h-3.25zM15.75 45.00h3.25v3.25h-3.25zM19.00 45.00h3.25v3.25h-3.25zM22.25 45.00h3.25v3.25h-3.25zM25.50 45.00h3.25v3.25h-3.25zM28.75 45.00h3.25v3.25h-3.25zM32.00 45.00h3.25v3.25h-3.25zM35.25 45.00h3.25v3.25h-3.25zM38.50 45.00h3.25v3.25h-3.25zM41.75 45.00h3.25v3.25h-3.25zM15.75 48.25h3.25v3.25h-3.25zM19.00 48.25h3.25v3.25h-3.25zM22.25 48.25h3.25v3.25h-3.25zM25.50 48.25h3.25v3.25h-3.25zM28.75 48.25h3.25v3.25h-3.25zM32.00 48.25h3.25v3.25h-3.25zM35.25 48.25h3.25v3.25h-3.25zM38.50 48.25h3.25v3.25h-3.25zM22.25 51.50h3.25v3.25h-3.25zM25.50 51.50h3.25v3.25h-3.25zM28.75 51.50h3.25v3.25h-3.25zM32.00 51.50h3.25v3.25h-3.25zM35.25 51.50h3.25v3.25h-3.25z"/>
+    <path fill="#ffe2b0" d="M45.00 19.00h3.25v3.25h-3.25zM51.50 12.50h3.25v3.25h-3.25zM48.25 32.00h3.25v3.25h-3.25z" opacity=".85"/>
+  </g>
+  <rect width="64" height="64" rx="12" fill="url(#scan)"/>
+  <rect width="64" height="64" rx="12" fill="url(#vignette)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="11" fill="none" stroke="#5a3f17" stroke-width="3"/>
+</svg>

@@ -66,6 +66,37 @@ test('Menüs öffnen sich, erklären sich und schließen wieder', async ({ page 
   await expect(page.locator('#panel-tonight')).toBeHidden();
 });
 
+test('Handy: Steuerkreuz liegt über der Karte, Log lässt sich einklappen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page);
+  const map = await page.locator('.map-frame').boundingBox();
+  const pad = await page.locator('.pad').boundingBox();
+  expect(pad.y).toBeGreaterThanOrEqual(map.y);
+  expect(pad.y + pad.height).toBeLessThanOrEqual(map.y + map.height + 1);
+  const before = (await page.locator('#world').boundingBox()).height;
+  await page.click('#log-toggle');
+  await expect(page.locator('#log')).toBeHidden();
+  await expect(page.locator('#log-peek')).toBeVisible();
+  expect((await page.locator('#world').boundingBox()).height).toBeGreaterThan(before);
+  // Das Steuerkreuz bewegt den Spieler weiterhin.
+  const turn = await page.evaluate(() => window.__overnight.state.turn);
+  await page.click('[data-action="wait"]');
+  expect(await page.evaluate(() => window.__overnight.state.turn)).toBe(turn + 1);
+  await page.reload();
+  await page.waitForFunction(() => window.__overnight);
+  await expect(page.locator('#log')).toBeHidden();
+  await page.click('#log-toggle');
+  await expect(page.locator('#log')).toBeVisible();
+});
+
+test('PC: kein Steuerkreuz, Log nicht einklappbar', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await open(page);
+  await expect(page.locator('.pad')).toBeHidden();
+  await expect(page.locator('#log-toggle')).toBeHidden();
+  await expect(page.locator('#log')).toBeVisible();
+});
+
 test('Bootsequenz blockiert weder Tasten noch Klicks', async ({ page }) => {
   await open(page);
   const before = await page.evaluate(() => window.__overnight.state.turn);

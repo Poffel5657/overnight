@@ -3,25 +3,52 @@ import { MAPS } from '../content/world.js';
 import { CREATURES } from '../content/creatures.js';
 import { tileAt, visibleEntities } from './game.js';
 
-// Auf schmalen Bildschirmen wird ein kleinerer Ausschnitt gezeigt, damit die Zeichen lesbar bleiben.
-const NARROW = window.innerWidth < 600;
-const VIEW_COLS = NARROW ? 15 : 25;
-const VIEW_ROWS = NARROW ? 11 : 13;
+// Breite Bildschirme zeigen einen festen Ausschnitt von 25 x 13 Feldern.
+// Schmale Bildschirme (Handy hochkant) zeigen 12 Spalten mit großen Zeichen und so viele Zeilen,
+// wie in den Kartenrahmen passen, damit die Karte den Rahmen wirklich füllt.
+const WIDE_VIEW = { cols: 25, rows: 13 };
+const NARROW_COLS = 12;
+const MIN_ROWS = 7;
+const MAX_ROWS = 25;
 const CELL = 32;
+
+function viewFor(frame) {
+  if (window.innerWidth >= 600 || !frame || !frame.clientWidth || !frame.clientHeight) return WIDE_VIEW;
+  const cell = frame.clientWidth / NARROW_COLS;
+  const rows = Math.min(MAX_ROWS, Math.max(MIN_ROWS, Math.floor(frame.clientHeight / cell)));
+  return { cols: NARROW_COLS, rows };
+}
 const FONT = `bold ${Math.round(CELL * 0.72)}px ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace`;
 
 // glow: Funktion, die sagt, ob die Zeichen leicht leuchten sollen (CRT-Einstellung).
 export function createRenderer(canvas, { glow = () => false } = {}) {
-  const scale = Math.max(window.devicePixelRatio || 1, 1);
-  canvas.width = VIEW_COLS * CELL * scale;
-  canvas.height = VIEW_ROWS * CELL * scale;
-  // Seitenverhältnis für das CSS, damit die Karte den Rahmen füllt, ohne verzerrt zu werden.
-  canvas.style.setProperty('--map-ratio', `${VIEW_COLS} / ${VIEW_ROWS}`);
   const ctx = canvas.getContext('2d');
-  ctx.scale(scale, scale);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = FONT;
+  const frame = canvas.parentElement;
+  let VIEW_COLS = 0;
+  let VIEW_ROWS = 0;
+  let last = null;
+
+  // Passt den Ausschnitt an den Rahmen an. Gibt true zurück, wenn sich etwas geändert hat.
+  function resize() {
+    const view = viewFor(frame);
+    if (view.cols === VIEW_COLS && view.rows === VIEW_ROWS) return false;
+    VIEW_COLS = view.cols;
+    VIEW_ROWS = view.rows;
+    const scale = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = VIEW_COLS * CELL * scale;
+    canvas.height = VIEW_ROWS * CELL * scale;
+    // Seitenverhältnis für das CSS, damit die Karte den Rahmen füllt, ohne verzerrt zu werden.
+    canvas.style.setProperty('--map-ratio', `${VIEW_COLS} / ${VIEW_ROWS}`);
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = FONT;
+    return true;
+  }
+  resize();
+  if (frame && 'ResizeObserver' in window) {
+    new ResizeObserver(() => { if (resize() && last) draw(last); }).observe(frame);
+  }
 
   const cell = (col, row, glyph, fg, bg) => {
     if (bg) {
@@ -43,7 +70,8 @@ export function createRenderer(canvas, { glow = () => false } = {}) {
       ? -Math.floor((view - size) / 2)
       : Math.min(Math.max(pos - Math.floor(view / 2), 0), size - view);
 
-  return function draw(s) {
+  function draw(s) {
+    last = s;
     const map = MAPS[s.map];
     const width = Math.max(...map.tiles.map((row) => row.length));
     const camX = cameraAxis(s.player.x, width, VIEW_COLS);
@@ -68,5 +96,6 @@ export function createRenderer(canvas, { glow = () => false } = {}) {
       }
     }
     figure(s.player.x, s.player.y, '@', '#ffffff');
-  };
+  }
+  return draw;
 }

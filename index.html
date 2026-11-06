@@ -6,7 +6,9 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://overnight-suggestions.overnight-rpg.workers.dev; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'">
   <title>Overnight</title>
   <meta name="description" content="A tiny RPG that grows every night at midnight.">
-  <link rel="icon" href="data:,">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="theme-color" content="#0b0906">
   <link rel="stylesheet" href="style.css">
   <script type="module" src="src/main.js"></script>
 </head>
@@ -76,6 +78,13 @@
         <div class="map-frame">
           <canvas id="world" aria-label="Game world. Use the arrow keys or the on-screen buttons to move."></canvas>
         </div>
+        <div class="pad" aria-label="Movement">
+          <button data-action="up" aria-label="Move up">↑</button>
+          <button data-action="left" aria-label="Move left">←</button>
+          <button data-action="wait" aria-label="Wait one turn">·</button>
+          <button data-action="right" aria-label="Move right">→</button>
+          <button data-action="down" aria-label="Move down">↓</button>
+        </div>
       </section>
 
       <div class="hud">
@@ -90,18 +99,14 @@
         </div>
       </div>
 
-      <section class="window window-log">
-        <h2 class="window-title">[ LOG ]</h2>
+      <section id="log-window" class="window window-log">
+        <h2 class="window-title">
+          <span>[ LOG ]</span>
+          <span id="log-peek" class="log-peek" aria-hidden="true"></span>
+          <button id="log-toggle" class="log-toggle" aria-expanded="true" aria-controls="log">Hide</button>
+        </h2>
         <ol id="log" class="log" aria-live="polite"></ol>
       </section>
-
-      <div class="pad" aria-label="Movement">
-        <button data-action="up" aria-label="Move up">↑</button>
-        <button data-action="left" aria-label="Move left">←</button>
-        <button data-action="wait" aria-label="Wait one turn">·</button>
-        <button data-action="right" aria-label="Move right">→</button>
-        <button data-action="down" aria-label="Move down">↓</button>
-      </div>
 
       <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait.</p>
     </div>

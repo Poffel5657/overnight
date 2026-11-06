@@ -34,12 +34,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp -r index.html style.css src content fonts timelapse _site/
+          cp -r index.html style.css icon.svg icon-180.png src content fonts timelapse _site/
           for tag in $(git tag -l 'day-[0-9][0-9][0-9]'); do
             dir="_site/day/${tag#day-}"
             mkdir -p "$dir"
             # Nur Pfade, die es in diesem Tag schon gab (fonts/ zum Beispiel erst seit dem Terminal-Look).
-            git archive "$tag" $(git ls-tree --name-only "$tag" index.html style.css src content fonts) | tar -x -C "$dir"
+            git archive "$tag" $(git ls-tree --name-only "$tag" index.html style.css icon.svg icon-180.png src content fonts) | tar -x -C "$dir"
           done
       # Zeitraffer: ein Bild pro archivierter Nacht. Scheitert das, geht die Seite trotzdem raus,
       # dann mit der leeren Platzhalterliste.
