@@ -158,7 +158,11 @@ canvas {
 .window-log { flex: none; }
 .window-log .window-title { display: flex; align-items: baseline; gap: 10px; }
 .log-peek { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--bright); font-size: 18px; visibility: hidden; }
-.log-toggle { display: none; margin-left: auto; font-size: 18px; }
+.log-toggle { margin-left: auto; font-size: 18px; }
+/* Eingeklappt bleibt nur die Titelleiste mit der neuesten Zeile. */
+.window-log.collapsed .log { display: none; }
+.window-log.collapsed .window-title { margin-bottom: -12px; border-bottom: 0; }
+.window-log.collapsed .log-peek { visibility: visible; }
 /* Feste Höhe, die neueste Zeile steht immer unten; lange Zeilen schieben ältere hinaus. */
 .log { list-style: none; margin: 0; padding: 0; height: 5em; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
 .log li { flex: none; }
@@ -225,14 +229,10 @@ button:disabled { opacity: 0.5; cursor: default; background: transparent; color:
 .pad [data-action="right"] { grid-area: 2 / 3; }
 .pad [data-action="down"] { grid-area: 3 / 2; }
 
-@media (pointer: coarse), (max-width: 959px) {
+/* Steuerkreuz nur auf Touchgeräten, egal wie breit das Fenster ist. */
+@media (pointer: coarse) {
   .pad { display: grid; }
   .hint { display: none; }
-  .log-toggle { display: inline-block; }
-  /* Eingeklappt bleibt nur die Titelleiste mit der neuesten Zeile; am PC gibt es das nicht. */
-  .window-log.collapsed .log { display: none; }
-  .window-log.collapsed .window-title { margin-bottom: -12px; border-bottom: 0; }
-  .window-log.collapsed .log-peek { visibility: visible; }
 }
 
 /* Kleine Handys: kleineres Steuerkreuz, damit es nicht die halbe Karte verdeckt. */

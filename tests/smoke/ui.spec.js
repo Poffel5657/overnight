@@ -10,8 +10,10 @@ const open = async (page) => {
 const noSideScroll = async (page) =>
   page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
+test.describe('Touchgerät', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
+
 test('Handy: kein seitliches Scrollen, Karte und Steuerkreuz im ersten Bildschirm', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
   // Lange Logzeilen, die umbrechen, dürfen das Steuerkreuz nicht aus dem Bild schieben.
   await page.evaluate(() => {
@@ -67,7 +69,6 @@ test('Menüs öffnen sich, erklären sich und schließen wieder', async ({ page 
 });
 
 test('Handy: Steuerkreuz liegt über der Karte, Log lässt sich einklappen', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
   const map = await page.locator('.map-frame').boundingBox();
   const pad = await page.locator('.pad').boundingBox();
@@ -88,13 +89,24 @@ test('Handy: Steuerkreuz liegt über der Karte, Log lässt sich einklappen', asy
   await page.click('#log-toggle');
   await expect(page.locator('#log')).toBeVisible();
 });
+});
 
-test('PC: kein Steuerkreuz, Log nicht einklappbar', async ({ page }) => {
+for (const viewport of [{ width: 1280, height: 800 }, { width: 500, height: 800 }]) {
+  test(`Ohne Touch kein Steuerkreuz, auch im schmalen Fenster (${viewport.width} px)`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await open(page);
+    await expect(page.locator('.pad')).toBeHidden();
+  });
+}
+
+test('PC: Log lässt sich einklappen, die Karte wird größer', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await open(page);
-  await expect(page.locator('.pad')).toBeHidden();
-  await expect(page.locator('#log-toggle')).toBeHidden();
-  await expect(page.locator('#log')).toBeVisible();
+  const before = (await page.locator('#world').boundingBox()).height;
+  await page.click('#log-toggle');
+  await expect(page.locator('#log')).toBeHidden();
+  await expect(page.locator('#log-peek')).toBeVisible();
+  expect((await page.locator('#world').boundingBox()).height).toBeGreaterThan(before);
 });
 
 test('Bootsequenz blockiert weder Tasten noch Klicks', async ({ page }) => {
