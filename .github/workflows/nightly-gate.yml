@@ -90,6 +90,8 @@ jobs:
     needs: gate
     # Fest gewählt: Playwright unterstützt nicht jedes neue ubuntu-latest.
     runs-on: ubuntu-24.04
+    # Hängt etwas (zum Beispiel ein langsamer Paketspiegel), scheitert die Nacht sichtbar statt stundenlang zu warten.
+    timeout-minutes: 25
     permissions:
       contents: read
     steps:

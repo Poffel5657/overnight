@@ -48,10 +48,13 @@ jobs:
           node-version: 22
       - name: Zeitraffer aufnehmen
         continue-on-error: true
+        # Ein langsamer Paketspiegel darf den Deploy nie aufhalten: dann eben ohne neue Bilder.
+        timeout-minutes: 6
         run: |
           set -euo pipefail
           npm ci --ignore-scripts
-          npx playwright install --with-deps chromium
+          # Ohne --with-deps: Die Runner haben die Bibliotheken schon, und apt war schon einmal minutenlang hängen.
+          npx playwright install chromium
           node .github/scripts/timelapse.mjs _site
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
