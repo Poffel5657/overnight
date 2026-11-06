@@ -33,12 +33,24 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp -r index.html style.css src content _site/
+          cp -r index.html style.css src content timelapse _site/
           for tag in $(git tag -l 'day-[0-9][0-9][0-9]'); do
             dir="_site/day/${tag#day-}"
             mkdir -p "$dir"
             git archive "$tag" index.html style.css src content | tar -x -C "$dir"
           done
+      # Zeitraffer: ein Bild pro archivierter Nacht. Scheitert das, geht die Seite trotzdem raus,
+      # dann mit der leeren Platzhalterliste.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Zeitraffer aufnehmen
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+          node .github/scripts/timelapse.mjs _site
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site

@@ -179,3 +179,38 @@ test('Ungültige Stimmen speichern nichts', async () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+const help = (body, ip = '203.0.113.7') => new Request('https://worker.test/event', {
+  method: 'POST',
+  headers: { Origin: ORIGIN, 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
+  body: JSON.stringify(body),
+});
+const count = async (env, id) => (await (await worker.fetch(new Request(`https://worker.test/event?id=${id}`), env)).json()).count;
+
+test('Event-Beiträge brauchen kein Captcha, zählen einmal pro Nacht und landen unter events/', async () => {
+  await withFakeGitHub(async (calls) => {
+    const env = { ...makeEnv(), TURNSTILE_SECRET: 'secret' };
+    expect(await count(env, 'rat-count')).toBe(0);
+    expect((await worker.fetch(help({ event: 'rat-count' }), env)).status).toBe(204);
+    expect((await worker.fetch(help({ event: 'rat-count' }), env)).status).toBe(409);
+    expect((await worker.fetch(help({ event: 'rat-count' }, '198.51.100.9'), env)).status).toBe(204);
+    expect(await count(env, 'rat-count')).toBe(2);
+    expect(await count(env, 'other')).toBe(0);
+    expect(calls).toHaveLength(2);
+    expect(calls[0].url).toMatch(/\/contents\/events\/.+\.json$/);
+    const stored = JSON.parse(Buffer.from(JSON.parse(calls[0].options.body).content, 'base64').toString());
+    expect(Object.keys(stored).sort()).toEqual(['event', 'receivedAt']);
+    expect([...env.SUBMISSIONS.entries.keys()].join()).not.toContain('203.0.113.7');
+  });
+});
+
+test('Ungültige Event-Anfragen speichern nichts', async () => {
+  await withFakeGitHub(async (calls) => {
+    const env = makeEnv();
+    expect((await worker.fetch(help({ event: 'Not Valid' }), env)).status).toBe(400);
+    expect((await worker.fetch(help({}), env)).status).toBe(400);
+    expect((await worker.fetch(new Request('https://worker.test/event?id=<x>'), env)).status).toBe(400);
+    expect((await worker.fetch(new Request('https://worker.test/vote'), env)).status).toBe(405);
+    expect(calls).toHaveLength(0);
+  });
+});

@@ -6,7 +6,7 @@ import { join } from 'node:path';
 // Einzige erlaubte Richtlinie. connect-src erlaubt nur den eigenen Vorschlags-Worker.
 const EXPECTED_CSP = "default-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src https://overnight-suggestions.overnight-rpg.workers.dev; frame-src https://challenges.cloudflare.com; base-uri 'none'; form-action 'none'";
 
-const NETWORK_ALLOWED = new Set(['src/suggest.js', 'src/vote.js', 'src/config.js']);
+const NETWORK_ALLOWED = new Set(['src/suggest.js', 'src/vote.js', 'src/event.js', 'src/config.js']);
 
 const walk = (dir) => readdirSync(dir).flatMap((name) => {
   const path = join(dir, name);
@@ -27,7 +27,7 @@ const BANNED_NETWORK = [
   [/navigator\.(clipboard|geolocation|mediaDevices)/, 'Geräte-API'],
 ];
 
-const files = [...walk('src'), ...walk('content')]
+const files = [...walk('src'), ...walk('content'), ...walk('timelapse')]
   .map((path) => path.split('\\').join('/'))
   .filter((path) => path.endsWith('.js'));
 
@@ -49,6 +49,15 @@ test('index.html lädt nur erlaubte Dateien und hat die erwartete CSP', () => {
   expect([...html.matchAll(/<link\b[^>]*href="([^"]+)"/g)].map(([, href]) => href).sort())
     .toEqual(['data:,', 'style.css']);
   expect(html).not.toMatch(/<(iframe|object|embed|base|img)\b/i);
+  expect(html).not.toMatch(/\son[a-z]+\s*=/i);
+});
+
+test('timelapse/index.html lädt nur eigene Dateien', () => {
+  const html = readFileSync('timelapse/index.html', 'utf8');
+  expect(html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1])
+    .toBe("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'");
+  expect([...html.matchAll(/<script\b[^>]*>/g)].map(([tag]) => tag))
+    .toEqual(['<script type="module" src="timelapse.js">']);
   expect(html).not.toMatch(/\son[a-z]+\s*=/i);
 });
 

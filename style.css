@@ -141,3 +141,18 @@ textarea {
 .vote-option { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; cursor: pointer; }
 .vote-option + .vote-option { border-top: 1px solid var(--line); }
 .vote-option input { margin-top: 3px; accent-color: var(--accent); }
+
+.button-link {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  text-decoration: none;
+}
+.button-link:hover, .button-link:focus-visible { border-color: var(--accent); color: var(--accent); }
+
+.event-box { border: 1px solid var(--accent); background: var(--panel); padding: 10px 12px; }
+.event-box h2 { margin: 0 0 4px; font-size: 1rem; color: var(--accent); }
+.event-box p { margin: 2px 0; }
+.event-mine { color: var(--good); }

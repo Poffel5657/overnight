@@ -1,12 +1,14 @@
-// Nimmt Vorschläge und Stimmen aus dem Spiel an und legt sie als JSON-Dateien im privaten Inbox-Repo ab.
+// Nimmt Vorschläge, Stimmen und Beiträge zu Community-Events aus dem Spiel an und legt sie als JSON-Dateien im privaten Inbox-Repo ab.
 // Im Inbox-Repo landet nur der Text bzw. die Stimme. Die IP selbst wird nie abgelegt: Für das Limit von
 // einem Vorschlag und einer Stimme pro Nacht bleibt nur ein Fingerabdruck, der sich täglich ändert und
 // nach gut einem Tag verfällt.
 const ALLOWED_ORIGIN = 'https://poffel5657.github.io';
 const MAX_LENGTH = 300;
 const FINGERPRINT_TTL_SECONDS = 26 * 60 * 60;
-// Stimmen enthalten keinen Freitext, nur die Nummer des Stimmzettels und eine kurze ID.
-const CHOICE_PATTERN = /^[a-z0-9-]{1,32}$/;
+// Stimmen und Event-Beiträge enthalten keinen Freitext, nur Zahlen und kurze IDs.
+const ID_PATTERN = /^[a-z0-9-]{1,32}$/;
+// Der Zähler eines Events ist nur Anzeige. Maßgeblich sind die Dateien im Inbox-Repo.
+const COUNT_TTL_SECONDS = 60 * 24 * 60 * 60;
 
 // Die Nacht wechselt um Mitternacht in Berlin, dann baut auch der Nachtlauf.
 const berlinDay = () =>
@@ -23,13 +25,17 @@ async function fingerprint(ip, day, secret) {
 
 const cors = {
   'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Max-Age': '86400',
   Vary: 'Origin',
 };
 
 const reply = (status) => new Response(null, { status, headers: cors });
+const json = (data) => new Response(JSON.stringify(data), {
+  status: 200,
+  headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+});
 
 function base64(text) {
   const bytes = new TextEncoder().encode(text);
@@ -70,20 +76,44 @@ const KINDS = {
     parse(body) {
       const { ballot, choice } = body ?? {};
       if (!Number.isInteger(ballot) || ballot < 0 || ballot > 9999) return null;
-      if (typeof choice !== 'string' || !CHOICE_PATTERN.test(choice)) return null;
+      if (typeof choice !== 'string' || !ID_PATTERN.test(choice)) return null;
       return { ballot, choice };
+    },
+  },
+  // Ein Spieler hat seinen Teil am Community-Event für heute erledigt. Kein Captcha, damit das
+  // im Spiel von selbst passieren kann; die Sperre pro Anschluss und Nacht gilt trotzdem.
+  event: {
+    folder: 'events',
+    lock: 'helped',
+    message: 'Neuer Event-Beitrag',
+    captcha: false,
+    parse(body) {
+      const { event } = body ?? {};
+      if (typeof event !== 'string' || !ID_PATTERN.test(event)) return null;
+      return { event };
     },
   },
 };
 
+const PATHS = { '': KINDS.suggestion, '/vote': KINDS.vote, '/event': KINDS.event };
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return reply(204);
+    const url = new URL(request.url);
+    const path = url.pathname.replace(/\/+$/, '');
+
+    // Zählerstand eines Events, öffentlich lesbar und ohne Sperre.
+    if (request.method === 'GET' && path === '/event') {
+      const id = url.searchParams.get('id') ?? '';
+      if (!ID_PATTERN.test(id)) return reply(400);
+      return json({ count: Number(await env.SUBMISSIONS.get(`count:${id}`)) || 0 });
+    }
+
     if (request.method !== 'POST') return reply(405);
     if (request.headers.get('Origin') !== ALLOWED_ORIGIN) return reply(403);
 
-    const path = new URL(request.url).pathname.replace(/\/+$/, '');
-    const kind = path === '/vote' ? KINDS.vote : path === '' ? KINDS.suggestion : null;
+    const kind = PATHS[path];
     if (!kind) return reply(404);
 
     const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
@@ -102,7 +132,7 @@ export default {
 
     const fields = kind.parse(body);
     if (!fields) return reply(400);
-    if (!(await captchaPassed(body.token, env, ip))) return reply(403);
+    if (kind.captcha !== false && !(await captchaPassed(body.token, env, ip))) return reply(403);
 
     const lockKey = `${kind.lock}:${await fingerprint(ip, berlinDay(), env.IP_HASH_SECRET)}`;
     if (await env.SUBMISSIONS.get(lockKey)) return reply(409);
@@ -122,6 +152,11 @@ export default {
     if (!stored.ok) return reply(502);
     // Erst nach dem Speichern sperren, damit ein Fehler niemanden die Nacht über aussperrt.
     await env.SUBMISSIONS.put(lockKey, '1', { expirationTtl: FINGERPRINT_TTL_SECONDS });
+    if (kind === KINDS.event) {
+      const countKey = `count:${fields.event}`;
+      const count = (Number(await env.SUBMISSIONS.get(countKey)) || 0) + 1;
+      await env.SUBMISSIONS.put(countKey, String(count), { expirationTtl: COUNT_TTL_SECONDS });
+    }
     return reply(204);
   },
 };

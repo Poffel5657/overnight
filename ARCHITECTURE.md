@@ -13,6 +13,10 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `src/main.js` | Verbindet alles, Eingabe, Chronik-Dialog, Begrüßung, `window.__overnight` |
 | `src/suggest.js`, `src/config.js` | Vorschlagsformular, gemeinsames Captcha (`createCaptcha`) und Einstellungen (geschützt) |
 | `src/vote.js` | Abstimmungsdialog über `content/ballot.js`, schickt `{ ballot, choice }` an `/vote` des Workers (geschützt) |
+| `src/event.js` | Community-Event: Anzeige `#event-box`, Tagesfortschritt in `localStorage` (`overnight.event`), meldet den Tagesbeitrag an `/event` des Workers, liest den Zähler per `GET /event?id=` (geschützt) |
+| `content/event.js` | `EVENT` (oder `null`): `{ id, title, text, task, reward, stat, need, goal, startDay, endDay }`, Format prüft `tests/smoke/event.spec.js` |
+| `timelapse/` | Zeitraffer-Seite; `days.js` und `shots/` erzeugt der Deploy mit `.github/scripts/timelapse.mjs` (geschützt) |
+| `LORE.md` | Weltlexikon: Orte, Figuren, Dinge, offene Fäden, Zeitleiste |
 | `content/ballot.js` | Stimmzettel `BALLOT = { day, options: [{ id, since, text }] }`, jede Nacht neu datiert (Format prüft `tests/smoke/vote.spec.js`) |
 | `content/tiles.js` | Geländetypen |
 | `content/creatures.js` | Kreaturentypen |
@@ -23,7 +27,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `tests/smoke/` | Allgemeine Tests, die immer gelten (geschützt) |
 | `tests/day/` | Tests pro Neuerung |
 | `tests/fixtures/` | Alte Spielstände, die immer ladbar bleiben müssen |
-| `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/` im Inbox-Repo; je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
+| `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/`, `POST /event` Event-Beiträge unter `events/` im Inbox-Repo (ohne Captcha, Zähler in KV für die Anzeige); je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
 
 ## Systeme
 
@@ -47,6 +51,8 @@ Aktuelle `SAVE_VERSION`: 1. Seit Tag 1 gibt es das optionale Feld `player.weapon
 `window.__overnight` bietet `state`, `day` und `act(action)`. Die Smoke-Tests hängen davon ab, sie darf nur erweitert werden.
 
 ## Veröffentlichung
+
+Der Deploy nimmt außerdem für jede archivierte Nacht ein Bild auf (frischer Browser, `?seed=1`, nur das Canvas) und schreibt `timelapse/days.js`. Scheitert das, geht die Seite trotzdem raus.
 
 Ein PR von `claude/day-NNN` wird von `.github/workflows/nightly-gate.yml` geprüft und gemergt, danach taggt der Workflow `day-NNN` und startet den Deploy. `.github/workflows/deploy.yml` baut die Seite aus `main` und legt für jeden Tag eine spielbare Kopie unter `day/NNN/` an. Fehlschläge lassen die Live-Seite unverändert.
 

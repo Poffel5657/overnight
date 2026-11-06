@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Overnight Timelapse</title>
+  <meta name="description" content="Every night of Overnight, one picture each.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="timelapse.css">
+  <script type="module" src="timelapse.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <h1>Overnight Timelapse</h1>
+      <a class="button-link" href="../">Back to today</a>
+    </header>
+
+    <figure class="frame">
+      <img id="shot" alt="">
+      <figcaption>
+        <p id="caption-title" class="caption-title"></p>
+        <p id="caption-text"></p>
+        <a id="caption-play" href="../">Play this version</a>
+      </figcaption>
+    </figure>
+
+    <div class="controls">
+      <button id="prev" aria-label="Previous night">◀</button>
+      <input id="slider" type="range" min="0" max="0" value="0" aria-label="Night">
+      <button id="next" aria-label="Next night">▶</button>
+      <button id="play">Play</button>
+    </div>
+
+    <p id="empty" class="fineprint" hidden>No pictures yet. They are taken every time the world changes.</p>
+    <p class="hint">Arrow keys move through the nights. Every picture is the first thing a new player saw on that day.</p>
+  </main>
+</body>
+</html>

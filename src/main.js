@@ -4,6 +4,7 @@ import { createRenderer } from './render.js';
 import { loadSave, saveKey, writeSave } from './save.js';
 import { setupSuggestions } from './suggest.js';
 import { setupVoting } from './vote.js';
+import { setupEvent } from './event.js';
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
 import { MAPS } from '../content/world.js';
@@ -46,10 +47,13 @@ function refresh() {
   );
 }
 
+let updateEvent = () => {};
+
 function perform(action) {
   act(state, action);
   writeSave(key, state);
   refresh();
+  updateEvent();
 }
 
 // Begrüßung: Wer wiederkommt, erfährt, was seit dem letzten Besuch entstanden ist.
@@ -106,6 +110,7 @@ function setupInput() {
 
 function setupArchiveNote() {
   if (!archivedDay) return;
+  $('open-timelapse').href = '../../timelapse/';
   const note = $('archive-note');
   note.hidden = false;
   note.append(`You are visiting the past: this is the game as it was on day ${Number(archivedDay)}. `);
@@ -120,6 +125,7 @@ setupArchiveNote();
 setupChronicle();
 setupSuggestions({ archived: Boolean(archivedDay) });
 setupVoting({ archived: Boolean(archivedDay) });
+updateEvent = setupEvent({ archived: Boolean(archivedDay), getStat: (name) => state.stats[name] });
 setupInput();
 greet();
 refresh();
