@@ -17,6 +17,14 @@ Das Wachstum ist also selbst die Geschichte: Was gestern neu war, ist heute scho
 - Spieltexte sind Englisch.
 - Kinderfreundlich genug, dass jeder den Link teilen kann.
 
+## Look
+
+Overnight sieht aus wie ein altes Terminal, auf dem die Welt läuft: Bernstein-Phosphor auf fast Schwarz, Scanlines, leichtes Glühen, die Pixelschrift VT323. Jeder Bereich ist ein Fenster mit Titel in eckigen Klammern (`[ MAP ]`, `[ TONIGHT ]`), Knöpfe sehen aus wie `[ SEND IDEA ]`. Die Karte selbst bleibt farbig.
+
+- Systemzeilen (Statusleiste, Bootsequenz, Fenstertitel) sind kurz, in Großbuchstaben und trocken, wie ein Gerät, das sich nicht wundert. Die Bewohner dürfen sich wundern, das Terminal nicht.
+- Neue Anzeigen passen sich ein: als Fenster in der Seitenleiste oder als Zeile unter der Karte, mit den vorhandenen Farben. Keine neuen Farbwelten.
+- Die Effekte sind Stimmung, nie Hindernis: Alles muss mit `CRT: OFF` und bei reduzierter Bewegung genauso gut spielbar sein.
+
 ## Spielregeln, die bleiben sollen
 
 - Alles passiert rundenweise. Der Spieler entscheidet in Ruhe, die Welt bewegt sich danach.

@@ -6,6 +6,7 @@ import { setupSuggestions } from './suggest.js';
 import { setupVoting } from './vote.js';
 import { setupEvent } from './event.js';
 import { setupRating } from './rate.js';
+import { crtEnabled, reducedMotion, setupBoot, setupCountdown, setupCrt } from './terminal.js';
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
 import { MAPS } from '../content/world.js';
@@ -26,26 +27,84 @@ const state = createGame({
   seed: seedParam === null ? Date.now() : Number(seedParam),
 });
 
-const draw = createRenderer($('world'));
+let glow = crtEnabled();
+const draw = createRenderer($('world'), { glow: () => glow });
+
+const HP_CELLS = 14;
+
+function chip(kind, name) {
+  const span = document.createElement('span');
+  span.className = 'chip';
+  const label = document.createElement('span');
+  label.className = 'chip-kind';
+  label.textContent = `${kind} `;
+  span.append(label, name);
+  return span;
+}
+
+function drawHud() {
+  const { hp, maxHp } = state.player;
+  const weapon = ITEMS[state.player.weapon];
+  const bag = state.player.bag.map((id) => ITEMS[id].name);
+  // Voller Text für Screenreader und Tests, die sichtbare Anzeige steht daneben.
+  const parts = [MAPS[state.map].name, `HP ${hp}/${maxHp}`];
+  if (weapon) parts.push(weapon.name);
+  if (bag.length) parts.push(`bag: ${bag.join(', ')}`);
+  $('hp-label').textContent = parts.join(' · ');
+  $('map-name').textContent = MAPS[state.map].name;
+
+  const filled = Math.round((hp / maxHp) * HP_CELLS);
+  $('hp-meter').textContent = `HP [${'█'.repeat(filled)}${'·'.repeat(HP_CELLS - filled)}] ${hp}/${maxHp}`;
+  $('hp-meter').classList.toggle('low', hp <= maxHp * 0.3);
+  $('items').replaceChildren(
+    ...(weapon ? [chip('WPN', weapon.name)] : []),
+    ...bag.map((name) => chip('BAG', name)),
+  );
+}
+
+// Die neueste Logzeile tippt sich ein wie auf einem Terminal.
+let typed = { text: '', shown: 0 };
+let typingTimer = null;
+
+function drawLog() {
+  const entries = state.log.slice(-5);
+  const items = entries.map(({ text, kind }) => {
+    const li = document.createElement('li');
+    li.textContent = text;
+    if (kind) li.className = kind;
+    return li;
+  });
+  $('log').replaceChildren(...items);
+  const last = items.at(-1);
+  if (!last) return;
+  const text = entries.at(-1).text;
+  if (reducedMotion() || typed.text === text) {
+    typed = { text, shown: text.length };
+    return;
+  }
+  typed = { text, shown: 0 };
+  clearInterval(typingTimer);
+  last.textContent = '';
+  typingTimer = setInterval(() => {
+    typed.shown = Math.min(typed.text.length, typed.shown + 3);
+    const current = $('log').lastElementChild;
+    if (current) current.textContent = typed.text.slice(0, typed.shown);
+    if (typed.shown >= typed.text.length) clearInterval(typingTimer);
+  }, 16);
+}
 
 function refresh() {
   draw(state);
-  const { hp, maxHp } = state.player;
-  const weapon = ITEMS[state.player.weapon];
-  const parts = [MAPS[state.map].name, `HP ${hp}/${maxHp}`];
-  if (weapon) parts.push(weapon.name);
-  if (state.player.bag.length) parts.push(`bag: ${state.player.bag.map((id) => ITEMS[id].name).join(', ')}`);
-  $('hp-label').textContent = parts.join(' · ');
-  $('hp-bar').style.width = `${(hp / maxHp) * 100}%`;
-  $('hp-bar').classList.toggle('low', hp <= maxHp * 0.3);
-  $('log').replaceChildren(
-    ...state.log.slice(-5).map(({ text, kind }) => {
-      const li = document.createElement('li');
-      li.textContent = text;
-      if (kind) li.className = kind;
-      return li;
-    }),
-  );
+  drawHud();
+  drawLog();
+}
+
+function setupTonight() {
+  const latest = CHRONICLE.at(-1);
+  $('tonight-title').textContent = `Day ${latest.day}: ${latest.title}`;
+  $('tonight-text').textContent = latest.text;
+  // In alten Versionen gibt es nichts mehr vorzuschlagen oder abzustimmen.
+  $('shape').hidden = Boolean(archivedDay);
 }
 
 let updateEvent = () => {};
@@ -122,6 +181,10 @@ function setupArchiveNote() {
 }
 
 $('day-label').textContent = `Day ${currentDay()}`;
+setupCrt((on) => { glow = on; draw(state); });
+setupCountdown({ latestDate: CHRONICLE.at(-1).date, archived: Boolean(archivedDay) });
+setupBoot({ day: currentDay(), title: CHRONICLE.at(-1).title });
+setupTonight();
 setupArchiveNote();
 setupChronicle();
 setupSuggestions({ archived: Boolean(archivedDay) });

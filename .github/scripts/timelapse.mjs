@@ -15,6 +15,7 @@ const TYPES = {
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json',
   '.png': 'image/png',
+  '.woff2': 'font/woff2',
 };
 
 const server = createServer(async (request, response) => {
@@ -46,7 +47,8 @@ for (const dir of dayDirs) {
   try {
     const { CHRONICLE } = await import(pathToFileURL(join(SITE, 'day', dir, 'content', 'chronicle.js')).href);
     const entry = CHRONICLE.find((item) => item.day === day) ?? CHRONICLE.at(-1);
-    const context = await browser.newContext({ viewport: { width: 900, height: 900 }, deviceScaleFactor: 1 });
+    // reducedMotion: keine Bootsequenz, die über der Karte liegen könnte.
+    const context = await browser.newContext({ viewport: { width: 900, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
     const page = await context.newPage();
     // Kein Netzwerk nach außen, auch nicht für Captcha oder Worker.
     await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (route) => route.abort());

@@ -10,7 +10,8 @@ const VIEW_ROWS = NARROW ? 11 : 13;
 const CELL = 32;
 const FONT = `bold ${Math.round(CELL * 0.72)}px ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace`;
 
-export function createRenderer(canvas) {
+// glow: Funktion, die sagt, ob die Zeichen leicht leuchten sollen (CRT-Einstellung).
+export function createRenderer(canvas, { glow = () => false } = {}) {
   const scale = Math.max(window.devicePixelRatio || 1, 1);
   canvas.width = VIEW_COLS * CELL * scale;
   canvas.height = VIEW_ROWS * CELL * scale;
@@ -22,11 +23,14 @@ export function createRenderer(canvas) {
 
   const cell = (col, row, glyph, fg, bg) => {
     if (bg) {
+      ctx.shadowBlur = 0;
       ctx.fillStyle = bg;
       ctx.fillRect(col * CELL, row * CELL, CELL, CELL);
     }
     if (glyph && glyph !== ' ') {
       ctx.fillStyle = fg;
+      ctx.shadowColor = fg;
+      ctx.shadowBlur = glow() ? 6 : 0;
       ctx.fillText(glyph, col * CELL + CELL / 2, row * CELL + CELL / 2 + 1);
     }
   };

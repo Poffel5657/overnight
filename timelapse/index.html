@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
   <title>Overnight Timelapse</title>
   <meta name="description" content="Every night of Overnight, one picture each.">
   <link rel="icon" href="data:,">
@@ -13,12 +13,13 @@
 </head>
 <body>
   <main class="shell">
-    <header class="topbar">
-      <h1>Overnight Timelapse</h1>
-      <a class="button-link" href="../">Back to today</a>
+    <header class="statusbar">
+      <h1 class="brand">OVERNIGHT // TIMELAPSE</h1>
+      <a class="button back" href="../">Back to today</a>
     </header>
 
-    <figure class="frame">
+    <figure class="frame window">
+      <h2 class="window-title">[ PLAYBACK ]</h2>
       <img id="shot" alt="">
       <figcaption>
         <p id="caption-title" class="caption-title"></p>

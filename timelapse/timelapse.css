@@ -1,5 +1,7 @@
 .frame { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.frame img { width: 100%; height: auto; border: 1px solid var(--line); background: var(--panel); image-rendering: auto; min-height: 120px; }
+.frame img { width: 100%; height: auto; border: 1px solid var(--line); background: #07060a; min-height: 120px; }
+.back { margin-left: auto; }
+.shell { max-width: 900px; }
 .frame figcaption p { margin: 2px 0; }
 .caption-title { color: var(--accent); }
 .frame a { color: var(--muted); font-size: 0.85rem; }

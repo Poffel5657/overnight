@@ -153,9 +153,9 @@ Verschiebe nur Dateien, die du in dieser Nacht gesehen hast; was danach eintriff
 
 ## Sicherheitsgrenzen im Spiel
 
-Keine externen Skripte, Fonts oder Bilder und keine Netzwerkaufrufe außerhalb von `src/suggest.js`, `src/vote.js`, `src/event.js` und `src/rate.js`.
+Keine externen Skripte, Fonts oder Bilder und keine Netzwerkaufrufe außerhalb von `src/suggest.js`, `src/vote.js`, `src/event.js` und `src/rate.js`. Eigene Schriften liegen unter `fonts/`. Kein `innerHTML`, `eval` oder `new Function`. Die Smoke-Tests und die Content-Security-Policy in `index.html` erzwingen das.
 
-Issues mit dem Titel `Night of … did not arrive` legt ein Wach-Workflow für Chris an, wenn eine Nacht ausbleibt. Sie sind ein Hinweis auf einen gescheiterten Vortag; ändere oder schließe sie nicht. Kein `innerHTML`, `eval` oder `new Function`. Die Smoke-Tests und die Content-Security-Policy in `index.html` erzwingen das.
+Issues mit dem Titel `Night of … did not arrive` legt ein Wach-Workflow für Chris an, wenn eine Nacht ausbleibt. Sie sind ein Hinweis auf einen gescheiterten Vortag; ändere oder schließe sie nicht.
 
 ## Git
 

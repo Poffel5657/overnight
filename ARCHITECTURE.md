@@ -6,7 +6,9 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 
 | Pfad | Inhalt |
 |---|---|
-| `index.html`, `style.css` | Seite und Oberfläche, inklusive Content-Security-Policy |
+| `index.html`, `style.css` | Seite und Oberfläche im Terminal-Look (siehe „Oberfläche“), inklusive Content-Security-Policy |
+| `src/terminal.js` | Bootsequenz, Countdown, CRT-Schalter |
+| `fonts/` | Selbst gehostete Schrift VT323 |
 | `src/game.js` | Reine Spiellogik ohne DOM, `act(state, action)` ist der einzige Einstieg für Züge |
 | `src/render.js` | Zeichnet die Welt aufs Canvas (25 x 13 Felder, auf dem Handy 15 x 11, die Kamera folgt, wenn die Karte größer ist als der Ausschnitt) |
 | `src/save.js` | Spielstand, Versionen, Migrationen |
@@ -29,6 +31,16 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `tests/day/` | Tests pro Neuerung |
 | `tests/fixtures/` | Alte Spielstände, die immer ladbar bleiben müssen |
 | `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/`, `POST /rate` Bewertungen unter `ratings/`, `POST /event` Event-Beiträge unter `events/` im Inbox-Repo (ohne Captcha, Zähler in KV für die Anzeige); je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
+
+## Oberfläche
+
+`index.html` ist gegliedert in `.statusbar` (Titel, `#day-label`, Countdown, CRT-Schalter), `.play` (Karte `#world`, HUD, Log, Steuerkreuz) und `.side` (Fenster TONIGHT, EVENT, SHAPE TOMORROW, ARCHIVE). Ab 960 px Breite stehen `.play` und `.side` nebeneinander, darunter untereinander; am Handy passen Karte, HUD, Log und Steuerkreuz in den ersten Bildschirm (Test in `tests/smoke/ui.spec.js`).
+
+- **Neues Fenster:** `<section class="window"><h2 class="window-title">[ NAME ]</h2>…</section>` in `.side`. Eine Anzeige zum Spielstand gehört in `drawHud()` in `src/main.js`.
+- **Farben** nur über die Tokens in `:root` von `style.css` (`--text`, `--accent`, `--muted`, `--bright`, `--good`, `--danger`, `--line`, `--panel`). Keine festen Höhen im Spielbereich, sonst rutscht am Handy das Steuerkreuz aus dem Bild.
+- **Knöpfe** bekommen die eckigen Klammern per CSS; im HTML steht nur der Text. Links, die wie Knöpfe aussehen sollen, haben `class="button"`.
+- **`src/terminal.js`:** Bootsequenz (einmal pro Tag, blockiert keine Eingabe), Countdown bis Mitternacht in Berlin, CRT-Schalter (`overnight.crt` in `localStorage`). `src/render.js` lässt die Zeichen leicht leuchten, wenn CRT an ist.
+- **Schrift:** `fonts/vt323.woff2` (OFL, Lizenz in `fonts/OFL.txt`), nur für die Oberfläche; die Karte nutzt eine Systemschrift, weil VT323 Zeichen wie `♣` und `π` fehlen.
 
 ## Systeme
 
