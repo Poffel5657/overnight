@@ -300,6 +300,14 @@ textarea:focus { outline: 1px solid var(--accent); }
 .vote-option + .vote-option { border-top: 1px dashed var(--line); }
 .vote-option input { margin-top: 5px; accent-color: var(--accent); }
 
+/* Zwischenstand und Ergebnis: Balken aus Zeichen. */
+.tally { margin: 10px 0; padding-top: 8px; border-top: 1px dashed var(--line); }
+.tally-title { color: var(--accent); }
+.tally-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.tally-text { display: block; color: var(--text); }
+.tally-bar { display: block; color: var(--good); white-space: pre; font-size: 18px; }
+.tonight-vote { color: var(--good); }
+
 /* ---------- Bildschirmeffekte ---------- */
 
 .crt-overlay {

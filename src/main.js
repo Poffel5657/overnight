@@ -10,6 +10,7 @@ import { crtEnabled, reducedMotion, setupBoot, setupCountdown, setupCrt } from '
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
 import { MAPS } from '../content/world.js';
+import { BALLOT } from '../content/ballot.js';
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
@@ -151,6 +152,14 @@ function setupTonight() {
   const latest = CHRONICLE.at(-1);
   $('tonight-title').textContent = `Day ${latest.day}: ${latest.title}`;
   $('tonight-text').textContent = latest.text;
+  // Wer hat die letzte Abstimmung gewonnen? Steht im Stimmzettel, sobald der Nachtlauf gezählt hat.
+  const result = BALLOT?.lastResult;
+  const winner = result?.options?.find((option) => option.won);
+  if (winner) {
+    const total = result.options.reduce((sum, option) => sum + option.votes, 0);
+    $('tonight-vote').textContent = `Vote winner: ${winner.text} (${winner.votes} of ${total} votes)`;
+    $('tonight-vote').hidden = false;
+  }
   // In alten Versionen gibt es nichts mehr vorzuschlagen oder abzustimmen.
   $('shape').hidden = Boolean(archivedDay);
 }

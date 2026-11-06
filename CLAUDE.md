@@ -78,7 +78,7 @@ Du darfst ein Community-Event starten, wenn du es für eine gute Idee hältst. E
 
 `content/ballot.js` ist der Stimmzettel: 2 bis 5 Ideen aus früheren Vorschlägen, die dir gefallen haben, die aber nicht gebaut wurden. Spieler stimmen im Spiel über den Knopf „Vote“ ab, eine Stimme pro Person und Nacht. `BALLOT.day` ist die Nummer des Zettels.
 
-**Zählen** beim Tagesstart: Stimmen liegen im Inbox-Repo unter `votes/` als JSON mit `ballot` und `choice`. Zähle nur Dateien, deren `ballot` gleich dem `BALLOT.day` auf `main` ist und deren `choice` eine ID vom Zettel ist. Alles andere ignorierst du. Gewinner ist die Idee mit den meisten Stimmen. Bei Gleichstand oder ganz ohne Stimmen entscheidest du selbst unter den Ideen auf dem Zettel. Halte das Ergebnis (Stimmen pro Idee) in `CHRONICLE.md` fest.
+**Zählen** beim Tagesstart: Stimmen liegen im Inbox-Repo unter `votes/` als JSON mit `ballot` und `choice`. Zähle nur Dateien, deren `ballot` gleich dem `BALLOT.day` auf `main` ist und deren `choice` eine ID vom Zettel ist. Alles andere ignorierst du. Gewinner ist die Idee mit den meisten Stimmen. Bei Gleichstand oder ganz ohne Stimmen entscheidest du selbst unter den Ideen auf dem Zettel. Halte das Ergebnis (Stimmen pro Idee) in `CHRONICLE.md` fest und trage es in `BALLOT.lastResult` ein (Format steht in `content/ballot.js`): jede Idee des alten Zettels mit ihrem Text, ihren gezählten Stimmen und `won: true` genau beim Gewinner. Spieler sehen das im Abstimmungsdialog und unter TONIGHT. Gab es keinen alten Zettel, bleibt es `null`.
 
 **Bauen:** Der Gewinner ist Teil 2 der Nacht. Ist er für eine Nacht zu groß, baue einen fertigen ersten Teil und mach den Rest zum Thema in `PLAN.md`, oder schlage ihn als großen Umbau vor.
 

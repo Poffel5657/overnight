@@ -109,6 +109,27 @@ KINDS.rating = {
   },
 };
 
+// Zwischenstand pro Stimmzettel als ein JSON-Objekt { choice: Anzahl }. Gleichzeitige Stimmen können
+// sich überschreiben, das ist für eine Anzeige in Ordnung. Unbekannte IDs kann der Worker nicht
+// erkennen; damit niemand den Eintrag aufbläht, nimmt er höchstens MAX_CHOICES verschiedene an.
+const MAX_CHOICES = 8;
+
+async function readTally(env, ballot) {
+  try {
+    const counts = JSON.parse(await env.SUBMISSIONS.get(`tally:${ballot}`)) ?? {};
+    return typeof counts === 'object' && !Array.isArray(counts) ? counts : {};
+  } catch {
+    return {};
+  }
+}
+
+async function addToTally(env, ballot, choice) {
+  const counts = await readTally(env, ballot);
+  if (!(choice in counts) && Object.keys(counts).length >= MAX_CHOICES) return;
+  counts[choice] = (Number(counts[choice]) || 0) + 1;
+  await env.SUBMISSIONS.put(`tally:${ballot}`, JSON.stringify(counts), { expirationTtl: COUNT_TTL_SECONDS });
+}
+
 const PATHS = { '': KINDS.suggestion, '/vote': KINDS.vote, '/event': KINDS.event, '/rate': KINDS.rating };
 
 export default {
@@ -116,6 +137,13 @@ export default {
     if (request.method === 'OPTIONS') return reply(204);
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
+
+    // Zwischenstand eines Stimmzettels, öffentlich lesbar. Nur Anzeige, maßgeblich sind die Dateien.
+    if (request.method === 'GET' && path === '/vote') {
+      const raw = url.searchParams.get('ballot') ?? '';
+      if (!/^\d{1,4}$/.test(raw)) return reply(400);
+      return json({ counts: await readTally(env, Number(raw)) });
+    }
 
     // Zählerstand eines Events, öffentlich lesbar und ohne Sperre.
     if (request.method === 'GET' && path === '/event') {
@@ -166,6 +194,7 @@ export default {
     if (!stored.ok) return reply(502);
     // Erst nach dem Speichern sperren, damit ein Fehler niemanden die Nacht über aussperrt.
     await env.SUBMISSIONS.put(lockKey, '1', { expirationTtl: FINGERPRINT_TTL_SECONDS });
+    if (kind === KINDS.vote) await addToTally(env, fields.ballot, fields.choice);
     if (kind === KINDS.event) {
       const countKey = `count:${fields.event}`;
       const count = (Number(await env.SUBMISSIONS.get(countKey)) || 0) + 1;

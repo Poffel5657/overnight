@@ -2,6 +2,9 @@
 // der Nachtlauf baut den Gewinner. Texte immer in eigenen Worten, nie Vorschlagstext.
 // day: Tag, an dem dieser Zettel veröffentlicht wurde. Stimmen zählen nur, wenn sie diese Nummer tragen.
 // since: Tag, an dem die Idee zum ersten Mal auf dem Zettel stand.
+// lastResult: Ergebnis des vorigen Zettels, trägt der Nachtlauf beim Auszählen ein (oder null):
+//   { ballot: 3, options: [{ text: 'A town of steam and gears…', votes: 4, won: true }, …] }
+//   text wie auf dem alten Zettel, votes aus den gezählten Dateien, won genau einmal true.
 export const BALLOT = {
   day: 3,
   options: [
@@ -10,4 +13,5 @@ export const BALLOT = {
     { id: 'wheel-of-chance', since: 3, text: 'A wheel of chance that hands out odd things, or odd visitors.' },
     { id: 'more-weapons', since: 3, text: 'More weapons from the workbench: a knife, an axe, a sword.' },
   ],
+  lastResult: null,
 };

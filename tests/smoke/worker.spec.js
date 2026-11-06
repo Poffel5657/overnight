@@ -210,7 +210,8 @@ test('Ungültige Event-Anfragen speichern nichts', async () => {
     expect((await worker.fetch(help({ event: 'Not Valid' }), env)).status).toBe(400);
     expect((await worker.fetch(help({}), env)).status).toBe(400);
     expect((await worker.fetch(new Request('https://worker.test/event?id=<x>'), env)).status).toBe(400);
-    expect((await worker.fetch(new Request('https://worker.test/vote'), env)).status).toBe(405);
+    expect((await worker.fetch(new Request('https://worker.test/vote'), env)).status).toBe(400);
+    expect((await worker.fetch(new Request('https://worker.test/rate'), env)).status).toBe(405);
     expect(calls).toHaveLength(0);
   });
 });
@@ -241,5 +242,29 @@ test('Ungültige Bewertungen speichern nichts', async () => {
       expect((await worker.fetch(rate(body), env)).status).toBe(400);
     }
     expect(calls).toHaveLength(0);
+  });
+});
+
+test('Stimmen landen im Zwischenstand, der per GET lesbar ist', async () => {
+  await withFakeGitHub(async () => {
+    const env = makeEnv();
+    const tally = async (ballot) => (await (await worker.fetch(new Request(`https://worker.test/vote?ballot=${ballot}`), env)).json()).counts;
+    expect(await tally(3)).toEqual({});
+    await worker.fetch(vote({ ballot: 3, choice: 'a' }, '203.0.113.1'), env);
+    await worker.fetch(vote({ ballot: 3, choice: 'a' }, '203.0.113.2'), env);
+    await worker.fetch(vote({ ballot: 3, choice: 'b' }, '203.0.113.3'), env);
+    await worker.fetch(vote({ ballot: 4, choice: 'a' }, '203.0.113.4'), env);
+    expect(await tally(3)).toEqual({ a: 2, b: 1 });
+    expect(await tally(4)).toEqual({ a: 1 });
+    expect((await worker.fetch(new Request('https://worker.test/vote?ballot=x'), env)).status).toBe(400);
+  });
+});
+
+test('Der Zwischenstand nimmt höchstens acht verschiedene Ideen an', async () => {
+  await withFakeGitHub(async () => {
+    const env = makeEnv();
+    for (let i = 0; i < 12; i += 1) await worker.fetch(vote({ ballot: 3, choice: `c${i}` }, `203.0.113.${i + 10}`), env);
+    const counts = (await (await worker.fetch(new Request('https://worker.test/vote?ballot=3'), env)).json()).counts;
+    expect(Object.keys(counts)).toHaveLength(8);
   });
 });

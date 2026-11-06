@@ -30,6 +30,7 @@
             <p>What the Nightwright made last night.</p>
             <p id="tonight-title" class="tonight-title"></p>
             <p id="tonight-text"></p>
+            <p id="tonight-vote" class="tonight-vote" hidden></p>
           </section>
         </div>
         <div id="shape" class="menu">
@@ -151,6 +152,14 @@
       <button id="vote-send">Send vote</button>
     </div>
     <p id="vote-status" role="status"></p>
+    <section id="vote-results" class="tally" hidden>
+      <p id="vote-results-title" class="tally-title"></p>
+      <ol id="vote-results-list" class="tally-list"></ol>
+    </section>
+    <section id="vote-last" class="tally" hidden>
+      <p id="vote-last-title" class="tally-title"></p>
+      <ol id="vote-last-list" class="tally-list"></ol>
+    </section>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 </body>

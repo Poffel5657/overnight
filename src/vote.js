@@ -1,25 +1,42 @@
-// Abstimmung über den Stimmzettel. Geschützte Datei: Neben suggest.js der einzige Ort mit Netzwerkzugriff.
+// Abstimmung über den Stimmzettel. Geschützte Datei: Netzwerkzugriff wie suggest.js.
+// Nach der eigenen Stimme zeigt der Dialog den Zwischenstand, vorher nicht, damit niemand
+// nur der Mehrheit folgt. Das Ergebnis der letzten Abstimmung trägt der Nachtlauf in BALLOT.lastResult ein.
 import { SUGGEST_URL } from './config.js';
 import { berlinDay, createCaptcha } from './suggest.js';
 import { BALLOT } from '../content/ballot.js';
 
 const VOTED_KEY = 'overnight.voted';
+const CHOICE_KEY = 'overnight.votedChoice';
 const ALREADY_VOTED = 'You already voted tonight. The Nightwright counts at midnight.';
+const BAR_CELLS = 16;
 
-function votedToday() {
+function read(key) {
   try {
-    return localStorage.getItem(VOTED_KEY) === berlinDay();
+    return localStorage.getItem(key);
   } catch {
-    return false;
+    return null;
   }
 }
 
-function markVoted() {
+function write(key, value) {
   try {
-    localStorage.setItem(VOTED_KEY, berlinDay());
+    localStorage.setItem(key, value);
   } catch {
     // Ohne Speicher greift nur noch die Sperre im Worker.
   }
+}
+
+const votedToday = () => read(VOTED_KEY) === berlinDay();
+
+// Eigene Wahl merken, aber nur für diesen Stimmzettel.
+function myChoice() {
+  const [ballot, choice] = (read(CHOICE_KEY) ?? '').split('|');
+  return Number(ballot) === BALLOT.day ? choice : null;
+}
+
+function markVoted(choice) {
+  write(VOTED_KEY, berlinDay());
+  if (choice) write(CHOICE_KEY, `${BALLOT.day}|${choice}`);
 }
 
 function buildOptions(list) {
@@ -38,6 +55,69 @@ function buildOptions(list) {
   }));
 }
 
+// Eine Zeile mit Balken aus Zeichen: Text, dann [██████······] 4 · 57%.
+export function tallyRows(rows) {
+  const total = rows.reduce((sum, row) => sum + row.votes, 0);
+  return rows.map(({ text, votes, mark }) => {
+    const share = total ? votes / total : 0;
+    const filled = Math.round(share * BAR_CELLS);
+    const li = document.createElement('li');
+    const label = document.createElement('span');
+    label.className = 'tally-text';
+    label.textContent = mark ? `${text} ${mark}` : text;
+    const bar = document.createElement('span');
+    bar.className = 'tally-bar';
+    bar.textContent = `[${'█'.repeat(filled)}${'·'.repeat(BAR_CELLS - filled)}] ${votes} · ${Math.round(share * 100)}%`;
+    li.append(label, bar);
+    return li;
+  });
+}
+
+function showLastResult() {
+  const result = BALLOT.lastResult;
+  const box = document.getElementById('vote-last');
+  if (!result?.options?.length) {
+    box.hidden = true;
+    return;
+  }
+  const total = result.options.reduce((sum, option) => sum + option.votes, 0);
+  document.getElementById('vote-last-title').textContent =
+    `Last vote (night ${result.ballot}): ${total} ${total === 1 ? 'vote' : 'votes'}`;
+  document.getElementById('vote-last-list').replaceChildren(...tallyRows(
+    [...result.options]
+      .sort((a, b) => b.votes - a.votes)
+      .map((option) => ({ ...option, mark: option.won ? '★ built' : '' })),
+  ));
+  box.hidden = false;
+}
+
+async function showLiveTally() {
+  const box = document.getElementById('vote-results');
+  const title = document.getElementById('vote-results-title');
+  const list = document.getElementById('vote-results-list');
+  box.hidden = false;
+  title.textContent = 'Votes so far: counting…';
+  list.replaceChildren();
+  try {
+    const response = await fetch(new URL(`vote?ballot=${BALLOT.day}`, SUGGEST_URL));
+    if (!response.ok) throw new Error(String(response.status));
+    const counts = (await response.json()).counts ?? {};
+    const mine = myChoice();
+    const rows = BALLOT.options
+      .map((option) => ({
+        text: option.text,
+        votes: Number(counts[option.id]) || 0,
+        mark: option.id === mine ? '◄ you' : '',
+      }))
+      .sort((a, b) => b.votes - a.votes);
+    const total = rows.reduce((sum, row) => sum + row.votes, 0);
+    title.textContent = `Votes so far: ${total}. Counted for real at midnight.`;
+    list.replaceChildren(...tallyRows(rows));
+  } catch {
+    title.textContent = "Couldn't load the votes so far. Try again later.";
+  }
+}
+
 export function setupVoting({ archived }) {
   const dialog = document.getElementById('vote-dialog');
   const openArea = document.getElementById('vote-open');
@@ -52,12 +132,15 @@ export function setupVoting({ archived }) {
     return;
   }
   buildOptions(list);
+  showLastResult();
   const captcha = createCaptcha(document.getElementById('vote-captcha'));
 
   opener.addEventListener('click', () => {
+    document.getElementById('vote-results').hidden = true;
     if (SUGGEST_URL && votedToday()) {
       openArea.hidden = true;
       status.textContent = ALREADY_VOTED;
+      showLiveTally();
     } else if (SUGGEST_URL) {
       openArea.hidden = false;
       status.textContent = '';
@@ -88,13 +171,15 @@ export function setupVoting({ archived }) {
         body: JSON.stringify({ ballot: BALLOT.day, choice, website: trap.value, token: captcha.token }),
       });
       if (response.ok) {
-        markVoted();
+        markVoted(choice);
         openArea.hidden = true;
         status.textContent = 'Thanks. Your vote is in the box.';
+        showLiveTally();
       } else if (response.status === 409) {
-        markVoted();
+        markVoted(null);
         openArea.hidden = true;
         status.textContent = ALREADY_VOTED;
+        showLiveTally();
       } else if (response.status === 429) {
         status.textContent = 'Too many votes right now. Try again later.';
       } else {
