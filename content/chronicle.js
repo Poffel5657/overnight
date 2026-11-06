@@ -25,4 +25,10 @@ export const CHRONICLE = [
     title: 'A workbench',
     text: 'A workbench stands by the hut, and a pointed rock glints in the pond shallows. Together with the stick, they make a stone spear.',
   },
+  {
+    day: 4,
+    date: '2026-11-07',
+    title: 'A wheel and a smudge',
+    text: 'You won the vote: a Dealer with a Wheel of Chance now waits in the Rough Draft. Fights earn levels, and smudged frogs crawl from a corner someone rubbed out.',
+  },
 ];

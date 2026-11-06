@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "draft",
+  "player": { "x": 16, "y": 6, "hp": 12, "maxHp": 14, "atk": 2, "weapon": "stone-spear", "bag": ["button", "button", "pencil-stub"], "xp": 14, "level": 3 },
+  "turn": 340,
+  "flags": { "talk": { "keeper": 9, "dealer": 2 }, "taken": { "stick": true, "pointy-rock": true }, "heard": { "keeper:stick": true }, "wheelDay": 4, "spins": 3 },
+  "stats": { "kills": 19, "faints": 1, "xp": 14 },
+  "lastSeenDay": 4
+}

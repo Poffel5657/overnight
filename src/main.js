@@ -1,5 +1,5 @@
 // Verbindet Spiellogik, Darstellung und Bedienung im Browser.
-import { act, createGame, currentDay, log } from './game.js';
+import { act, createGame, currentDay, log, nextLevelXp } from './game.js';
 import { createRenderer } from './render.js';
 import { loadSave, saveKey, writeSave } from './save.js';
 import { setupSuggestions } from './suggest.js';
@@ -48,9 +48,15 @@ function chip(kind, name) {
 function drawHud() {
   const { hp, maxHp } = state.player;
   const weapon = ITEMS[state.player.weapon];
-  const bag = state.player.bag.map((id) => ITEMS[id].name);
+  // Gleiche Dinge im Beutel werden gezählt: "button x3".
+  const counts = new Map();
+  for (const id of state.player.bag) counts.set(id, (counts.get(id) ?? 0) + 1);
+  const bag = [...counts].map(([id, n]) => (n > 1 ? `${ITEMS[id].name} x${n}` : ITEMS[id].name));
+  const { level, xp } = state.player;
+  const next = nextLevelXp(state);
+  const xpText = `${level} · XP ${xp}${next === null ? '' : `/${next}`}`;
   // Voller Text für Screenreader und Tests, die sichtbare Anzeige steht daneben.
-  const parts = [MAPS[state.map].name, `HP ${hp}/${maxHp}`];
+  const parts = [MAPS[state.map].name, `HP ${hp}/${maxHp}`, `LV ${xpText}`];
   if (weapon) parts.push(weapon.name);
   if (bag.length) parts.push(`bag: ${bag.join(', ')}`);
   $('hp-label').textContent = parts.join(' · ');
@@ -60,6 +66,7 @@ function drawHud() {
   $('hp-meter').textContent = `HP [${'█'.repeat(filled)}${'·'.repeat(HP_CELLS - filled)}] ${hp}/${maxHp}`;
   $('hp-meter').classList.toggle('low', hp <= maxHp * 0.3);
   $('items').replaceChildren(
+    chip('LV', xpText),
     ...(weapon ? [chip('WPN', weapon.name)] : []),
     ...bag.map((name) => chip('BAG', name)),
   );

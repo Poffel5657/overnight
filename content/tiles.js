@@ -25,5 +25,10 @@ export const TILES = {
     name: 'sketch', glyph: ':', fg: '#8a8fa8', bg: '#181a24', walkable: false,
     bump: "This part is only sketched in. It won't hold your weight yet.",
   },
+  // Seit Tag 4: ausradierte Stellen im Rough Draft. Nicht vom Nightwright.
+  'e': {
+    name: 'rubbed out', glyph: '░', fg: '#4a4c5a', bg: '#0b0b12', walkable: false,
+    bump: 'This bit has been rubbed out. There are crumbs. It feels colder than nothing.',
+  },
   'B': { name: 'bed', glyph: '=', fg: '#e0705f', bg: '#2a2219', walkable: true },
 };

@@ -4,44 +4,52 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 
 ## Stand
 
-- Letzter Tag: 3
-- Inbox gelesen bis: `2026-11-05T20-15-25-676Z-c0cbecd5.json`
+- Letzter Tag: 4
+- Inbox gelesen bis: `2026-11-06T13-43-08-901Z-2399d7b1.json` (Vorschläge), Stimmen und Bewertungen bis `2026-11-06T18-54-06-065Z-fae9530b.json`
 
 ## Stimmzettel
 
-Seit dem 2026-11-06 gibt es die Abstimmung (siehe `CLAUDE.md`). Den ersten Zettel (Nummer 3) hat Chris vorbereitet, damit schon am Tag 3 abgestimmt werden kann. In Nacht 4 wird er zum ersten Mal gezählt. Ideen darauf, alle aus früheren Vorschlägen:
+Zettel 4 (alle Ideen aus Vorschlägen, in eigenen Worten):
 
-- `well-drains`: in den Brunnen fallen und durch ein Kanalsystem (mehrere Karten) wieder herausfinden.
-- `clockwork-town`: eine Stadt aus Dampf und Zahnrädern, deren Bewohner Aufträge geben.
-- `wheel-of-chance`: ein Glücksrad für Gegenstände oder Begegnungen.
-- `more-weapons`: weitere Waffen über die Werkbank (Messer, Axt, Schwert) mit unterschiedlichem Schaden.
+- `well-drains` (seit 3): in den Brunnen fallen und durch Kanäle (mehrere Karten) wieder heraus. Letzte Nacht auf dem Zettel ist Nacht 5.
+- `clockwork-town` (seit 3): Stadt aus Dampf und Zahnrädern mit Aufträgen. Nacht 4 kam ein weiterer Wunsch nach einer Stadt mit Bewohnern. Fliegt nach Nacht 5.
+- `more-weapons` (seit 3): Messer, Axt, Schwert über die Werkbank. Fliegt nach Nacht 5. Achtung: Waffen im Beutel lassen sich noch nicht wieder anlegen.
+- `hut-grows` (seit 4): Hütte bekommt Dach und Obergeschoss, Werkbank zieht hinein.
+- `dwarf-band` (seit 4): eine Kapelle winziger Bergleute mit sehr lauter Musik, die Mut macht (z. B. kurzzeitig mehr Angriff).
+
+Gewinner Zettel 3: `wheel-of-chance` (4 Stimmen), gebaut in Nacht 4.
 
 ## Nächste Tage (Vorschlag, darf sich ändern)
 
-Ab Nacht 4 besteht jede Nacht aus drei Teilen: Vorschlag, Abstimmungsgewinner, eigene Idee. Die Punkte unten sind Kandidaten für Teil 3 oder Ergänzungen, keine Tagesgrenze.
+Jede Nacht drei Teile: Vorschlag, Abstimmungsgewinner, eigene Idee. Die Punkte unten sind Kandidaten für Teil 3.
 
-
-4. Ein zäheres Wesen, für das sich der Speer lohnt (Ratten sterben schon am Stock). Naheliegend: Krähen im Rough Draft, die die Vogelscheuche endlich erschrecken kann, oder etwas mit 3 bis 4 HP.
-5. Die erste kleine Quest, die Keeper und Vogelscheuche verbindet und den Beutel nutzt (etwas von einem Ort zum anderen bringen).
-6. Ratten lassen etwas fallen, das man an der Werkbank verarbeiten kann (zweites Rezept). Achtung: Ratten erneuern sich bei jedem Kartenwechsel, Beute also selten machen.
-7. Der Rough Draft wird fertiger, oder eine weitere Tür. Spielerideen dafür: aus Versehen in den Brunnen fallen und durch ein kleines Kanalsystem (mehrere Karten) wieder herausfinden; eine Stadt mit Bewohnern, die Aufträge geben. Weitere Waffenarten (Messer, Axt, Schwert) lassen sich über Rezepte verteilen. Ein Glücksrad für Gegenstände oder Begegnungen wäre ein möglicher Ort-Inhalt.
+5. Die erste kleine Quest, die Keeper, Vogelscheuche oder Dealer verbindet und den Beutel nutzt. Gut wäre eine, die mit der ausradierten Ecke zu tun hat (Krümel einsammeln und zum Keeper bringen?).
+6. Der Bleistiftstummel bekommt einen Zweck: Mit ihm lassen sich Bleistiftlinien (`:`) im Rough Draft „nachziehen“ und begehbar machen, oder Ausradiertes neu zeichnen. Bogen-Baustein.
+7. **Aufräumnacht.** Kandidaten: `src/game.js` wird groß (Interaktionen, Rad, Stufen) und könnte in Module geteilt werden; Balance der Frösche und des Rads prüfen; `LORE.md` und `PLAN.md` entrümpeln.
+8. Ein erstes Community-Event, sobald das Smoke-Test-Problem (siehe unten) gelöst ist. Vorbereitet: „The Smudge Watch“, Erfahrung sammeln für die Vogelscheuche, Belohnung: etwas, das die Ecke festhält (Tintenzaun, Laterne).
 
 ## Ideen für später
 
-Ideen aus Vorschlägen, die gefallen, aber noch nicht gebaut sind, in eigenen Worten. Quelle für den Stimmzettel. Seit dem Aufräumen ab Nacht 4 liest niemand alte Vorschlagsdateien noch einmal, deshalb muss alles Wichtige hier stehen.
+Ideen aus Vorschlägen, die gefallen, aber noch nicht gebaut sind, in eigenen Worten. Quelle für den Stimmzettel. Alte Vorschlagsdateien liest niemand noch einmal, deshalb muss alles Wichtige hier stehen.
 
-- Brunnen-Kanäle, Dampfstadt mit Aufträgen, Glücksrad, weitere Waffen: stehen auf Zettel 3.
+- Der Teich wird tiefer, man kann darin schwimmen und sich waschen (Nacht 4). Noch nicht auf dem Zettel.
+- Brunnen-Kanäle, Dampfstadt, weitere Waffen, Hütte mit Obergeschoss, Zwergenkapelle: stehen auf Zettel 4.
 
 ## Was ankommt
 
-Muster aus den Bewertungen der Spieler (seit 2026-11-06). Noch keine Daten.
+Muster aus den Bewertungen der Spieler (seit 2026-11-06).
+
+- Tag 3 (Werkbank, Stein, Speer): 5 hoch, 0 runter. Handwerk und das Verbinden alter Dinge kommen gut an. Mehr davon.
 
 ## Offene Fäden
 
 - Wer oder was ist der Nightwright? Der Keeper kennt nur den Namen. Das sollte lange offen bleiben.
 - Die Lücke im Osten hat seit Tag 2 eine braune Tür in den Rough Draft. Dessen Bleistiftlinien (`:`) sind "noch nicht fertig"; sie später fester werden zu lassen, ist eine schöne kleine Neuerung.
 - Die Vogelscheuche soll Krähen erschrecken, aber es gibt noch keine Krähen. Ein naheliegendes künftiges Wesen.
-- Kreaturen werden bei jedem Kartenwechsel neu gesetzt. Ratten lassen sich also durch Hin- und Herlaufen erneuern. Bisher harmlos, aber bei Beute (Tag 3) bedenken.
+- Kreaturen werden bei jedem Kartenwechsel neu gesetzt. Seit Tag 4 lassen Frösche Knöpfe fallen (30 %) und geben Erfahrung; Hin- und Herlaufen erneuert sie. Bisher vertretbar, weil Knöpfe nur Raddrehungen kaufen. Bei wertvollerer Beute bedenken.
+- Die ausradierte Ecke im Rough Draft (Tag 4) ist der Anfang des langen Bogens (Plan geheim im Inbox-Repo, `nightwright/arc.md`). Jede Nacht ein kleines Stück davon zeigen.
+- Der Dealer weiß, was er verkauft, aber es ist „noch nicht gemalt“. Später könnte er wirklich etwas verkaufen (gegen Knöpfe).
+- Der Bleistiftstummel (vom Rad, Tag 4) hat noch keinen Zweck.
 - Der Stock ist "zu gerade, um zufällig dort zu liegen": eine leise Spur zum Nightwright, die man später aufgreifen kann.
 - Seit Tag 3 gibt es `player.bag` und Rezepte (`content/recipes.js`). Eine neue Waffe ersetzt die alte, die alte wandert in den Beutel. Bisher kann man Waffen im Beutel nicht wieder anlegen; falls das wichtig wird, braucht es eine Auswahl.
 - Ein Spieler wünschte sich ein Schild mit Nachrichten anderer Spieler. Das braucht Netzwerk und ist nach den Sicherheitsregeln nicht möglich.
@@ -49,7 +57,8 @@ Muster aus den Bewertungen der Spieler (seit 2026-11-06). Noch keine Daten.
 
 ## Bekannte Probleme
 
-- Im Cloud-Container scheitert `npx playwright install chromium` (Download nicht möglich). Tests laufen mit einer temporären Config, die `launchOptions.executablePath: '/opt/pw-browsers/chromium'` setzt (nicht einchecken, `playwright.config.js` ist geschützt).
+- Im Cloud-Container scheitert `npx playwright install chromium` (Download nicht möglich). Tests laufen mit einer temporären Config, die `launchOptions.executablePath: '/opt/pw-browsers/chromium-1243/chrome-linux64/chrome'` (Pfad in Nacht 4; vorher `ls /opt/pw-browsers` prüfen) setzt (nicht einchecken, `playwright.config.js` ist geschützt).
+- **Community-Events sind blockiert:** Ein laufendes Event lässt `tests/smoke/game.spec.js` scheitern („Spiel startet ohne Fehler und ohne externe Anfragen“ u. a.), weil `src/event.js` beim Start `GET /event?id=` an den Worker schickt und der Test jede Anfrage außerhalb von `127.0.0.1:4173` als extern zählt. Beides ist geschützt. Chris muss den Smoke-Test (Worker-Origin erlauben oder Event-Abrufe abfangen) anpassen. Bis dahin kein Event starten. Gemeldet in Nacht 4.
 - Die geschlossenen PRs #1 bis #4 waren absichtliche Gate-Tests vom Einrichten, keine fehlgeschlagenen Nächte. Ihre Branches existieren nicht mehr.
 
 ## Ignorierte Inbox-Dateien
@@ -57,6 +66,7 @@ Muster aus den Bewertungen der Spieler (seit 2026-11-06). Noch keine Daten.
 - `2026-11-04T16-55-06-000Z-injtest1.json`: Steuerungsversuch, ignoriert.
 - `2026-11-04T17-22-12-857Z-f8088fbf.json`: unpassender Inhalt, ignoriert.
 - `2026-11-04T17-57-06-198Z-724c004f.json`: Steuerungsversuch, ignoriert.
+- Nacht 4: keine Steuerungsversuche.
 
 ## Große Vorschläge
 

@@ -34,3 +34,20 @@ Warum: Der Plan sah für heute ein kleines Inventar vor, und Design wünscht sic
 
 Vorschläge: Ein Spieler wünschte sich genau diese Kombination aus Werkbank neben dem Haus, sichtbarem spitzem Stein im Teich und einem Speer aus Stock und Stein mit 4 Schaden. Das passte so gut zum Plan, dass es die Neuerung bestimmt hat. Weitere Ideen stehen im Plan: in den Brunnen fallen und aus einem Kanalsystem entkommen, ein Glücksrad für Gegenstände oder Begegnungen, eine Stadt mit Aufträgen. Ein Schild mit Nachrichten anderer Spieler bräuchte Netzwerkzugriff und passt deshalb nicht zu den Sicherheitsregeln.
 
+
+Bewertung (nachgetragen in Nacht 4): 5 Daumen hoch, 0 runter. Handwerk und das Verbinden alter Dinge kommen an.
+
+## Tag 4 (2026-11-07): Ein Rad und ein Fleck
+
+Die erste Nacht mit drei Teilen.
+
+**Teil 1, aus den Vorschlägen: Stufen, Frösche und der Dealer.** Siege geben jetzt Erfahrung (Ratten 1, Frösche 2). Mit genug Erfahrung steigt man eine Stufe auf (bis Stufe 10): Jede Stufe gibt 2 max HP und heilt ganz, jede zweite ab Stufe 3 einen Angriffspunkt. Die Anzeige zeigt `LV` und `XP`. Im Rough Draft leben jetzt „smudged frogs“ (`f`): 5 HP, sie stoßen mit 2 Schaden zu, sitzen jede zweite Runde still und springen dann zwei Felder. Der Speer braucht für sie zwei Stiche, endlich lohnt er sich. Frösche lassen manchmal einen Knopf fallen. Neben dem Rad steht der Dealer (`$`), der genau weiß, was er verkauft, nur ist es noch nicht fertig gemalt. Der Beutel zählt gleiche Dinge zusammen („button x2“).
+Ein Spieler wünschte sich mutierte Kanalfrösche mit doppelt so viel Erfahrung wie Ratten, eine Erfahrungsleiste und Stufen; ein anderer einen zwielichtigen Händler im zweiten Ort, dessen Ware noch gemalt wird. Beides passte zu „ein zäheres Wesen“ aus dem Plan und zu Design („Stufen“ als verbindendes System). Nicht gebaut: das nächtliche Zurücksetzen der Stufen und die Bestenliste, denn die bräuchte Netzwerkzugriff, und Fortschritt soll bleiben.
+
+**Teil 2, aus der Abstimmung: das Glücksrad.** Zettel 3: Glücksrad 4 Stimmen, Dampfstadt 3, Brunnen-Kanäle 1, weitere Waffen 0. Das Rad (`¤`) steht beim Dealer, dreht einmal pro Nacht umsonst und danach für je einen Knopf. Es gibt Erfahrung, Heilung, Knöpfe, einmalig einen Bleistiftstummel, einen Frosch als Besucher (kommt nach dem Sieg nicht wieder), ein leeres Feld oder selten +1 max HP. Die Felder liegen als Daten in `content/wheel.js`.
+
+**Teil 3, vom Nightwright: die ausradierte Ecke.** Unten rechts im Rough Draft fehlt ein Stück Welt (`░`): nicht unfertig, sondern ausradiert, mit Krümeln. Die Vogelscheuche ist sicher, dass das nicht der Nightwright war, „the Nightwright only ever adds“. Die Frösche kamen von dort. Das ist der erste sichtbare Schritt des langen Bogens. Der Bleistiftstummel vom Rad hat noch keinen Zweck.
+
+Community-Event: Geplant war „The Smudge Watch“ (Erfahrung sammeln für die Vogelscheuche), aber ein laufendes Event lässt den geschützten Smoke-Test `game.spec.js` scheitern, weil der Zählerabruf an den Worker als externe Anfrage gilt. Deshalb kein Event, Problem an Chris gemeldet.
+
+Vorschläge außerdem: eine Stadt mit Bewohnern (stützt `clockwork-town` auf dem Zettel), die Hütte wächst um Dach und Obergeschoss mit Werkbank drinnen, ein tieferer Teich zum Schwimmen, eine Zwergenkapelle mit sehr lauter Musik, die Mut macht. Hütte und Kapelle stehen jetzt auf dem Zettel, Schwimmen unter „Ideen für später“. Eine isometrische Ansicht passt nicht zu einer Welt aus Schriftzeichen und wurde verworfen.
