@@ -41,6 +41,18 @@ jobs:
             # Nur Pfade, die es in diesem Tag schon gab (fonts/ zum Beispiel erst seit dem Terminal-Look).
             git archive "$tag" $(git ls-tree --name-only "$tag" index.html style.css icon.svg icon-180.png src content fonts) | tar -x -C "$dir"
           done
+          # Gegen gemischte Versionen im Browser-Cache (Pages erlaubt 10 Minuten): CSS und Skripte jeder
+          # Version liegen unter v/<commit>/, index.html zeigt genau darauf. Die letzten fünf Versionen
+          # bleiben liegen, damit auch eine noch gecachte ältere index.html ihre Dateien findet.
+          for sha in $(git rev-list -n 5 HEAD); do
+            v="_site/v/${sha::10}"
+            mkdir -p "$v"
+            git archive "$sha" $(git ls-tree --name-only "$sha" style.css src content fonts) | tar -x -C "$v"
+          done
+          current="v/${GITHUB_SHA::10}"
+          grep -q 'href="style.css"' _site/index.html && grep -q 'src="src/main.js"' _site/index.html
+          sed -i "s#href=\"style.css\"#href=\"$current/style.css\"#; s#src=\"src/main.js\"#src=\"$current/src/main.js\"#" _site/index.html
+          grep -q "$current/src/main.js" _site/index.html
       # Zeitraffer: ein Bild pro archivierter Nacht. Scheitert das, geht die Seite trotzdem raus,
       # dann mit der leeren Platzhalterliste.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
