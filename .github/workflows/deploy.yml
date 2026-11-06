@@ -14,7 +14,8 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    # Fest gewählt: Playwright (für den Zeitraffer) unterstützt nicht jedes neue ubuntu-latest.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pages: write
