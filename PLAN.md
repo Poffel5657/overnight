@@ -28,6 +28,22 @@ Jede Nacht drei Teile: Vorschlag, Abstimmungsgewinner, eigene Idee. Die Punkte u
 7. **Aufräumnacht.** Kandidaten: `src/game.js` wird groß (Interaktionen, Rad, Stufen) und könnte in Module geteilt werden; Balance der Frösche und des Rads prüfen; `LORE.md` und `PLAN.md` entrümpeln.
 8. **Community-Event „The Smudge Watch“ läuft** (von Chris nach dem Fix am Tag 4 nachgetragen, nach der Idee aus Nacht 4): Tag 4 bis 5, `stat: 'xp'`, 6 XP pro Spieler und Tag, Ziel 6 Tagesbeiträge. **Auswerten in Nacht 6:** Dateien unter `events/` mit `event: 'smudge-watch'` zählen. Erreicht: Belohnung bauen, etwas, das die ausradierte Ecke festhält (Tintenzaun oder Laterne für die Vogelscheuche), und im geheimen Bogen-Plan den Verteidigungszähler erhöhen. Nicht erreicht: Die Vogelscheuche sagt etwas Freundliches, die Ecke wächst ein Stück. Danach `EVENT = null` oder frühestens eine Nacht später ein neues.
 
+## Sonderabstimmung: der Look nach dem ersten Bogen
+
+Wunsch von Chris (2026-11-07): Am Ende des ersten großen Bogens, also nach dem Ernstfall, gibt es eine besondere Abstimmung darüber, wie die Welt künftig aussieht. Drei Optionen:
+
+1. **Bleibt, wie es ist:** Schriftzeichen im CRT-Look.
+2. **2D-Sprites:** kleine gezeichnete Figuren und Kacheln von oben, im Stil klassischer Konsolen-Rollenspiele.
+3. **2.5D isometrisch:** dieselbe Welt schräg von oben, wie in klassischen isometrischen Strategie- und Action-Rollenspielen.
+
+3D ist ausdrücklich keine Option, das wäre für dieses Projekt zu viel Arbeit.
+
+Hinweise für die Umsetzung:
+- **Bis dahin gilt die Regel aus `DESIGN.md`:** alles Schriftzeichen. Vorschläge zu Grafik oder Perspektive nicht verwerfen, sondern unter „Ideen für später“ sammeln, als Material für diese Abstimmung.
+- **Vorschau statt Worte:** Spieler sollen vor der Abstimmung sehen können, wie jede Option aussähe, zum Beispiel als umschaltbare Vorschau oder als Bilder. Die CRT-Farbwelt (Bernstein, Glühen) sollte in jeder Option erkennbar bleiben.
+- **Ablauf:** Die Abstimmung läuft getrennt vom normalen Stimmzettel. Gewinnt eine neue Grafik, ist das ein großer Umbau. Dafür einen `big-change`-Vorschlag an Chris machen, nichts auf Verdacht bauen.
+- **Geschichte:** Ein neuer Look kann erzählerisch daran anknüpfen, dass die Welt nach dem Ernstfall neu gezeichnet wird.
+
 ## Ideen für später
 
 Ideen aus Vorschlägen, die gefallen, aber noch nicht gebaut sind, in eigenen Worten. Quelle für den Stimmzettel. Alte Vorschlagsdateien liest niemand noch einmal, deshalb muss alles Wichtige hier stehen.
