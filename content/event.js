@@ -10,4 +10,15 @@
 //   goal: 20,                         // so viele Tagesbeiträge braucht es insgesamt
 //   startDay: 4, endDay: 6,           // läuft vom Tag startDay bis einschließlich endDay
 // }
-export const EVENT = null;
+export const EVENT = {
+  id: 'smudge-watch',
+  title: 'The Smudge Watch',
+  text: 'The Scarecrow wants someone to keep watch on the rubbed-out corner. It cannot leave its pole.',
+  task: 'Earn 6 XP today.',
+  reward: 'Hold the line, and the corner gets something to hold it in place.',
+  stat: 'xp',
+  need: 6,
+  goal: 6,
+  startDay: 4,
+  endDay: 5,
+};
