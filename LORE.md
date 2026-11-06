@@ -48,6 +48,10 @@ Rätsel, die die Welt angedeutet, aber nicht aufgelöst hat. Langsam weiterspinn
 - Die Vogelscheuche wartet auf Krähen.
 - Die Tür klemmt ein wenig. Jemand sollte es dem Nightwright sagen.
 
+## Der große Bogen
+
+Was die Welt vom aktuellen Bogen schon gezeigt hat (siehe `DESIGN.md`). Der eigentliche Plan mit allen Spoilern liegt geheim im Inbox-Repo unter `nightwright/arc.md`. Noch hat die Welt nichts gezeigt.
+
 ## Zeitleiste
 
 - Tag 0: Die Welt beginnt. Wiese, Hütte, Brunnen, Keeper, Ratten.

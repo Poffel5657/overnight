@@ -13,6 +13,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `src/main.js` | Verbindet alles, Eingabe, Chronik-Dialog, Begrüßung, `window.__overnight` |
 | `src/suggest.js`, `src/config.js` | Vorschlagsformular, gemeinsames Captcha (`createCaptcha`) und Einstellungen (geschützt) |
 | `src/vote.js` | Abstimmungsdialog über `content/ballot.js`, schickt `{ ballot, choice }` an `/vote` des Workers (geschützt) |
+| `src/rate.js` | Daumen hoch/runter für die letzte Nacht (`#rate-box`), schickt `{ day, value }` an `/rate`, einmal pro Nacht (geschützt) |
 | `src/event.js` | Community-Event: Anzeige `#event-box`, Tagesfortschritt in `localStorage` (`overnight.event`), meldet den Tagesbeitrag an `/event` des Workers, liest den Zähler per `GET /event?id=` (geschützt) |
 | `content/event.js` | `EVENT` (oder `null`): `{ id, title, text, task, reward, stat, need, goal, startDay, endDay }`, Format prüft `tests/smoke/event.spec.js` |
 | `timelapse/` | Zeitraffer-Seite; `days.js` und `shots/` erzeugt der Deploy mit `.github/scripts/timelapse.mjs` (geschützt) |
@@ -27,7 +28,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `tests/smoke/` | Allgemeine Tests, die immer gelten (geschützt) |
 | `tests/day/` | Tests pro Neuerung |
 | `tests/fixtures/` | Alte Spielstände, die immer ladbar bleiben müssen |
-| `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/`, `POST /event` Event-Beiträge unter `events/` im Inbox-Repo (ohne Captcha, Zähler in KV für die Anzeige); je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
+| `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/`, `POST /rate` Bewertungen unter `ratings/`, `POST /event` Event-Beiträge unter `events/` im Inbox-Repo (ohne Captcha, Zähler in KV für die Anzeige); je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
 
 ## Systeme
 

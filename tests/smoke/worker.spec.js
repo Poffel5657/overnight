@@ -214,3 +214,32 @@ test('Ungültige Event-Anfragen speichern nichts', async () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+const rate = (body, ip = '203.0.113.7') => new Request('https://worker.test/rate', {
+  method: 'POST',
+  headers: { Origin: ORIGIN, 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
+  body: JSON.stringify(body),
+});
+
+test('Bewertungen brauchen kein Captcha, zählen einmal pro Nacht und landen unter ratings/', async () => {
+  await withFakeGitHub(async (calls) => {
+    const env = { ...makeEnv(), TURNSTILE_SECRET: 'secret' };
+    expect((await worker.fetch(rate({ day: 4, value: 'up' }), env)).status).toBe(204);
+    expect((await worker.fetch(rate({ day: 4, value: 'down' }), env)).status).toBe(409);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toMatch(/\/contents\/ratings\/.+\.json$/);
+    const stored = JSON.parse(Buffer.from(JSON.parse(calls[0].options.body).content, 'base64').toString());
+    expect(stored).toMatchObject({ day: 4, value: 'up' });
+    expect(Object.keys(stored).sort()).toEqual(['day', 'receivedAt', 'value']);
+  });
+});
+
+test('Ungültige Bewertungen speichern nichts', async () => {
+  await withFakeGitHub(async (calls) => {
+    const env = makeEnv();
+    for (const body of [{ day: 4 }, { day: 4, value: 'meh' }, { day: '4', value: 'up' }, { value: 'up' }]) {
+      expect((await worker.fetch(rate(body), env)).status).toBe(400);
+    }
+    expect(calls).toHaveLength(0);
+  });
+});

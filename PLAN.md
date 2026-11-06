@@ -32,6 +32,10 @@ Ideen aus Vorschlägen, die gefallen, aber noch nicht gebaut sind, in eigenen Wo
 
 - Brunnen-Kanäle, Dampfstadt mit Aufträgen, Glücksrad, weitere Waffen: stehen auf Zettel 3.
 
+## Was ankommt
+
+Muster aus den Bewertungen der Spieler (seit 2026-11-06). Noch keine Daten.
+
 ## Offene Fäden
 
 - Wer oder was ist der Nightwright? Der Keeper kennt nur den Namen. Das sollte lange offen bleiben.

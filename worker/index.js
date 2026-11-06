@@ -1,4 +1,4 @@
-// Nimmt Vorschläge, Stimmen und Beiträge zu Community-Events aus dem Spiel an und legt sie als JSON-Dateien im privaten Inbox-Repo ab.
+// Nimmt Vorschläge, Stimmen, Bewertungen und Beiträge zu Community-Events aus dem Spiel an und legt sie als JSON-Dateien im privaten Inbox-Repo ab.
 // Im Inbox-Repo landet nur der Text bzw. die Stimme. Die IP selbst wird nie abgelegt: Für das Limit von
 // einem Vorschlag und einer Stimme pro Nacht bleibt nur ein Fingerabdruck, der sich täglich ändert und
 // nach gut einem Tag verfällt.
@@ -95,7 +95,21 @@ const KINDS = {
   },
 };
 
-const PATHS = { '': KINDS.suggestion, '/vote': KINDS.vote, '/event': KINDS.event };
+// Daumen hoch oder runter für die Neuerungen einer Nacht. Ein Klick, daher ohne Captcha.
+KINDS.rating = {
+  folder: 'ratings',
+  lock: 'rated',
+  message: 'Neue Bewertung',
+  captcha: false,
+  parse(body) {
+    const { day, value } = body ?? {};
+    if (!Number.isInteger(day) || day < 0 || day > 9999) return null;
+    if (value !== 'up' && value !== 'down') return null;
+    return { day, value };
+  },
+};
+
+const PATHS = { '': KINDS.suggestion, '/vote': KINDS.vote, '/event': KINDS.event, '/rate': KINDS.rating };
 
 export default {
   async fetch(request, env) {
