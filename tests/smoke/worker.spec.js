@@ -128,3 +128,54 @@ test('Ohne Captcha-Token wird abgelehnt, wenn Turnstile aktiv ist', async () => 
     expect(calls).toHaveLength(0);
   });
 });
+
+const vote = (body, ip = '203.0.113.7', path = '/vote') => new Request(`https://worker.test${path}`, {
+  method: 'POST',
+  headers: { Origin: ORIGIN, 'Content-Type': 'application/json', 'CF-Connecting-IP': ip },
+  body: JSON.stringify(body),
+});
+
+test('Gültige Stimme wird unter votes/ abgelegt, nur Stimmzettel und Wahl', async () => {
+  await withFakeGitHub(async (calls) => {
+    const response = await worker.fetch(vote({ ballot: 3, choice: 'well-drains', text: 'extra' }), makeEnv());
+    expect(response.status).toBe(204);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toMatch(/\/repos\/owner\/inbox\/contents\/votes\/.+\.json$/);
+    const stored = JSON.parse(Buffer.from(JSON.parse(calls[0].options.body).content, 'base64').toString());
+    expect(stored).toMatchObject({ ballot: 3, choice: 'well-drains' });
+    expect(Object.keys(stored).sort()).toEqual(['ballot', 'choice', 'receivedAt']);
+  });
+});
+
+test('Eine Stimme pro Nacht, unabhängig vom Vorschlag', async () => {
+  await withFakeGitHub(async (calls) => {
+    const env = makeEnv();
+    expect((await worker.fetch(vote({ ballot: 3, choice: 'a' }), env)).status).toBe(204);
+    expect((await worker.fetch(vote({ ballot: 3, choice: 'b' }), env)).status).toBe(409);
+    expect((await worker.fetch(vote({ ballot: 3, choice: 'a' }, '198.51.100.9'), env)).status).toBe(204);
+    expect((await worker.fetch(postFrom('203.0.113.7'), env)).status).toBe(204);
+    expect(calls).toHaveLength(3);
+    expect([...env.SUBMISSIONS.entries.keys()].join()).not.toContain('203.0.113.7');
+  });
+});
+
+test('Ungültige Stimmen speichern nichts', async () => {
+  await withFakeGitHub(async (calls) => {
+    const env = makeEnv();
+    for (const body of [
+      { ballot: 3 },
+      { ballot: '3', choice: 'a' },
+      { ballot: -1, choice: 'a' },
+      { ballot: 3, choice: 'Hello world' },
+      { ballot: 3, choice: 'x'.repeat(33) },
+      { ballot: 3, choice: '<b>' },
+    ]) {
+      expect((await worker.fetch(vote(body), env)).status).toBe(400);
+    }
+    expect((await worker.fetch(vote({ ballot: 3, choice: 'a' }, '203.0.113.7', '/other'), env)).status).toBe(404);
+    expect((await worker.fetch(vote({ ballot: 3, choice: 'a', website: 'spam' }), env)).status).toBe(204);
+    const withCaptcha = { ...makeEnv(), TURNSTILE_SECRET: 'secret' };
+    expect((await worker.fetch(vote({ ballot: 3, choice: 'a' }), withCaptcha)).status).toBe(403);
+    expect(calls).toHaveLength(0);
+  });
+});

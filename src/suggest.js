@@ -1,4 +1,4 @@
-// Vorschlagsformular. Geschützte Datei: Das ist der einzige Ort mit Netzwerkzugriff im Spiel.
+// Vorschlagsformular und gemeinsames Captcha. Geschützte Datei: Nur hier und in vote.js gibt es Netzwerkzugriff.
 import { SUGGEST_URL, TURNSTILE_SITE_KEY } from './config.js';
 
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -6,10 +6,7 @@ const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?ren
 const SENT_KEY = 'overnight.suggested';
 const ALREADY_SENT = 'You already sent an idea tonight. The box opens again after midnight.';
 
-let captchaToken = '';
-let captchaRequested = false;
-
-const berlinDay = () =>
+export const berlinDay = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date());
 
 function sentToday() {
@@ -28,20 +25,47 @@ function markSent() {
   }
 }
 
-function loadCaptcha(container) {
-  if (captchaRequested || !TURNSTILE_SITE_KEY) return;
-  captchaRequested = true;
-  const script = document.createElement('script');
-  script.src = TURNSTILE_SRC;
-  script.onload = () => {
-    window.turnstile.render(container, {
-      sitekey: TURNSTILE_SITE_KEY,
-      theme: 'dark',
-      callback: (token) => { captchaToken = token; },
-      'expired-callback': () => { captchaToken = ''; },
-    });
+let turnstileScript = null;
+
+function turnstileReady() {
+  turnstileScript ??= new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = TURNSTILE_SRC;
+    script.onload = () => resolve(window.turnstile);
+    script.onerror = () => {
+      turnstileScript = null;
+      reject(new Error('Turnstile nicht geladen'));
+    };
+    document.head.append(script);
+  });
+  return turnstileScript;
+}
+
+// Ein Captcha pro Dialog. Vorschlag und Abstimmung teilen sich das Skript, nicht das Widget.
+export function createCaptcha(container) {
+  let token = '';
+  let widget = null;
+  let requested = false;
+  return {
+    load() {
+      if (requested || !TURNSTILE_SITE_KEY) return;
+      requested = true;
+      turnstileReady().then((turnstile) => {
+        widget = turnstile.render(container, {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: 'dark',
+          callback: (value) => { token = value; },
+          'expired-callback': () => { token = ''; },
+        });
+      }).catch(() => { requested = false; });
+    },
+    get missing() { return Boolean(TURNSTILE_SITE_KEY) && !token; },
+    get token() { return token; },
+    reset() {
+      token = '';
+      if (widget !== null) window.turnstile?.reset(widget);
+    },
   };
-  document.head.append(script);
 }
 
 export function setupSuggestions({ archived }) {
@@ -52,6 +76,7 @@ export function setupSuggestions({ archived }) {
   const trap = document.getElementById('suggest-website');
   const send = document.getElementById('suggest-send');
   const opener = document.getElementById('open-suggest');
+  const captcha = createCaptcha(document.getElementById('suggest-captcha'));
 
   if (archived) {
     opener.hidden = true;
@@ -65,7 +90,7 @@ export function setupSuggestions({ archived }) {
     } else if (SUGGEST_URL) {
       openArea.hidden = false;
       status.textContent = '';
-      loadCaptcha(document.getElementById('suggest-captcha'));
+      captcha.load();
     } else {
       openArea.hidden = true;
       status.textContent = "The suggestion box isn't open yet. Check back soon.";
@@ -79,7 +104,7 @@ export function setupSuggestions({ archived }) {
       status.textContent = 'Write an idea first.';
       return;
     }
-    if (TURNSTILE_SITE_KEY && !captchaToken) {
+    if (captcha.missing) {
       status.textContent = 'Please finish the check above first.';
       return;
     }
@@ -89,7 +114,7 @@ export function setupSuggestions({ archived }) {
       const response = await fetch(SUGGEST_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: idea, website: trap.value, token: captchaToken }),
+        body: JSON.stringify({ text: idea, website: trap.value, token: captcha.token }),
       });
       if (response.ok) {
         text.value = '';
@@ -109,8 +134,7 @@ export function setupSuggestions({ archived }) {
       status.textContent = "That didn't work. Try again later.";
     } finally {
       send.disabled = false;
-      captchaToken = '';
-      window.turnstile?.reset();
+      captcha.reset();
     }
   });
 }

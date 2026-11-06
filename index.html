@@ -39,6 +39,7 @@
     <nav class="actions">
       <button id="open-chronicle">Chronicle</button>
       <button id="open-suggest">Suggest for tomorrow</button>
+      <button id="open-vote">Vote</button>
     </nav>
 
     <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait.</p>
@@ -66,6 +67,23 @@
       <button id="suggest-send">Send idea</button>
     </div>
     <p id="suggest-status" role="status"></p>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <dialog id="vote-dialog">
+    <h2>Second chances</h2>
+    <div id="vote-open">
+      <p>Old ideas the Nightwright liked but has not built yet. The one with the most votes gets built at midnight.</p>
+      <fieldset id="vote-options" class="vote-options"><legend>Pick one</legend></fieldset>
+      <div class="trap" aria-hidden="true">
+        <label for="vote-website">Leave this empty</label>
+        <input id="vote-website" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <div id="vote-captcha"></div>
+      <p class="fineprint">One vote per night. Only your choice is kept, without your name or IP address. To enforce the limit, a scrambled fingerprint of your connection is kept for about a day, then deleted.</p>
+      <button id="vote-send">Send vote</button>
+    </div>
+    <p id="vote-status" role="status"></p>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 </body>

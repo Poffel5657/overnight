@@ -7,7 +7,19 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 - Letzter Tag: 3
 - Inbox gelesen bis: `2026-11-05T20-15-25-676Z-c0cbecd5.json`
 
+## Stimmzettel
+
+Seit dem 2026-11-06 gibt es die Abstimmung (siehe `CLAUDE.md`). Den ersten Zettel (Nummer 3) hat Chris vorbereitet, damit schon am Tag 3 abgestimmt werden kann. In Nacht 4 wird er zum ersten Mal gezählt. Ideen darauf, alle aus früheren Vorschlägen:
+
+- `well-drains`: in den Brunnen fallen und durch ein Kanalsystem (mehrere Karten) wieder herausfinden.
+- `clockwork-town`: eine Stadt aus Dampf und Zahnrädern, deren Bewohner Aufträge geben.
+- `wheel-of-chance`: ein Glücksrad für Gegenstände oder Begegnungen.
+- `more-weapons`: weitere Waffen über die Werkbank (Messer, Axt, Schwert) mit unterschiedlichem Schaden.
+
 ## Nächste Tage (Vorschlag, darf sich ändern)
+
+Ab Nacht 4 besteht jede Nacht aus drei Teilen: Vorschlag, Abstimmungsgewinner, eigene Idee. Die Punkte unten sind Kandidaten für Teil 3 oder Ergänzungen, keine Tagesgrenze.
+
 
 4. Ein zäheres Wesen, für das sich der Speer lohnt (Ratten sterben schon am Stock). Naheliegend: Krähen im Rough Draft, die die Vogelscheuche endlich erschrecken kann, oder etwas mit 3 bis 4 HP.
 5. Die erste kleine Quest, die Keeper und Vogelscheuche verbindet und den Beutel nutzt (etwas von einem Ort zum anderen bringen).

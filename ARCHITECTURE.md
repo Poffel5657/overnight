@@ -11,7 +11,9 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `src/render.js` | Zeichnet die Welt aufs Canvas (25 x 13 Felder, auf dem Handy 15 x 11, die Kamera folgt, wenn die Karte größer ist als der Ausschnitt) |
 | `src/save.js` | Spielstand, Versionen, Migrationen |
 | `src/main.js` | Verbindet alles, Eingabe, Chronik-Dialog, Begrüßung, `window.__overnight` |
-| `src/suggest.js`, `src/config.js` | Vorschlagsformular und Einstellungen (geschützt) |
+| `src/suggest.js`, `src/config.js` | Vorschlagsformular, gemeinsames Captcha (`createCaptcha`) und Einstellungen (geschützt) |
+| `src/vote.js` | Abstimmungsdialog über `content/ballot.js`, schickt `{ ballot, choice }` an `/vote` des Workers (geschützt) |
+| `content/ballot.js` | Stimmzettel `BALLOT = { day, options: [{ id, since, text }] }`, jede Nacht neu datiert (Format prüft `tests/smoke/vote.spec.js`) |
 | `content/tiles.js` | Geländetypen |
 | `content/creatures.js` | Kreaturentypen |
 | `content/items.js` | Gegenstände: mit `atk` (und `hitVerb`) eine Waffe, ohne `atk` ein Ding für den Beutel |
@@ -21,7 +23,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `tests/smoke/` | Allgemeine Tests, die immer gelten (geschützt) |
 | `tests/day/` | Tests pro Neuerung |
 | `tests/fixtures/` | Alte Spielstände, die immer ladbar bleiben müssen |
-| `worker/` | Cloudflare Worker für Vorschläge, ein Vorschlag pro Nacht und Anschluss (geschützt) |
+| `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/` im Inbox-Repo; je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
 
 ## Systeme
 

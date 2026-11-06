@@ -134,3 +134,10 @@ textarea {
 .fineprint { color: var(--muted); font-size: 0.8rem; }
 .trap { position: absolute; left: -9999px; }
 #suggest-captcha:not(:empty) { margin-top: 8px; }
+#vote-captcha:not(:empty) { margin-top: 8px; }
+
+.vote-options { border: 1px solid var(--line); padding: 8px 12px; margin: 0 0 8px; }
+.vote-options legend { color: var(--muted); padding: 0 4px; }
+.vote-option { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; cursor: pointer; }
+.vote-option + .vote-option { border-top: 1px solid var(--line); }
+.vote-option input { margin-top: 3px; accent-color: var(--accent); }
