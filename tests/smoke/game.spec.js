@@ -2,8 +2,21 @@
 import { expect, test } from '@playwright/test';
 import { readdirSync, readFileSync } from 'node:fs';
 
+// Der Chat verbindet sich am PC beim Start. Im Test wird die Verbindung nur aufgezeichnet, nicht aufgebaut;
+// erlaubt ist ausschließlich der eigene Worker.
+const CHAT_SOCKET = /^wss:\/\/overnight-suggestions\.overnight-rpg\.workers\.dev\/chat(\?|$)/;
+
 const openGame = async (page, url = '/?seed=7') => {
   const problems = [];
+  await page.addInitScript(() => {
+    window.__socketUrls = [];
+    window.WebSocket = class {
+      constructor(target) { window.__socketUrls.push(String(target)); }
+      addEventListener() {}
+      send() {}
+      close() {}
+    };
+  });
   page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
   page.on('console', (message) => {
     if (message.type() === 'error') problems.push(`console: ${message.text()}`);
@@ -16,6 +29,9 @@ const openGame = async (page, url = '/?seed=7') => {
   });
   await page.goto(url);
   await page.waitForFunction(() => window.__overnight);
+  for (const target of await page.evaluate(() => window.__socketUrls)) {
+    if (!CHAT_SOCKET.test(target)) problems.push(`websocket: ${target}`);
+  }
   return problems;
 };
 

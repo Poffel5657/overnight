@@ -93,7 +93,24 @@ a { color: var(--accent); }
   color: var(--accent);
 }
 
-.play { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.layout { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.play { min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+
+/* PC: Chat fest rechts neben dem Spiel. Schmaler: Chat nur über den Menüpunkt, als Vollbild. */
+@media (min-width: 1000px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 340px; }
+  .no-chat .layout { grid-template-columns: minmax(0, 1fr); }
+  #open-chat, .chat-close { display: none; }
+}
+@media (max-width: 999px) {
+  body:not(.chat-open) .chat-pane { display: none; }
+  body.chat-open .chat-pane {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    margin: 0;
+  }
+}
 
 /* ---------- Menüs in der Kopfzeile ---------- */
 
@@ -301,13 +318,16 @@ textarea:focus { outline: 1px solid var(--accent); }
 .vote-option input { margin-top: 5px; accent-color: var(--accent); }
 
 /* Chat */
-dialog.chat-dialog { width: min(720px, calc(100vw - 24px)); display: none; flex-direction: column; }
-dialog.chat-dialog[open] { display: flex; }
+.chat-pane { display: flex; flex-direction: column; min-height: 0; }
+.chat-pane .window-title { display: flex; align-items: baseline; justify-content: space-between; }
+.chat-close { font-size: 18px; }
+.chat-pane .fineprint { margin: 0; }
 .chat-list {
   list-style: none;
+  flex: 1;
+  min-height: 0;
   margin: 8px 0;
   padding: 8px;
-  height: min(52vh, 460px);
   overflow-y: auto;
   border: 1px solid var(--line);
   background: var(--bg-deep);

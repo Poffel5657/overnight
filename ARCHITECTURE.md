@@ -30,14 +30,14 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `tests/smoke/` | Allgemeine Tests, die immer gelten (geschützt) |
 | `tests/day/` | Tests pro Neuerung |
 | `tests/fixtures/` | Alte Spielstände, die immer ladbar bleiben müssen |
-| `src/chat.js` | Chat-Dialog: liest per WebSocket, Schreiben mit Tagesticket nach Captcha (geschützt) |
+| `src/chat.js` | Chat: ab 1000 px fest rechts neben dem Spiel (`#chat-pane` in `.layout`) und immer verbunden, schmaler als Vollbild über `[ CHAT ]`; liest per WebSocket, Schreiben mit Tagesticket nach Captcha (geschützt) |
 | `worker/chat.js` | Chatraum als Durable Object: Verlauf (200), Wortfilter, keine Links, Rate-Limit, Melden (3 Meldungen verstecken), Admin (geschützt) |
 | `tools/chat-admin.mjs` | Moderation für Chris: `list`, `hide <id>`, `mute <name>` (Schlüssel nur lokal, geschützt) |
 | `worker/` | Cloudflare Worker: `POST /` legt Vorschläge unter `suggestions/` ab, `POST /vote` Stimmen unter `votes/`, `POST /rate` Bewertungen unter `ratings/`, `POST /event` Event-Beiträge unter `events/` im Inbox-Repo (ohne Captcha, Zähler in KV für die Anzeige); je ein Vorschlag und eine Stimme pro Nacht und Anschluss (geschützt) |
 
 ## Oberfläche
 
-`index.html` ist gegliedert in `.statusbar` (Titel, `#day-label`, Menüs TONIGHT, SHAPE TOMORROW, ARCHIVE, Countdown, CRT-Schalter), einen optionalen Event-Streifen `#event-box` und `.play` (Karte `#world`, HUD mit Bewertung, Log, Steuerkreuz). Die Seite ist genau einen Bildschirm hoch und scrollt nicht; die Karte füllt den freien Platz, so groß es geht, ohne Verzerrung (`.map-frame` mit Container-Einheiten, `--map-ratio` setzt `src/render.js`). Tests dazu in `tests/smoke/ui.spec.js`.
+`index.html` ist gegliedert in `.statusbar` (Titel, `#day-label`, Menüs TONIGHT, SHAPE TOMORROW, ARCHIVE, Countdown, CRT-Schalter), einen optionalen Event-Streifen `#event-box` und `.layout` mit `.play` (Karte `#world`, HUD mit Bewertung, Log, Steuerkreuz) und am PC der Chat-Spalte. Die Seite ist genau einen Bildschirm hoch und scrollt nicht; die Karte füllt den freien Platz, so groß es geht, ohne Verzerrung (`.map-frame` mit Container-Einheiten, `--map-ratio` setzt `src/render.js`). Tests dazu in `tests/smoke/ui.spec.js`.
 
 - **Neuer Menüpunkt:** `<div class="menu">` mit `<button class="menu-button" aria-controls="panel-x">` und `<section id="panel-x" class="menu-panel window" hidden>` in `.menus`; die Logik in `setupMenus()` (`src/main.js`) greift von selbst. Im Panel erst ein Satz, was das ist, dann die Punkte als `<dl class="menu-list">` mit Knopf und Erklärung.
 - **Steuerkreuz und Log:** Das Steuerkreuz `.pad` gibt es nur auf Touchgeräten (`pointer: coarse`), halbdurchsichtig unten rechts über der Karte. Das Log lässt sich überall einklappen (`#log-toggle`, gespeichert als `overnight.log`), dann zeigt `#log-peek` die neueste Zeile in der Titelleiste. `src/render.js` zeigt auf schmalen Bildschirmen 12 Spalten und so viele Zeilen, wie in den Rahmen passen, und passt das bei Größenänderungen an (ResizeObserver).

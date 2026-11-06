@@ -89,6 +89,7 @@
       <p id="event-reward" class="fineprint"></p>
     </section>
 
+    <div class="layout">
     <div class="play">
       <section class="window window-map">
         <h2 class="window-title">[ MAP ] <span id="map-name" class="window-sub"></span></h2>
@@ -127,6 +128,28 @@
 
       <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait.</p>
     </div>
+
+    <!-- Chat: am PC fest rechts neben dem Spiel, am Handy über [ CHAT ] als Vollbild. -->
+    <section id="chat-pane" class="window chat-pane" aria-label="Chat">
+      <h2 class="window-title">
+        <span>[ CHAT ]</span>
+        <button id="chat-close" class="chat-close" aria-label="Close chat">Close</button>
+      </h2>
+      <p class="fineprint">Anonymous, names change every night. Be kind; no links. [ ! ] reports a message, three reports hide it.</p>
+      <ol id="chat-list" class="chat-list" aria-live="polite"></ol>
+      <p id="chat-status" class="chat-status" role="status"></p>
+      <p id="chat-name" class="chat-me-line"></p>
+      <div id="chat-compose" class="chat-compose" hidden>
+        <label for="chat-input" class="visually-hidden">Message</label>
+        <input id="chat-input" type="text" maxlength="200" autocomplete="off" placeholder="say something…">
+        <button id="chat-send">Send</button>
+      </div>
+      <div id="chat-join" hidden>
+        <div id="chat-captcha"></div>
+        <button id="chat-join-button">Join the chat</button>
+      </div>
+    </section>
+    </div>
   </main>
 
   <dialog id="chronicle-dialog" class="window">
@@ -151,24 +174,6 @@
       <button id="suggest-send">Send idea</button>
     </div>
     <p id="suggest-status" role="status"></p>
-    <form method="dialog"><button>Close</button></form>
-  </dialog>
-
-  <dialog id="chat-dialog" class="window chat-dialog">
-    <h2 class="window-title">[ CHAT ]</h2>
-    <p class="fineprint">Anonymous chat for everyone in this world. Names change every night. Be kind; no links. Press [ ! ] to report a message, three reports hide it.</p>
-    <ol id="chat-list" class="chat-list" aria-live="polite"></ol>
-    <p id="chat-status" class="chat-status" role="status"></p>
-    <p id="chat-name" class="chat-me-line"></p>
-    <div id="chat-compose" class="chat-compose" hidden>
-      <label for="chat-input" class="visually-hidden">Message</label>
-      <input id="chat-input" type="text" maxlength="200" autocomplete="off" placeholder="say something…">
-      <button id="chat-send">Send</button>
-    </div>
-    <div id="chat-join" hidden>
-      <div id="chat-captcha"></div>
-      <button id="chat-join-button">Join the chat</button>
-    </div>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 

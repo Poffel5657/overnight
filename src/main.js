@@ -217,6 +217,9 @@ function setupInput() {
   document.addEventListener('keydown', (event) => {
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (document.querySelector('dialog[open]')) return;
+    // Wer im Chat oder in einem Formular tippt, bewegt den Spieler nicht.
+    if (event.target.closest?.('input, textarea, select, [contenteditable]')) return;
+    if (document.body.classList.contains('chat-open')) return;
     const action = KEYS[event.key];
     if (!action) return;
     event.preventDefault();

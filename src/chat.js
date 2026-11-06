@@ -1,4 +1,6 @@
-// Chat. Geschützte Datei: Netzwerkzugriff wie suggest.js. Die Verbindung öffnet sich erst mit dem Dialog.
+// Chat. Geschützte Datei: Netzwerkzugriff wie suggest.js.
+// Am PC (breites Fenster) steht der Chat fest neben dem Spiel und ist immer verbunden.
+// Am Handy öffnet [ CHAT ] ihn als Vollbild; nur dann besteht die Verbindung.
 // Lesen kann jeder. Schreiben braucht ein Ticket für heute, das es nach dem Captcha vom Worker gibt.
 // Alle Texte kommen als Text ins DOM (textContent), nie als HTML.
 import { SUGGEST_URL } from './config.js';
@@ -6,6 +8,7 @@ import { berlinDay, createCaptcha } from './suggest.js';
 
 const TICKET_KEY = 'overnight.chatTicket';
 const MAX_SHOWN = 100;
+const WIDE = '(min-width: 1000px)';
 const $ = (id) => document.getElementById(id);
 
 function readTicket() {
@@ -31,9 +34,12 @@ export function setupChat({ archived }) {
   const opener = $('open-chat');
   if (archived || !SUGGEST_URL) {
     opener.hidden = true;
+    $('chat-pane').hidden = true;
+    document.body.classList.add('no-chat');
     return;
   }
-  const dialog = $('chat-dialog');
+  const pane = $('chat-pane');
+  const wide = window.matchMedia(WIDE);
   const list = $('chat-list');
   const status = $('chat-status');
   const input = $('chat-input');
@@ -126,22 +132,44 @@ export function setupChat({ archived }) {
       }
     });
     socket.addEventListener('close', () => {
-      if (ws !== socket || !dialog.open) return;
+      if (ws !== socket || !visible()) return;
       say('Connection lost. Trying again…');
       retry = setTimeout(connect, 3000);
     });
   }
 
-  opener.addEventListener('click', () => {
-    dialog.showModal();
-    connect();
-  });
-  dialog.addEventListener('close', () => {
+  // Sichtbar heißt: breites Fenster, oder am Handy geöffnet.
+  const visible = () => wide.matches || document.body.classList.contains('chat-open');
+  const disconnect = () => {
     clearTimeout(retry);
     const socket = ws;
     ws = null;
     socket?.close();
+  };
+  const sync = () => {
+    if (visible() && !ws) connect();
+    if (!visible() && ws) disconnect();
+  };
+  opener.addEventListener('click', () => {
+    if (wide.matches) {
+      input.focus();
+      return;
+    }
+    document.body.classList.add('chat-open');
+    sync();
   });
+  $('chat-close').addEventListener('click', () => {
+    document.body.classList.remove('chat-open');
+    sync();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && document.body.classList.contains('chat-open')) {
+      document.body.classList.remove('chat-open');
+      sync();
+    }
+  });
+  wide.addEventListener('change', sync);
+  sync();
 
   $('chat-join-button').addEventListener('click', async () => {
     if (captcha.missing) return say('Please finish the check above first.');
