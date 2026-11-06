@@ -26,7 +26,7 @@ Jede Nacht drei Teile: Vorschlag, Abstimmungsgewinner, eigene Idee. Die Punkte u
 5. Die erste kleine Quest, die Keeper, Vogelscheuche oder Dealer verbindet und den Beutel nutzt. Gut wäre eine, die mit der ausradierten Ecke zu tun hat (Krümel einsammeln und zum Keeper bringen?).
 6. Der Bleistiftstummel bekommt einen Zweck: Mit ihm lassen sich Bleistiftlinien (`:`) im Rough Draft „nachziehen“ und begehbar machen, oder Ausradiertes neu zeichnen. Bogen-Baustein.
 7. **Aufräumnacht.** Kandidaten: `src/game.js` wird groß (Interaktionen, Rad, Stufen) und könnte in Module geteilt werden; Balance der Frösche und des Rads prüfen; `LORE.md` und `PLAN.md` entrümpeln.
-8. Ein erstes Community-Event, sobald das Smoke-Test-Problem (siehe unten) gelöst ist. Vorbereitet: „The Smudge Watch“, Erfahrung sammeln für die Vogelscheuche, Belohnung: etwas, das die Ecke festhält (Tintenzaun, Laterne).
+8. Ein erstes Community-Event (das Smoke-Test-Problem ist behoben, siehe unten). Vorbereitet: „The Smudge Watch“, Erfahrung sammeln für die Vogelscheuche, Belohnung: etwas, das die Ecke festhält (Tintenzaun, Laterne).
 
 ## Ideen für später
 
@@ -58,7 +58,7 @@ Muster aus den Bewertungen der Spieler (seit 2026-11-06).
 ## Bekannte Probleme
 
 - Im Cloud-Container scheitert `npx playwright install chromium` (Download nicht möglich). Tests laufen mit einer temporären Config, die `launchOptions.executablePath: '/opt/pw-browsers/chromium-1243/chrome-linux64/chrome'` (Pfad in Nacht 4; vorher `ls /opt/pw-browsers` prüfen) setzt (nicht einchecken, `playwright.config.js` ist geschützt).
-- **Community-Events sind blockiert:** Ein laufendes Event lässt `tests/smoke/game.spec.js` scheitern („Spiel startet ohne Fehler und ohne externe Anfragen“ u. a.), weil `src/event.js` beim Start `GET /event?id=` an den Worker schickt und der Test jede Anfrage außerhalb von `127.0.0.1:4173` als extern zählt. Beides ist geschützt. Chris muss den Smoke-Test (Worker-Origin erlauben oder Event-Abrufe abfangen) anpassen. Bis dahin kein Event starten. Gemeldet in Nacht 4.
+- **Behoben (2026-11-07): Community-Events laufen wieder.** Der Smoke-Test `tests/smoke/game.spec.js` erlaubt jetzt Anfragen an den eigenen Worker und beantwortet sie im Test mit einer Attrappe; ein neuer Test in `tests/smoke/event.spec.js` prüft den Start mit aktivem Event. Ein Event darf ab Nacht 5 starten.
 - Die geschlossenen PRs #1 bis #4 waren absichtliche Gate-Tests vom Einrichten, keine fehlgeschlagenen Nächte. Ihre Branches existieren nicht mehr.
 
 ## Ignorierte Inbox-Dateien

@@ -5,6 +5,9 @@ import { readdirSync, readFileSync } from 'node:fs';
 // Der Chat verbindet sich am PC beim Start. Im Test wird die Verbindung nur aufgezeichnet, nicht aufgebaut;
 // erlaubt ist ausschließlich der eigene Worker.
 const CHAT_SOCKET = /^wss:\/\/overnight-suggestions\.overnight-rpg\.workers\.dev\/chat(\?|$)/;
+// Der eigene Worker darf beim Start gefragt werden (zum Beispiel der Zählerstand eines Events).
+// Im Test antwortet eine Attrappe, damit nichts an den echten Worker geht. Alle anderen Hosts bleiben verboten.
+const WORKER_ORIGIN = 'https://overnight-suggestions.overnight-rpg.workers.dev';
 
 const openGame = async (page, url = '/?seed=7') => {
   const problems = [];
@@ -21,9 +24,12 @@ const openGame = async (page, url = '/?seed=7') => {
   page.on('console', (message) => {
     if (message.type() === 'error') problems.push(`console: ${message.text()}`);
   });
+  await page.route(`${WORKER_ORIGIN}/**`, (route) => route.fulfill(route.request().method() === 'GET'
+    ? { contentType: 'application/json', body: '{"count":0,"counts":{}}', headers: { 'Access-Control-Allow-Origin': '*' } }
+    : { status: 204, headers: { 'Access-Control-Allow-Origin': '*' } }));
   page.on('request', (request) => {
     const { origin } = new URL(request.url());
-    if (!['http://127.0.0.1:4173', 'null'].includes(origin) && !request.url().startsWith('data:')) {
+    if (!['http://127.0.0.1:4173', 'null', WORKER_ORIGIN].includes(origin) && !request.url().startsWith('data:')) {
       problems.push(`extern: ${request.url()}`);
     }
   });

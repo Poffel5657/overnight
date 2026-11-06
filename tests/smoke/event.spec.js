@@ -76,3 +76,28 @@ test('Ohne aktives Event bleibt die Anzeige verborgen', async ({ page }) => {
   await page.waitForFunction(() => window.__overnight);
   await expect(page.locator('#event-box')).toBeHidden();
 });
+
+// Wächter für Nacht 4: Ein aktives Event darf beim Start nur den eigenen Worker fragen und keine Fehler werfen.
+test('Mit aktivem Event startet das Spiel ohne Fehler und fragt nur den eigenen Worker', async ({ page }) => {
+  const worker = 'https://overnight-suggestions.overnight-rpg.workers.dev';
+  const problems = [];
+  page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
+  page.on('console', (message) => { if (message.type() === 'error') problems.push(`console: ${message.text()}`); });
+  page.on('request', (request) => {
+    const { origin } = new URL(request.url());
+    if (!['http://127.0.0.1:4173', 'null', worker].includes(origin) && !request.url().startsWith('data:')) problems.push(`extern: ${request.url()}`);
+  });
+  await page.addInitScript(() => { window.WebSocket = class { addEventListener() {} send() {} close() {} }; });
+  await page.route('**/content/event.js', (route) => route.fulfill({ contentType: 'text/javascript', body: FAKE(lastDay) }));
+  let asked = 0;
+  await page.route(`${worker}/**`, (route) => {
+    if (route.request().url().includes('/event?id=')) asked += 1;
+    return route.fulfill({ contentType: 'application/json', body: '{"count":2}', headers: { 'Access-Control-Allow-Origin': '*' } });
+  });
+  await page.goto('/?seed=7');
+  await page.waitForFunction(() => window.__overnight);
+  await expect(page.locator('#event-box')).toBeVisible();
+  await expect(page.locator('#event-together')).toContainText('2 / 10');
+  expect(asked).toBe(1);
+  expect(problems).toEqual([]);
+});
