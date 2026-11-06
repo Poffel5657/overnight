@@ -5,6 +5,8 @@ import { CREATURES } from '../content/creatures.js';
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
 import { RECIPES } from '../content/recipes.js';
+import { LEVELS, LEVEL_UP_TEXT } from '../content/levels.js';
+import { WHEEL } from '../content/wheel.js';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const LOG_LIMIT = 50;
@@ -54,6 +56,24 @@ function giveItem(s, id) {
   s.player.weapon = id;
 }
 
+// Stufen (seit Tag 4): Erfahrung aus Siegen und vom Glücksrad. Nächste Schwelle oder null am Ende der Leiter.
+export const nextLevelXp = (s) => LEVELS[s.player.level]?.xp ?? null;
+
+function gainXp(s, amount) {
+  s.player.xp += amount;
+  s.stats.xp += amount;
+  while (nextLevelXp(s) !== null && s.player.xp >= nextLevelXp(s)) {
+    const step = LEVELS[s.player.level];
+    s.player.level += 1;
+    s.player.maxHp += step.maxHp ?? 0;
+    s.player.atk += step.atk ?? 0;
+    s.player.hp = s.player.maxHp;
+    log(s, LEVEL_UP_TEXT.replace('{level}', s.player.level), 'new-tonight');
+    const gains = [step.maxHp && `+${step.maxHp} max HP`, step.atk && `+${step.atk} attack`].filter(Boolean);
+    if (gains.length) log(s, `${gains.join(', ')}. You are fully mended.`);
+  }
+}
+
 export const creatureAt = (s, x, y) =>
   s.creatures.find((c) => c.respawnAt === null && c.x === x && c.y === y);
 
@@ -65,15 +85,13 @@ const isFree = (s, x, y) =>
 
 const distance = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
+// once: Kreatur kommt nach dem Sieg nicht wieder (Besucher vom Glücksrad).
+const newCreature = (type, x, y, once = false) => ({
+  type, x, y, hp: CREATURES[type].hp, spawn: { x, y }, respawnAt: null, once,
+});
+
 function spawnCreatures(mapId) {
-  return MAPS[mapId].spawns.map((spawn) => ({
-    type: spawn.type,
-    x: spawn.x,
-    y: spawn.y,
-    hp: CREATURES[spawn.type].hp,
-    spawn: { x: spawn.x, y: spawn.y },
-    respawnAt: null,
-  }));
+  return MAPS[mapId].spawns.map((spawn) => newCreature(spawn.type, spawn.x, spawn.y));
 }
 
 // Wechselt die Karte. Kreaturen der neuen Karte erscheinen frisch, nie auf dem Ankunftsfeld.
@@ -91,11 +109,11 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     seed: seed | 0,
     map: START.map,
     player: {
-      x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null, bag: [],
+      x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null, bag: [], xp: 0, level: 1,
     },
     turn: 0,
     flags: {},
-    stats: { kills: 0, faints: 0 },
+    stats: { kills: 0, faints: 0, xp: 0 },
     lastSeenDay: null,
     log: [],
     creatures: [],
@@ -109,6 +127,10 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     s.lastSeenDay = saved.lastSeenDay ?? null;
     if (!Array.isArray(s.player.bag)) s.player.bag = [];
     s.player.bag = s.player.bag.filter((id) => ITEMS[id]);
+    // Stände von vor Tag 4 haben keine Stufe: Sie beginnen bei Stufe 1 ohne Erfahrung.
+    if (!Number.isInteger(s.player.xp) || s.player.xp < 0) s.player.xp = 0;
+    if (!Number.isInteger(s.player.level) || !LEVELS[s.player.level - 1]) s.player.level = 1;
+    if (!Number.isInteger(s.stats.xp)) s.stats.xp = 0;
     s.player.hp = Math.min(Math.max(s.player.hp, 1), s.player.maxHp);
   }
   s.creatures = spawnCreatures(s.map);
@@ -164,11 +186,59 @@ export const INTERACTIONS = {
     enterMap(s, e.to.map, e.to.x, e.to.y);
     log(s, e.text);
   },
+  // Glücksrad (Tag 4): einmal pro Nacht umsonst, danach für einen Knopf.
+  wheel(s) {
+    const flags = s.flags;
+    if (flags.wheelDay !== currentDay()) {
+      flags.wheelDay = currentDay();
+      log(s, WHEEL.freeText);
+    } else if (hasItem(s, WHEEL.cost)) {
+      takeItem(s, WHEEL.cost);
+      log(s, WHEEL.paidText);
+    } else {
+      log(s, WHEEL.emptyText);
+      return;
+    }
+    flags.spins = (flags.spins ?? 0) + 1;
+    spinWheel(s);
+  },
   well(s, e) {
     s.player.hp = s.player.maxHp;
     log(s, e.text);
   },
 };
+
+function pickWedge(s) {
+  const total = WHEEL.wedges.reduce((sum, w) => sum + w.weight, 0);
+  let roll = random(s) * total;
+  return WHEEL.wedges.find((w) => (roll -= w.weight) < 0) ?? WHEEL.wedges.at(-1);
+}
+
+// Was ein Feld des Glücksrads bewirkt. Neue Effekte bekommen hier einen Eintrag.
+export const WHEEL_EFFECTS = {
+  xp(s, w) { gainXp(s, w.amount); },
+  heal(s) { s.player.hp = s.player.maxHp; },
+  item(s, w) { giveItem(s, w.item); },
+  nothing() {},
+  maxHp(s, w) {
+    s.player.maxHp += w.amount;
+    s.player.hp += w.amount;
+  },
+  visitor(s, w) {
+    const spot = Object.values(DIRS)
+      .map(([dx, dy]) => ({ x: s.player.x + dx, y: s.player.y + dy }))
+      .find(({ x, y }) => isFree(s, x, y));
+    if (spot) s.creatures.push(newCreature(w.creature, spot.x, spot.y, true));
+  },
+};
+
+function spinWheel(s) {
+  let wedge = pickWedge(s);
+  // Einzelstücke gibt es nur einmal. Wer es schon hat, bekommt stattdessen das erste Erfahrungsfeld.
+  if (wedge.unique && hasItem(s, wedge.item)) wedge = WHEEL.wedges.find((w) => w.effect === 'xp');
+  log(s, wedge.text, 'new-tonight');
+  WHEEL_EFFECTS[wedge.effect](s, wedge);
+}
 
 function attackCreature(s, c) {
   const def = CREATURES[c.type];
@@ -176,8 +246,14 @@ function attackCreature(s, c) {
   c.hp -= attackOf(s);
   if (c.hp <= 0) {
     c.respawnAt = s.turn + def.respawnTurns;
+    if (c.once) s.creatures.splice(s.creatures.indexOf(c), 1);
     s.stats.kills += 1;
     log(s, weapon ? `You ${weapon.hitVerb} the ${def.name}. It leaves.` : `You squash the ${def.name}.`);
+    if (def.drop && random(s) < def.drop.chance) {
+      giveItem(s, def.drop.item);
+      log(s, `The ${def.name} leaves a ${ITEMS[def.drop.item].name} behind.`);
+    }
+    gainXp(s, def.xp ?? 0);
   } else {
     log(s, weapon ? `You ${weapon.hitVerb} the ${def.name}.` : `You hit the ${def.name}.`);
   }
@@ -185,7 +261,7 @@ function attackCreature(s, c) {
 
 function hurtPlayer(s, def) {
   s.player.hp -= def.atk;
-  log(s, `The ${def.name} bites you.`, 'danger');
+  log(s, `The ${def.name} ${def.biteVerb ?? 'bites'} you.`, 'danger');
   if (s.player.hp <= 0) {
     s.stats.faints += 1;
     s.player.hp = s.player.maxHp;
@@ -212,6 +288,16 @@ function wander(s, c) {
 }
 
 // Verhalten pro Runde. Rückgabe true heißt: Der Spieler wurde besiegt, die Runde endet sofort.
+// Ein Schritt auf den Spieler zu. Rückgabe true, wenn die Kreatur sich bewegt hat.
+function approach(s, c) {
+  const dx = Math.sign(s.player.x - c.x);
+  const dy = Math.sign(s.player.y - c.y);
+  const horizontalFirst = Math.abs(s.player.x - c.x) >= Math.abs(s.player.y - c.y);
+  return Boolean(horizontalFirst
+    ? (dx && stepCreature(s, c, dx, 0)) || (dy && stepCreature(s, c, 0, dy))
+    : (dy && stepCreature(s, c, 0, dy)) || (dx && stepCreature(s, c, dx, 0)));
+}
+
 export const AI_BEHAVIOURS = {
   skulk(s, c, def) {
     const d = distance(c, s.player);
@@ -222,13 +308,20 @@ export const AI_BEHAVIOURS = {
       wander(s, c);
       return false;
     }
-    const dx = Math.sign(s.player.x - c.x);
-    const dy = Math.sign(s.player.y - c.y);
-    const horizontalFirst = Math.abs(s.player.x - c.x) >= Math.abs(s.player.y - c.y);
-    const moved = horizontalFirst
-      ? (dx && stepCreature(s, c, dx, 0)) || (dy && stepCreature(s, c, 0, dy))
-      : (dy && stepCreature(s, c, 0, dy)) || (dx && stepCreature(s, c, dx, 0));
-    if (!moved) wander(s, c);
+    if (!approach(s, c)) wander(s, c);
+    return false;
+  },
+  // Frösche (Tag 4): beißen wie Ratten, sitzen aber jede zweite Runde still und springen dann zwei Felder.
+  hop(s, c, def) {
+    if (distance(c, s.player) === 1) {
+      return random(s) < def.hitChance ? hurtPlayer(s, def) : false;
+    }
+    if (s.turn % 2 === 1) return false;
+    if (distance(c, s.player) > def.senseRange) {
+      wander(s, c);
+      return false;
+    }
+    if (approach(s, c) && distance(c, s.player) > 1) approach(s, c);
     return false;
   },
 };

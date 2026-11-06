@@ -31,6 +31,8 @@ export const MAPS = {
           "If you know what should exist tomorrow, write it down. Sometimes the Nightwright listens.",
           "There's a door in the eastern trees now. Brown. I didn't order a door. Nobody orders doors.",
           "Someone put a workbench by your hut. It hums when you bring it two things that belong together.",
+      "There's a dealer past the brown door now, with a wheel. I asked what they sell. They said: yes.",
+      "You look sturdier than you did. Fighting rats is good for you, apparently. Nobody tell the rats.",
         ],
         // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
         itemLines: {
@@ -82,9 +84,9 @@ export const MAPS = {
       'T.........,.....:...: ',
       'T.................:..:',
       'T....,.............:  ',
-      'T.......,.........:.: ',
-      'T..........:.:..::.:  ',
-      ' TTTTTTTTTT:::::::::  ',
+      'T.......,..e......:.: ',
+      'T.........eeee..::.:  ',
+      ' TTTTTTTTTeeeeee::::  ',
     ],
     entities: [
       {
@@ -103,16 +105,37 @@ export const MAPS = {
           "The grey lines over there are only pencil. Don't lean on them.",
           "I'm meant to scare crows. Nobody has made any crows yet, so I practise on the rats.",
           'If you meet the Nightwright, tell them the door sticks a little.',
+          'Something rubbed out the bottom corner last night. The Nightwright only ever adds. I checked.',
+          "Frogs crawled out of the rubbed bit. They look half finished. I don't think they're meant to scare.",
+          'If the rubbing-out spreads, someone ought to keep watch. I would, but I am attached to this pole.',
         ],
         itemLines: {
           stick: "A stick! I'm mostly sticks myself. Be gentle with it.",
           'stone-spear': "Is that a stick with a rock on it? Please don't introduce me to the workbench.",
         },
       },
+      // Tag 4: Der Dealer und sein Glücksrad (Daten in content/wheel.js).
+      {
+        id: 'dealer', kind: 'npc', name: 'The Dealer', glyph: '$', color: '#b6d96a', x: 16, y: 7,
+        lines: [
+          'Psst. Surprises. Fresh tonight. I know exactly what I sell, it just has not been painted in yet.',
+          'The wheel is free once a night. After that it takes buttons. Frogs have buttons. Do not ask me why.',
+          "Where did I come from? Same as you. One night I wasn't, and then I was, holding a wheel.",
+          'Business has been good since the corner got rubbed out. People want surprises when things go missing.',
+        ],
+        itemLines: {
+          'stone-spear': 'Nice spear. Not for sale? Pity. Everything is for sale, eventually.',
+        },
+      },
+      {
+        id: 'wheel', kind: 'wheel', name: 'Wheel of Chance', glyph: '¤', color: '#f2c56b', x: 17, y: 6,
+      },
     ],
     spawns: [
       { type: 'rat', x: 8, y: 8 },
       { type: 'rat', x: 15, y: 2 },
+      { type: 'frog', x: 13, y: 8 },
+      { type: 'frog', x: 15, y: 9 },
     ],
   },
 };
