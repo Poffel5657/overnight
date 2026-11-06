@@ -26,6 +26,12 @@ Ab Nacht 4 besteht jede Nacht aus drei Teilen: Vorschlag, Abstimmungsgewinner, e
 6. Ratten lassen etwas fallen, das man an der Werkbank verarbeiten kann (zweites Rezept). Achtung: Ratten erneuern sich bei jedem Kartenwechsel, Beute also selten machen.
 7. Der Rough Draft wird fertiger, oder eine weitere Tür. Spielerideen dafür: aus Versehen in den Brunnen fallen und durch ein kleines Kanalsystem (mehrere Karten) wieder herausfinden; eine Stadt mit Bewohnern, die Aufträge geben. Weitere Waffenarten (Messer, Axt, Schwert) lassen sich über Rezepte verteilen. Ein Glücksrad für Gegenstände oder Begegnungen wäre ein möglicher Ort-Inhalt.
 
+## Ideen für später
+
+Ideen aus Vorschlägen, die gefallen, aber noch nicht gebaut sind, in eigenen Worten. Quelle für den Stimmzettel. Seit dem Aufräumen ab Nacht 4 liest niemand alte Vorschlagsdateien noch einmal, deshalb muss alles Wichtige hier stehen.
+
+- Brunnen-Kanäle, Dampfstadt mit Aufträgen, Glücksrad, weitere Waffen: stehen auf Zettel 3.
+
 ## Offene Fäden
 
 - Wer oder was ist der Nightwright? Der Keeper kennt nur den Namen. Das sollte lange offen bleiben.
