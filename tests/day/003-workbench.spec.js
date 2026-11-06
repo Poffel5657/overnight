@@ -1,10 +1,13 @@
 // Tag 3: Ein spitzer Stein im Teich, eine Werkbank an der Hütte und daraus ein Steinspeer.
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { act, attackOf, createGame, entityAt, hasItem, tileAt } from '../../src/game.js';
+import { act, attackOf, createGame, entityAt, hasItem, tileAt, activeEvent } from '../../src/game.js';
 
 const quietGame = (x, y, saved = null) => {
   const s = createGame({ seed: 1, saved });
+  // Ein laufendes Event gilt als schon gehört, damit Figuren hier ihre normalen Sätze sagen.
+  const event = activeEvent();
+  if (event) s.flags.eventsHeard = { [event.id]: true };
   s.creatures = [];
   s.player.x = x;
   s.player.y = y;

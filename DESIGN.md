@@ -23,6 +23,7 @@ Overnight sieht aus wie ein altes Terminal, auf dem die Welt läuft: Bernstein-P
 
 - Systemzeilen (Statusleiste, Bootsequenz, Fenstertitel) sind kurz, in Großbuchstaben und trocken, wie ein Gerät, das sich nicht wundert. Die Bewohner dürfen sich wundern, das Terminal nicht.
 - Die Karte ist der Star und füllt den Bildschirm. Alles andere ist Kopfzeile, Menü oder eine schmale Zeile darunter, mit den vorhandenen Farben. Keine neuen Farbwelten.
+- **Aufgaben beginnen bei Figuren, nicht im Menü.** Events, Quests und Aufträge stellt immer eine Figur in der Welt. Die Oberfläche zeigt höchstens einen Hinweis, wohin man gehen soll („Something is going on in the Rough Draft. Talk to the Scarecrow.“); was genau zu tun ist, erfährt man im Gespräch. Danach darf die Anzeige die Aufgabe und den Fortschritt zeigen.
 - Die Effekte sind Stimmung, nie Hindernis: Alles muss mit `CRT: OFF` und bei reduzierter Bewegung genauso gut spielbar sein.
 
 ## Spielregeln, die bleiben sollen

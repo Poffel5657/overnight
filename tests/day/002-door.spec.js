@@ -1,11 +1,14 @@
 // Tag 2: Eine braune Tür in der Lücke im Osten führt in den Rough Draft und wieder zurück.
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { act, createGame, entityAt, tileAt } from '../../src/game.js';
+import { act, createGame, entityAt, tileAt, activeEvent } from '../../src/game.js';
 import { MAPS } from '../../content/world.js';
 
 const quietGame = (x, y, saved = null) => {
   const s = createGame({ seed: 1, saved });
+  // Ein laufendes Event gilt als schon gehört, damit Figuren hier ihre normalen Sätze sagen.
+  const event = activeEvent();
+  if (event) s.flags.eventsHeard = { [event.id]: true };
   s.creatures = [];
   s.player.x = x;
   s.player.y = y;

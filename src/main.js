@@ -268,7 +268,7 @@ setupChronicle();
 setupSuggestions({ archived: Boolean(archivedDay) });
 setupVoting({ archived: Boolean(archivedDay) });
 setupRating({ archived: Boolean(archivedDay) });
-updateEvent = setupEvent({ archived: Boolean(archivedDay), getStat: (name) => state.stats[name] });
+updateEvent = setupEvent({ archived: Boolean(archivedDay), getStat: (name) => state.stats[name], getFlags: () => state.flags });
 setupInput();
 greet();
 refresh();

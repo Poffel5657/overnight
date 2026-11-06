@@ -1,10 +1,13 @@
-// Community-Event. Geschützte Datei: Neben suggest.js und vote.js der einzige Ort mit Netzwerkzugriff.
-// Jeder Spieler kann pro Nacht einmal beitragen: Sobald die Statistik heute um `need` gewachsen ist,
-// meldet das Spiel das von selbst an den Worker. Der Zählerstand dort ist nur Anzeige.
+// Community-Event. Geschützte Datei: Netzwerkzugriff wie suggest.js.
+// Ein Event beginnt bei einer Figur (EVENT.giver): Bis man mit ihr gesprochen hat, zeigt die Anzeige nur
+// einen Hinweis, wohin man gehen soll, und den Stand der Gemeinschaft. Danach die Aufgabe.
+// Jeder Spieler kann pro Nacht einmal beitragen: Sobald die Statistik seit dem Gespräch bzw. seit Tagesbeginn
+// um `need` gewachsen ist, meldet das Spiel das von selbst an den Worker. Der Zählerstand dort ist nur Anzeige.
 import { SUGGEST_URL } from './config.js';
 import { berlinDay } from './suggest.js';
-import { currentDay } from './game.js';
+import { activeEvent, currentDay } from './game.js';
 import { EVENT } from '../content/event.js';
+import { MAPS } from '../content/world.js';
 
 const KEY = 'overnight.event';
 
@@ -24,10 +27,18 @@ function writeLocal(value) {
   }
 }
 
-export const eventActive = (day = currentDay()) =>
-  Boolean(EVENT) && day >= EVENT.startDay && day <= EVENT.endDay;
+export const eventActive = (day = currentDay()) => Boolean(activeEvent(day));
 
-export function setupEvent({ archived, getStat }) {
+// Wer leitet das Event, und wo steht er?
+function findGiver() {
+  for (const map of Object.values(MAPS)) {
+    const entity = map.entities.find((e) => e.id === EVENT.giver);
+    if (entity) return { name: entity.name, place: map.name };
+  }
+  return { name: 'someone', place: 'the world' };
+}
+
+export function setupEvent({ archived, getStat, getFlags = () => ({}) }) {
   const box = document.getElementById('event-box');
   if (archived || !eventActive()) {
     box.hidden = true;
@@ -35,9 +46,8 @@ export function setupEvent({ archived, getStat }) {
   }
   box.hidden = false;
   const $ = (id) => document.getElementById(id);
-  $('event-title').textContent = EVENT.title;
-  $('event-text').textContent = `${EVENT.text} ${EVENT.task}`;
-  $('event-reward').textContent = EVENT.reward;
+  const giver = findGiver();
+  const heard = () => Boolean(getFlags()?.eventsHeard?.[EVENT.id]);
 
   let total = null;
   let sending = false;
@@ -47,8 +57,9 @@ export function setupEvent({ archived, getStat }) {
     const today = berlinDay();
     const value = Number(getStat(EVENT.stat)) || 0;
     local = readLocal();
-    if (!local || local.id !== EVENT.id || local.day !== today) {
-      local = { id: EVENT.id, day: today, base: value, sent: false };
+    // Vor dem Gespräch zählt noch nichts: Die Aufgabe beginnt, wenn man sie kennt.
+    if (!heard() || !local || local.id !== EVENT.id || local.day !== today) {
+      local = { id: EVENT.id, day: today, base: value, sent: local?.id === EVENT.id && local.day === today && local.sent };
       writeLocal(local);
     } else if (value < local.base) {
       // Neuer Spielstand: Fortschritt von hier an zählen.
@@ -59,13 +70,30 @@ export function setupEvent({ archived, getStat }) {
   }
 
   function draw(done) {
-    const together = total === null ? '…' : total;
     const left = EVENT.endDay - currentDay();
     const when = left === 0 ? 'Last day.' : `${left + 1} days left.`;
-    $('event-together').textContent = `Together: ${together} / ${EVENT.goal}. ${when}`;
+    let together;
+    if (total === null) together = `Together: … of ${EVENT.goal} parts done.`;
+    else if (total >= EVENT.goal) together = `Together: ${total} of ${EVENT.goal} parts done. Goal reached!`;
+    else together = `Together: ${total} of ${EVENT.goal} parts done, ${EVENT.goal - total} more needed.`;
+    $('event-together').textContent = `${together} ${when}`;
+
+    if (!heard()) {
+      // Nur ein Hinweis: Wer mehr wissen will, geht hin und redet.
+      $('event-title').textContent = `Something is going on in ${giver.place}.`;
+      $('event-text').textContent = `Talk to ${giver.name} to learn more.`;
+      $('event-mine').textContent = '';
+      $('event-reward').textContent = '';
+      box.classList.add('teaser');
+      return;
+    }
+    box.classList.remove('teaser');
+    $('event-title').textContent = EVENT.title;
+    $('event-text').textContent = EVENT.text;
+    $('event-reward').textContent = `${EVENT.reward} Each player can add one part per day.`;
     $('event-mine').textContent = local.sent
       ? 'Your part is done for today. Thank you.'
-      : `Your part today: ${Math.min(done, EVENT.need)} / ${EVENT.need}`;
+      : `Your part today: ${EVENT.task} (${Math.min(done, EVENT.need)} / ${EVENT.need})`;
   }
 
   async function contribute() {
@@ -101,7 +129,7 @@ export function setupEvent({ archived, getStat }) {
 
   function update() {
     const done = progress();
-    if (SUGGEST_URL && !local.sent && !sending && done >= EVENT.need) contribute();
+    if (SUGGEST_URL && heard() && !local.sent && !sending && done >= EVENT.need) contribute();
     draw(done);
   }
 

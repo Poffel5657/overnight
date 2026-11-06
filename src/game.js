@@ -7,11 +7,16 @@ import { ITEMS } from '../content/items.js';
 import { RECIPES } from '../content/recipes.js';
 import { LEVELS, LEVEL_UP_TEXT } from '../content/levels.js';
 import { WHEEL } from '../content/wheel.js';
+import { EVENT } from '../content/event.js';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const LOG_LIMIT = 50;
 
 export const currentDay = () => CHRONICLE[CHRONICLE.length - 1].day;
+
+// Das laufende Community-Event oder null.
+export const activeEvent = (day = currentDay()) =>
+  (EVENT && day >= EVENT.startDay && day <= EVENT.endDay ? EVENT : null);
 
 // Eigener Zufall mit Seed (mulberry32), damit Abläufe in Tests wiederholbar sind.
 function random(s) {
@@ -145,6 +150,13 @@ const isStandable = (s, x, y) => tileAt(s.map, x, y).walkable && !entityAt(s, x,
 // Was beim Dagegenlaufen an einem Objekt passiert. Neue Objektarten bekommen hier einen Eintrag.
 export const INTERACTIONS = {
   npc(s, e) {
+    // Wer ein Event leitet, erklärt es beim ersten Gespräch. Erst danach zeigt die Anzeige die Aufgabe.
+    const event = activeEvent();
+    if (event?.giver === e.id && !s.flags.eventsHeard?.[event.id]) {
+      (s.flags.eventsHeard ??= {})[event.id] = true;
+      log(s, `${e.name}: "${event.intro}"`, 'new-tonight');
+      return;
+    }
     const remark = e.itemLines?.[s.player.weapon];
     const heard = (s.flags.heard ??= {});
     if (remark && !heard[`${e.id}:${s.player.weapon}`]) {
