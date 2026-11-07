@@ -31,4 +31,10 @@ export const CHRONICLE = [
     title: 'A wheel and a smudge',
     text: 'You won the vote: a Dealer with a Wheel of Chance now waits in the Rough Draft. Fights earn levels, and smudged frogs crawl from a corner someone rubbed out.',
   },
+  {
+    day: 5,
+    date: '2026-11-08',
+    title: 'Down the well',
+    text: 'You won the vote: drink from the well when you are already fine and you slip into the drains. Chests hold armour, the Keeper has a first quest, and behind a locked gate something made of crumbs is waiting.',
+  },
 ];

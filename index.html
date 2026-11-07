@@ -134,6 +134,7 @@
         <p id="hp-label" class="visually-hidden"></p>
         <p id="hp-meter" class="hp-meter" aria-hidden="true"></p>
         <p id="items" class="chips" aria-hidden="true"></p>
+        <button id="open-gear" class="gear-button" aria-haspopup="dialog">Gear</button>
         <div id="rate-box" class="rate-box" hidden>
           <span id="rate-question"></span>
           <button data-rate="up" aria-label="I liked it">GOOD</button>
@@ -182,6 +183,18 @@
     <h2 class="window-title">[ CHRONICLE ]</h2>
     <p>Everything that has ever appeared, and the night it appeared. Every old version stays playable.</p>
     <ol id="chronicle-list" class="chronicle" reversed></ol>
+    <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <dialog id="gear-dialog" class="window">
+    <h2 class="window-title">[ GEAR ]</h2>
+    <p id="gear-stats" class="gear-stats"></p>
+    <h3 class="gear-head">WORN</h3>
+    <ul id="gear-worn" class="gear-list"></ul>
+    <h3 class="gear-head">BAG</h3>
+    <ul id="gear-bag" class="gear-list"></ul>
+    <p id="gear-empty" class="fineprint">Nothing in the bag yet. Walk into things.</p>
+    <p class="fineprint">Defence is taken off every hit, but one point always gets through. Press I to open this window.</p>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 

@@ -171,6 +171,18 @@ canvas {
 .chips { margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { padding: 0 6px; border: 1px solid var(--line); color: var(--bright); }
 .chip-kind { color: var(--muted); }
+.gear-button { font-size: 18px; padding: 0 6px; }
+
+/* Fenster [ GEAR ] (seit Tag 5) */
+.gear-stats { color: var(--bright); white-space: pre-wrap; }
+.gear-head { margin: 12px 0 4px; font-size: 20px; font-weight: normal; color: var(--muted); }
+.gear-list { list-style: none; margin: 0; padding: 0; }
+.gear-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 4px 0; border-top: 1px dashed var(--line); }
+.gear-kind { min-width: 3.5em; color: var(--muted); }
+.gear-name { color: var(--bright); }
+.gear-bonus { color: var(--good); }
+.gear-equip { margin-left: auto; font-size: 18px; }
+.gear-text { flex-basis: 100%; color: var(--muted); font-size: 17px; }
 
 .window-log { flex: none; }
 .window-log .window-title { display: flex; align-items: baseline; gap: 10px; }
@@ -297,6 +309,8 @@ button:disabled { opacity: 0.5; cursor: default; background: transparent; color:
 .quest p { margin: 0 0 2px; }
 .quest-title, .event-title { color: var(--accent); }
 .event-label { padding: 0 4px; background: var(--accent); color: #1a1006; }
+.quest-label { padding: 0 4px; border: 1px solid var(--accent); color: var(--accent); }
+.quest-progress { color: var(--good); }
 .quest-text { color: var(--bright); }
 .event-together { color: var(--muted); }
 .event-mine { color: var(--good); }

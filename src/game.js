@@ -8,6 +8,7 @@ import { RECIPES } from '../content/recipes.js';
 import { LEVELS, LEVEL_UP_TEXT } from '../content/levels.js';
 import { WHEEL } from '../content/wheel.js';
 import { EVENT } from '../content/event.js';
+import { QUESTS } from '../content/quests.js';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const LOG_LIMIT = 50;
@@ -45,20 +46,64 @@ export const entityAt = (s, x, y) =>
   visibleEntities(s).find((e) => e.x === x && e.y === y);
 
 export const attackOf = (s) => s.player.atk + (ITEMS[s.player.weapon]?.atk ?? 0);
-// Gegenstände: Waffen (mit atk) liegen in player.weapon, alles andere in player.bag.
-export const hasItem = (s, id) => s.player.weapon === id || s.player.bag.includes(id);
+// Rüstung (seit Tag 5): player.armor = { head, body, feet }, def wird vom Schaden abgezogen.
+export const ARMOR_SLOTS = ['head', 'body', 'feet'];
+export const defenseOf = (s) =>
+  Object.values(s.player.armor).reduce((sum, id) => sum + (ITEMS[id]?.def ?? 0), 0);
+const isWeapon = (id) => ITEMS[id]?.atk !== undefined;
+const isArmor = (id) => Boolean(ITEMS[id]?.slot);
+
+// Gegenstände: Waffen (mit atk) liegen in player.weapon, Rüstung in player.armor, alles andere in player.bag.
+const worn = (s) => [s.player.weapon, ...Object.values(s.player.armor)].filter(Boolean);
+export const countItem = (s, id) =>
+  worn(s).filter((w) => w === id).length + s.player.bag.filter((b) => b === id).length;
+export const hasItem = (s, id) => countItem(s, id) > 0;
+// Aus dem Beutel zuerst, damit niemand ungefragt seine Waffe oder Rüstung verliert.
 function takeItem(s, id) {
-  if (s.player.weapon === id) s.player.weapon = null;
-  else s.player.bag.splice(s.player.bag.indexOf(id), 1);
+  const index = s.player.bag.indexOf(id);
+  if (index >= 0) s.player.bag.splice(index, 1);
+  else if (s.player.weapon === id) s.player.weapon = null;
+  else s.player.armor[ITEMS[id].slot] = null;
 }
 // Eine neue Waffe ersetzt die alte, die alte wandert in den Beutel und geht nie verloren.
+// Rüstung zieht man an, wenn der Platz frei ist, sonst kommt sie in den Beutel.
 function giveItem(s, id) {
-  if (ITEMS[id].atk === undefined) {
+  const item = ITEMS[id];
+  if (isWeapon(id)) {
+    if (s.player.weapon) s.player.bag.push(s.player.weapon);
+    s.player.weapon = id;
+  } else if (isArmor(id) && !s.player.armor[item.slot]) {
+    s.player.armor[item.slot] = id;
+  } else {
     s.player.bag.push(id);
-    return;
   }
-  if (s.player.weapon) s.player.bag.push(s.player.weapon);
-  s.player.weapon = id;
+}
+
+// Fenster [ GEAR ]: Waffe oder Rüstung aus dem Beutel anlegen. Kostet keine Runde.
+// Das bisher Getragene wandert in den Beutel. Rückgabe true, wenn sich etwas geändert hat.
+export function equip(s, id) {
+  const index = s.player.bag.indexOf(id);
+  if (index < 0 || !(isWeapon(id) || isArmor(id))) return false;
+  s.player.bag.splice(index, 1);
+  const item = ITEMS[id];
+  if (isWeapon(id)) {
+    if (s.player.weapon) s.player.bag.push(s.player.weapon);
+    s.player.weapon = id;
+    log(s, `You take up the ${item.name}. You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
+  } else {
+    const old = s.player.armor[item.slot];
+    if (old) s.player.bag.push(old);
+    s.player.armor[item.slot] = id;
+    log(s, `You put on the ${item.name}. Defence ${defenseOf(s)}.`);
+  }
+  return true;
+}
+
+// Ergebnis einer neuen Sache für das Log: Waffen nennen den Schaden, Rüstung die Abwehr.
+function describeGain(s, id) {
+  const item = ITEMS[id];
+  if (isWeapon(id) && s.player.weapon === id) log(s, `You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
+  else if (isArmor(id) && s.player.armor[item.slot] === id) log(s, `You wear the ${item.name}. Defence ${defenseOf(s)}.`);
 }
 
 // Stufen (seit Tag 4): Erfahrung aus Siegen und vom Glücksrad. Nächste Schwelle oder null am Ende der Leiter.
@@ -95,8 +140,11 @@ const newCreature = (type, x, y, once = false) => ({
   type, x, y, hp: CREATURES[type].hp, spawn: { x, y }, respawnAt: null, once,
 });
 
-function spawnCreatures(mapId) {
-  return MAPS[mapId].spawns.map((spawn) => newCreature(spawn.type, spawn.x, spawn.y));
+// Besiegte Bosse (flags.slain) kommen nie wieder.
+function spawnCreatures(s, mapId) {
+  return MAPS[mapId].spawns
+    .filter((spawn) => !(CREATURES[spawn.type].boss && s.flags.slain?.[spawn.type]))
+    .map((spawn) => newCreature(spawn.type, spawn.x, spawn.y));
 }
 
 // Wechselt die Karte. Kreaturen der neuen Karte erscheinen frisch, nie auf dem Ankunftsfeld.
@@ -104,7 +152,7 @@ function enterMap(s, mapId, x, y) {
   s.map = mapId;
   s.player.x = x;
   s.player.y = y;
-  s.creatures = spawnCreatures(mapId).filter((c) => !(c.x === x && c.y === y));
+  s.creatures = spawnCreatures(s, mapId).filter((c) => !(c.x === x && c.y === y));
 }
 
 // saved: migrierter Spielstand aus save.js oder null für ein neues Spiel.
@@ -115,6 +163,7 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     map: START.map,
     player: {
       x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null, bag: [], xp: 0, level: 1,
+      armor: { head: null, body: null, feet: null },
     },
     turn: 0,
     flags: {},
@@ -132,13 +181,18 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     s.lastSeenDay = saved.lastSeenDay ?? null;
     if (!Array.isArray(s.player.bag)) s.player.bag = [];
     s.player.bag = s.player.bag.filter((id) => ITEMS[id]);
+    // Stände von vor Tag 5 haben keine Rüstung. Unbekanntes oder Falsches wird verworfen.
+    const armor = saved.player?.armor ?? {};
+    s.player.armor = Object.fromEntries(ARMOR_SLOTS.map((slot) =>
+      [slot, ITEMS[armor[slot]]?.slot === slot ? armor[slot] : null]));
+    if (s.player.weapon && !isWeapon(s.player.weapon)) s.player.weapon = null;
     // Stände von vor Tag 4 haben keine Stufe: Sie beginnen bei Stufe 1 ohne Erfahrung.
     if (!Number.isInteger(s.player.xp) || s.player.xp < 0) s.player.xp = 0;
     if (!Number.isInteger(s.player.level) || !LEVELS[s.player.level - 1]) s.player.level = 1;
     if (!Number.isInteger(s.stats.xp)) s.stats.xp = 0;
     s.player.hp = Math.min(Math.max(s.player.hp, 1), s.player.maxHp);
   }
-  s.creatures = spawnCreatures(s.map);
+  s.creatures = spawnCreatures(s, s.map);
   // Die Welt kann sich über Nacht geändert haben: Spieler notfalls zurück an den Start setzen.
   if (!isStandable(s, s.player.x, s.player.y)) enterMap(s, START.map, START.x, START.y);
   s.creatures = s.creatures.filter((c) => !(c.x === s.player.x && c.y === s.player.y));
@@ -157,6 +211,8 @@ export const INTERACTIONS = {
       log(s, `${e.name}: "${event.intro}"`, 'new-tonight');
       return;
     }
+    const quest = QUESTS.find((q) => q.giver === e.id && questState(s, q.id) !== 'done');
+    if (quest && talkQuest(s, e, quest)) return;
     const remark = e.itemLines?.[s.player.weapon];
     const heard = (s.flags.heard ??= {});
     if (remark && !heard[`${e.id}:${s.player.weapon}`]) {
@@ -173,15 +229,36 @@ export const INTERACTIONS = {
     log(s, e.text);
   },
   pickup(s, e) {
-    const item = ITEMS[e.item];
     (s.flags.taken ??= {})[e.id] = true;
     giveItem(s, e.item);
     log(s, e.text, 'new-tonight');
-    if (item.atk !== undefined) log(s, `You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
+    describeGain(s, e.item);
+  },
+  // Truhen (Tag 5): geben einmal ihren Inhalt und bleiben offen stehen (flags.opened).
+  chest(s, e) {
+    const opened = (s.flags.opened ??= {});
+    if (opened[e.id]) {
+      log(s, e.emptyText);
+      return;
+    }
+    opened[e.id] = true;
+    giveItem(s, e.item);
+    log(s, e.text, 'new-tonight');
+    describeGain(s, e.item);
+  },
+  // Verschlossene Gitter (Tag 5): Mit dem Schlüssel (key) gehen sie für immer auf und verschwinden wie aufgehobene Dinge.
+  gate(s, e) {
+    if (!hasItem(s, e.key)) {
+      log(s, e.text);
+      return;
+    }
+    takeItem(s, e.key);
+    (s.flags.taken ??= {})[e.id] = true;
+    log(s, e.openText, 'new-tonight');
   },
   // Werkbank: baut das erste Rezept aus content/recipes.js, für das der Spieler alles dabeihat.
   bench(s, e) {
-    const recipe = RECIPES.find((r) => r.needs.every((id) => hasItem(s, id)));
+    const recipe = RECIPES.find((r) => r.needs.every((id) => countItem(s, id) >= r.needs.filter((n) => n === id).length));
     if (!recipe) {
       const partial = RECIPES.find((r) => r.needs.some((id) => hasItem(s, id)));
       log(s, partial ? partial.hint : e.text);
@@ -189,9 +266,8 @@ export const INTERACTIONS = {
     }
     for (const id of recipe.needs) takeItem(s, id);
     giveItem(s, recipe.makes);
-    const made = ITEMS[recipe.makes];
     log(s, recipe.text, 'new-tonight');
-    if (made.atk !== undefined) log(s, `You now ${made.hitVerb} things for ${attackOf(s)} damage.`);
+    describeGain(s, recipe.makes);
   },
   // Türen führen auf eine andere Karte: to = { map, x, y } ist das Ankunftsfeld.
   door(s, e) {
@@ -214,11 +290,49 @@ export const INTERACTIONS = {
     flags.spins = (flags.spins ?? 0) + 1;
     spinWheel(s);
   },
+  // Der Brunnen heilt. Wer schon heil ist und trotzdem trinkt, rutscht hinein (down, seit Tag 5).
   well(s, e) {
+    if (s.player.hp >= s.player.maxHp && e.down) {
+      enterMap(s, e.down.map, e.down.x, e.down.y);
+      log(s, e.downText, 'new-tonight');
+      return;
+    }
     s.player.hp = s.player.maxHp;
     log(s, e.text);
   },
 };
+
+// Quests (seit Tag 5, Daten in content/quests.js).
+export const questState = (s, id) => s.flags.quests?.[id] ?? null;
+
+// Das Gespräch über eine Quest. Rückgabe false: Die Figur hat dazu gerade nichts zu sagen.
+function talkQuest(s, e, quest) {
+  const quests = (s.flags.quests ??= {});
+  if (!quests[quest.id]) {
+    if (quest.startItem && !hasItem(s, quest.startItem)) return false;
+    quests[quest.id] = 'active';
+    log(s, `${e.name}: "${quest.offerText}"`, 'new-tonight');
+    return true;
+  }
+  if (countItem(s, quest.item) >= quest.count) {
+    for (let i = 0; i < quest.count; i += 1) takeItem(s, quest.item);
+    quests[quest.id] = 'done';
+    log(s, `${e.name}: "${quest.doneText}"`, 'new-tonight');
+    if (quest.reward.item) {
+      giveItem(s, quest.reward.item);
+      log(s, `You receive: ${ITEMS[quest.reward.item].name}.`);
+      describeGain(s, quest.reward.item);
+    }
+    if (quest.reward.xp) gainXp(s, quest.reward.xp);
+    return true;
+  }
+  // Abwechselnd erinnern und plaudern, damit die Figur ihre anderen Sätze nicht vergisst.
+  const nag = (s.flags.questNag ??= {});
+  nag[quest.id] = !nag[quest.id];
+  if (!nag[quest.id]) return false;
+  log(s, `${e.name}: "${quest.remindText}" (${countItem(s, quest.item)}/${quest.count})`);
+  return true;
+}
 
 function pickWedge(s) {
   const total = WHEEL.wedges.reduce((sum, w) => sum + w.weight, 0);
@@ -258,12 +372,16 @@ function attackCreature(s, c) {
   c.hp -= attackOf(s);
   if (c.hp <= 0) {
     c.respawnAt = s.turn + def.respawnTurns;
-    if (c.once) s.creatures.splice(s.creatures.indexOf(c), 1);
+    if (c.once || def.boss) s.creatures.splice(s.creatures.indexOf(c), 1);
+    if (def.boss) (s.flags.slain ??= {})[c.type] = true;
     s.stats.kills += 1;
     log(s, weapon ? `You ${weapon.hitVerb} the ${def.name}. It leaves.` : `You squash the ${def.name}.`);
-    if (def.drop && random(s) < def.drop.chance) {
-      giveItem(s, def.drop.item);
-      log(s, `The ${def.name} leaves a ${ITEMS[def.drop.item].name} behind.`);
+    if (def.boss) log(s, `The ${def.name} comes apart into ordinary crumbs and washes away.`, 'new-tonight');
+    for (const drop of def.drops ?? []) {
+      if (random(s) >= drop.chance) continue;
+      giveItem(s, drop.item);
+      log(s, `The ${def.name} leaves a ${ITEMS[drop.item].name} behind.`);
+      describeGain(s, drop.item);
     }
     gainXp(s, def.xp ?? 0);
   } else {
@@ -271,8 +389,11 @@ function attackCreature(s, c) {
   }
 }
 
+// Rüstung zieht ihre Abwehr vom Schaden ab, ein Punkt geht immer durch.
+export const damageFrom = (s, def) => Math.max(1, def.atk - defenseOf(s));
+
 function hurtPlayer(s, def) {
-  s.player.hp -= def.atk;
+  s.player.hp -= damageFrom(s, def);
   log(s, `The ${def.name} ${def.biteVerb ?? 'bites'} you.`, 'danger');
   if (s.player.hp <= 0) {
     s.stats.faints += 1;
@@ -334,6 +455,20 @@ export const AI_BEHAVIOURS = {
       return false;
     }
     if (approach(s, c) && distance(c, s.player) > 1) approach(s, c);
+    return false;
+  },
+  // Aale (Tag 5): rühren sich nie, beißen aber, wer daneben steht.
+  lurk(s, c, def) {
+    if (distance(c, s.player) !== 1) return false;
+    return random(s) < def.hitChance ? hurtPlayer(s, def) : false;
+  },
+  // Der Krümelhaufen (Tag 5): langsam, ein Schritt jede zweite Runde, aber schwer.
+  trudge(s, c, def) {
+    if (distance(c, s.player) === 1) {
+      return random(s) < def.hitChance ? hurtPlayer(s, def) : false;
+    }
+    if (s.turn % 2 === 1 || distance(c, s.player) > def.senseRange) return false;
+    approach(s, c);
     return false;
   },
 };
