@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "drains",
+  "player": { "x": 13, "y": 3, "hp": 14, "maxHp": 16, "atk": 2, "weapon": "stone-spear", "bag": ["button", "crumb", "stick"], "xp": 24, "level": 4, "armor": { "head": "colander", "body": "button-mail", "feet": null } },
+  "turn": 512,
+  "flags": { "talk": { "keeper": 11, "dealer": 3 }, "taken": { "stick": true, "pointy-rock": true, "draft-crumb": true }, "opened": { "drain-chest": true }, "quests": { "grey-crumbs": "active" }, "questNag": { "grey-crumbs": true }, "heard": { "keeper:stick": true }, "wheelDay": 5, "spins": 4 },
+  "stats": { "kills": 31, "faints": 2, "xp": 24 },
+  "lastSeenDay": 5
+}

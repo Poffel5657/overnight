@@ -30,5 +30,16 @@ export const TILES = {
     name: 'rubbed out', glyph: '░', fg: '#4a4c5a', bg: '#0b0b12', walkable: false,
     bump: 'This bit has been rubbed out. There are crumbs. It feels colder than nothing.',
   },
+  // Seit Tag 5: die Kanäle unter dem Brunnen.
+  'W': {
+    name: 'brick', glyph: '#', fg: '#5d6b66', bg: '#121a18', walkable: false,
+    bump: 'Damp brick. Somebody laid it very quickly and very well.',
+  },
+  '_': { name: 'drain floor', glyph: '.', fg: '#47605a', bg: '#0e1514', walkable: true },
+  'c': {
+    name: 'channel', glyph: '≈', fg: '#5fa596', bg: '#0c2826', walkable: false,
+    bump: 'The channel is going somewhere in a hurry. You are not invited.',
+  },
+  'p': { name: 'plank', glyph: '=', fg: '#a8703a', bg: '#0c2826', walkable: true },
   'B': { name: 'bed', glyph: '=', fg: '#e0705f', bg: '#2a2219', walkable: true },
 };

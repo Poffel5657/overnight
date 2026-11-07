@@ -33,11 +33,14 @@ export const MAPS = {
           "Someone put a workbench by your hut. It hums when you bring it two things that belong together.",
       "There's a dealer past the brown door now, with a wheel. I asked what they sell. They said: yes.",
       "You look sturdier than you did. Fighting rats is good for you, apparently. Nobody tell the rats.",
+          "Frogs keep tracking grey crumbs onto my meadow. If you find one, show me. I have a feeling about them.",
+          "If you drink from the well when you're already fine, mind the edge. It's deeper than it was.",
         ],
         // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
         itemLines: {
           stick: "Is that a stick? It wasn't there yesterday. Rats respect a good stick. Mostly.",
           'stone-spear': "A spear! Now we're a settlement with a weapons industry. Don't tell the rats.",
+          'drain-hook': "That came out of the sump? Then the sump is a little emptier. Good. I never liked the sump.",
         },
       },
       {
@@ -61,9 +64,12 @@ export const MAPS = {
         id: 'stick', kind: 'pickup', item: 'stick', name: 'Stick', glyph: '/', color: '#b98a52', x: 20, y: 8,
         text: 'You pick up a stick. It is very straight, as if someone made it on purpose last night.',
       },
+      // Tag 5: Wer gesund ist und trotzdem trinkt, rutscht hinein (down) und landet in den Kanälen.
       {
         id: 'well', kind: 'well', name: 'Well', glyph: 'O', color: '#6fb1e0', x: 14, y: 2,
         text: 'You drink from the well. The water tastes faintly of tomorrow. You feel better.',
+        down: { map: 'drains', x: 2, y: 2 },
+        downText: 'You lean in for a drink you do not need, and keep leaning. Splash. You are in the drains.',
       },
     ],
     spawns: [
@@ -108,6 +114,7 @@ export const MAPS = {
           'Something rubbed out the bottom corner last night. The Nightwright only ever adds. I checked.',
           "Frogs crawled out of the rubbed bit. They look half finished. I don't think they're meant to scare.",
           'If the rubbing-out spreads, someone ought to keep watch. I would, but I am attached to this pole.',
+          'There is a grate in the grass now. Things gurgle under it. I preferred not knowing that.',
         ],
         itemLines: {
           stick: "A stick! I'm mostly sticks myself. Be gentle with it.",
@@ -130,12 +137,89 @@ export const MAPS = {
       {
         id: 'wheel', kind: 'wheel', name: 'Wheel of Chance', glyph: '¤', color: '#f2c56b', x: 17, y: 6,
       },
+      // Tag 5: ein Gitter im Gras führt hinunter in die Kanäle.
+      {
+        id: 'draft-grate', kind: 'door', name: 'Drain grate', glyph: '▤', color: '#8a9a96', x: 3, y: 8,
+        to: { map: 'drains', x: 27, y: 2 },
+        text: 'You lift the grate and climb down. It is damp, and it smells of tomorrow, only older.',
+      },
+      {
+        id: 'draft-crumb', kind: 'pickup', item: 'crumb', name: 'Grey crumb', glyph: '·', color: '#d6c3cf', x: 10, y: 8,
+        text: 'At the edge of the rubbed-out bit lies a grey crumb. You pocket it. It is faintly warm.',
+      },
     ],
     spawns: [
       { type: 'rat', x: 8, y: 8 },
       { type: 'rat', x: 15, y: 2 },
       { type: 'frog', x: 13, y: 8 },
       { type: 'frog', x: 15, y: 9 },
+    ],
+  },
+  // Tag 5 (Gewinner von Zettel 4): die Kanäle unter dem Brunnen. Leiter zurück zum Brunnen,
+  // Gitter hinauf in den Rough Draft, und hinter einem verschlossenen Gitter der Sumpf mit dem Krümelhaufen.
+  drains: {
+    name: 'The Drains',
+    tiles: [
+      'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
+      'W____W_______________W______WWWW',
+      'W____W_______________W_______WWW',
+      'W____________________________WWW',
+      'W____W_______________W_______WWW',
+      'W____W_______________W_______WWW',
+      'WWccccccpcccccccccccccccpcccccWW',
+      'W______W_______________W_WWWWWWW',
+      'W______W_______________W_____WWW',
+      'W______________________W_____WWW',
+      'W______W_______________W_____WWW',
+      'W______W_______________W_____WWW',
+      'WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW',
+    ],
+    entities: [
+      {
+        id: 'drain-ladder', kind: 'door', name: 'Ladder', glyph: 'H', color: '#c49a6c', x: 2, y: 1,
+        to: { map: 'meadow', x: 14, y: 3 },
+        text: 'You climb the ladder and out over the rim of the well. Nobody saw. Probably.',
+      },
+      {
+        id: 'drains-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 3, y: 4,
+        text: 'THE DRAINS. Everything ends up here eventually. Please keep left of the water.',
+      },
+      {
+        id: 'drain-chest', kind: 'chest', item: 'colander', name: 'Chest', glyph: '■', openGlyph: '□', color: '#c49a6c', x: 2, y: 10,
+        text: 'You open the chest. Inside: a colander. It fits your head as if it were measured for it.',
+        emptyText: 'The chest is empty. It looks pleased to have been useful.',
+      },
+      // Leise Vorbereitung auf etwas, das noch geheim ist.
+      {
+        id: 'footprints', kind: 'sign', name: 'Footprints', glyph: '"', color: '#8fb8c8', x: 13, y: 9,
+        text: 'Wet footprints, a little smaller than yours, lead east and stop at the wall. They are not yours.',
+      },
+      {
+        id: 'drains-crumb', kind: 'pickup', item: 'crumb', name: 'Grey crumb', glyph: '·', color: '#d6c3cf', x: 18, y: 11,
+        text: 'A grey crumb has washed up against the brick. You pocket it. The water carried it from somewhere.',
+      },
+      {
+        id: 'drain-grate', kind: 'door', name: 'Drain grate', glyph: '▤', color: '#8a9a96', x: 27, y: 1,
+        to: { map: 'draft', x: 4, y: 8 },
+        text: 'You push up a grate and climb out into grass that smells of pencil. The Rough Draft.',
+      },
+      {
+        id: 'sump-gate', kind: 'gate', key: 'keeper-key', name: 'Iron gate', glyph: '|', color: '#c8ccd4', x: 24, y: 7,
+        text: 'An iron gate with a big keyhole. Something on the other side breathes, slowly, like a pile of sand would.',
+        openText: "The Keeper's key turns with a groan, and stays in the lock. The gate swings open. Something stirs in the sump.",
+      },
+      {
+        id: 'sump-chest', kind: 'chest', item: 'rubber-boots', name: 'Chest', glyph: '■', openGlyph: '□', color: '#c49a6c', x: 28, y: 11,
+        text: 'You open the chest. Rubber boots, your size, with a note in pencil: "for the wet bits".',
+        emptyText: 'The chest is empty. The note is gone too.',
+      },
+    ],
+    spawns: [
+      { type: 'rat', x: 10, y: 2 },
+      { type: 'rat', x: 16, y: 9 },
+      { type: 'eel', x: 12, y: 5 },
+      { type: 'eel', x: 19, y: 7 },
+      { type: 'crumb-heap', x: 26, y: 9 },
     ],
   },
 };

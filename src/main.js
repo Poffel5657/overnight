@@ -1,11 +1,13 @@
 // Verbindet Spiellogik, Darstellung und Bedienung im Browser.
-import { act, createGame, currentDay, log, nextLevelXp } from './game.js';
+import {
+  act, attackOf, countItem, createGame, currentDay, defenseOf, equip, log, nextLevelXp, questState, ARMOR_SLOTS,
+} from './game.js';
 import { createRenderer } from './render.js';
 import { loadSave, saveKey, writeSave } from './save.js';
 import { setupSuggestions } from './suggest.js';
 import { setupVoting } from './vote.js';
 import { setupEvent } from './event.js';
-import { setupQuestLog } from './quests.js';
+import { setupQuestLog, updateQuests } from './quests.js';
 import { setupRating } from './rate.js';
 import { setupChat } from './chat.js';
 import { CONTACT_EMAIL } from './config.js';
@@ -14,11 +16,14 @@ import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
 import { MAPS } from '../content/world.js';
 import { BALLOT } from '../content/ballot.js';
+import { QUESTS } from '../content/quests.js';
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
   w: 'up', s: 'down', a: 'left', d: 'right', ' ': 'wait',
 };
+// Tasten, die ein Fenster öffnen statt einen Zug zu machen.
+const WINDOW_KEYS = { i: 'gear-dialog', g: 'gear-dialog' };
 
 const $ = (id) => document.getElementById(id);
 const pad3 = (n) => String(n).padStart(3, '0');
@@ -57,8 +62,10 @@ function drawHud() {
   const next = nextLevelXp(state);
   const xpText = `${level} · XP ${xp}${next === null ? '' : `/${next}`}`;
   // Voller Text für Screenreader und Tests, die sichtbare Anzeige steht daneben.
+  const def = defenseOf(state);
   const parts = [MAPS[state.map].name, `HP ${hp}/${maxHp}`, `LV ${xpText}`];
   if (weapon) parts.push(weapon.name);
+  if (def) parts.push(`defence ${def}`);
   if (bag.length) parts.push(`bag: ${bag.join(', ')}`);
   $('hp-label').textContent = parts.join(' · ');
   $('map-name').textContent = MAPS[state.map].name;
@@ -69,8 +76,89 @@ function drawHud() {
   $('items').replaceChildren(
     chip('LV', xpText),
     ...(weapon ? [chip('WPN', weapon.name)] : []),
+    ...(def ? [chip('DEF', String(def))] : []),
     ...bag.map((name) => chip('BAG', name)),
   );
+}
+
+// Fenster [ GEAR ] (seit Tag 5): Werte, was man trägt, und der Beutel mit Knöpfen zum Anlegen.
+const SLOT_LABELS = { weapon: 'WPN', head: 'HEAD', body: 'BODY', feet: 'FEET' };
+
+function gearRow(label, id, action) {
+  const row = document.createElement('li');
+  row.className = 'gear-row';
+  const kind = document.createElement('span');
+  kind.className = 'gear-kind';
+  kind.textContent = label;
+  const name = document.createElement('span');
+  name.className = 'gear-name';
+  const item = ITEMS[id];
+  name.textContent = item ? item.name : '—';
+  const stat = item?.atk !== undefined ? ` +${item.atk} ATK` : item?.def ? ` +${item.def} DEF` : '';
+  if (stat) {
+    const bonus = document.createElement('span');
+    bonus.className = 'gear-bonus';
+    bonus.textContent = stat;
+    name.append(bonus);
+  }
+  row.append(kind, name);
+  if (action) row.append(action);
+  if (item?.text) {
+    const text = document.createElement('span');
+    text.className = 'gear-text';
+    text.textContent = item.text;
+    row.append(text);
+  }
+  return row;
+}
+
+function drawGear() {
+  const p = state.player;
+  const next = nextLevelXp(state);
+  $('gear-stats').textContent = [
+    `LV ${p.level}`, `XP ${p.xp}${next === null ? '' : `/${next}`}`, `HP ${p.hp}/${p.maxHp}`,
+    `ATK ${attackOf(state)}`, `DEF ${defenseOf(state)}`,
+  ].join('   ');
+  $('gear-worn').replaceChildren(
+    gearRow(SLOT_LABELS.weapon, p.weapon),
+    ...ARMOR_SLOTS.map((slot) => gearRow(SLOT_LABELS[slot], p.armor[slot])),
+  );
+  const counts = new Map();
+  for (const id of p.bag) counts.set(id, (counts.get(id) ?? 0) + 1);
+  const rows = [...counts].map(([id, n]) => {
+    const item = ITEMS[id];
+    let button = null;
+    if (item.atk !== undefined || item.slot) {
+      button = document.createElement('button');
+      button.className = 'gear-equip';
+      button.textContent = item.slot ? 'Wear' : 'Wield';
+      button.addEventListener('click', () => {
+        equip(state, id);
+        writeSave(key, state);
+        refresh();
+        drawGear();
+      });
+    }
+    return gearRow(n > 1 ? `x${n}` : 'BAG', id, button);
+  });
+  $('gear-bag').replaceChildren(...rows);
+  $('gear-empty').hidden = rows.length > 0;
+}
+
+function setupGear() {
+  const open = () => {
+    drawGear();
+    $('gear-dialog').showModal();
+  };
+  $('open-gear').addEventListener('click', open);
+  document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || document.querySelector('dialog[open]')) return;
+    if (event.target.closest?.('input, textarea, select, [contenteditable]')) return;
+    if (document.body.classList.contains('chat-open')) return;
+    if (WINDOW_KEYS[event.key] !== 'gear-dialog') return;
+    event.preventDefault();
+    open();
+  });
 }
 
 // Die neueste Logzeile tippt sich ein wie auf einem Terminal.
@@ -108,6 +196,7 @@ function refresh() {
   draw(state);
   drawHud();
   drawLog();
+  updateQuests(QUESTS, (id) => questState(state, id), (item) => countItem(state, item));
   $('log-peek').textContent = state.log.at(-1)?.text ?? '';
 }
 
@@ -271,6 +360,7 @@ setupSuggestions({ archived: Boolean(archivedDay) });
 setupVoting({ archived: Boolean(archivedDay) });
 setupRating({ archived: Boolean(archivedDay) });
 setupQuestLog();
+setupGear();
 updateEvent = setupEvent({ archived: Boolean(archivedDay), getStat: (name) => state.stats[name], getFlags: () => state.flags });
 setupInput();
 greet();

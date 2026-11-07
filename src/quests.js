@@ -48,3 +48,45 @@ export function setupQuestLog() {
   });
   refreshQuestLog();
 }
+
+// Quests aus content/quests.js (seit Tag 5): Jede angenommene, offene Quest bekommt einen Eintrag
+// mit Titel, Fortschritt und Aufgabe. Wird nach jedem Zug aufgerufen.
+const questItems = new Map();
+
+function questItem(quest) {
+  if (questItems.has(quest.id)) return questItems.get(quest.id);
+  const li = document.createElement('li');
+  li.className = 'quest quest-entry';
+  li.dataset.quest = quest.id;
+  const title = document.createElement('p');
+  title.className = 'quest-title';
+  const label = document.createElement('span');
+  label.className = 'quest-label';
+  label.textContent = 'QUEST';
+  title.append(label, ` ${quest.title}`);
+  const progress = document.createElement('p');
+  progress.className = 'quest-progress';
+  const text = document.createElement('p');
+  text.className = 'quest-text';
+  text.textContent = quest.task;
+  li.append(title, progress, text);
+  $('quest-list').append(li);
+  questItems.set(quest.id, li);
+  return li;
+}
+
+// quests: Liste aus content/quests.js. stateOf(id) = 'active' | 'done' | null, have(item) = Anzahl.
+export function updateQuests(quests, stateOf, have) {
+  if (!$('quest-list')) return;
+  let changed = false;
+  for (const quest of quests) {
+    const active = stateOf(quest.id) === 'active';
+    if (!active && !questItems.has(quest.id)) continue;
+    const li = questItem(quest);
+    if (li.hidden === active) changed = true;
+    li.hidden = !active;
+    const n = Math.min(have(quest.item), quest.count);
+    li.querySelector('.quest-progress').textContent = `${quest.progressLabel} ${n}/${quest.count}${n >= quest.count ? ` · ${quest.returnText}` : ''}`;
+  }
+  if (changed) refreshQuestLog();
+}

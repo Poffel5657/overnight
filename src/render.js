@@ -89,7 +89,10 @@ export function createRenderer(canvas, { glow = () => false, marker = true } = {
     const figure = (x, y, glyph, color) =>
       cell(x - camX, y - camY, glyph, color, tileAt(s.map, x, y).bg);
 
-    for (const e of visibleEntities(s)) figure(e.x, e.y, e.glyph, e.color);
+    // Offene Truhen (seit Tag 5) zeigen openGlyph.
+    for (const e of visibleEntities(s)) {
+      figure(e.x, e.y, s.flags.opened?.[e.id] && e.openGlyph ? e.openGlyph : e.glyph, e.color);
+    }
 
     // Event-Figur, mit der man noch nicht gesprochen hat: leuchtender Rahmen und ein "!" in der Ecke.
     const event = marker && activeEvent();
