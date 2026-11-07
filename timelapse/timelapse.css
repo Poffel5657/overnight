@@ -1,7 +1,7 @@
 .frame { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.atlas-frame { border: 1px solid var(--line); background: #050508; min-height: 120px; padding: 8px; overflow-x: auto; }
-/* Die Breite setzt timelapse.js: gleich große Felder in jeder Nacht, die Karte wächst mit der Welt. */
-.atlas-frame canvas { display: block; height: auto; max-width: none; image-rendering: auto; transition: width 0.4s ease; }
+.atlas-frame { border: 1px solid var(--line); background: #050508; min-height: 120px; padding: 8px; display: flex; justify-content: center; }
+/* Jede Nacht füllt den Rahmen: Die Karte wird skaliert, der Rahmen bleibt gleich groß. */
+.atlas-frame canvas { display: block; width: 100%; height: 62vh; object-fit: contain; }
 .back { margin-left: auto; }
 .shell { max-width: 1400px; }
 .frame figcaption p { margin: 2px 0; }
@@ -9,4 +9,4 @@
 .frame a { color: var(--muted); font-size: 0.85rem; }
 .controls { display: flex; align-items: center; gap: 8px; }
 .controls input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); }
-@media (prefers-reduced-motion: reduce) { .atlas-frame canvas { transition: none; } }
+@media (max-width: 600px) { .atlas-frame canvas { height: auto; } }

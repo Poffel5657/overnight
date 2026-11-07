@@ -142,3 +142,22 @@ test('Mit aktivem Event startet das Spiel ohne Fehler und fragt nur den eigenen 
   expect(asked).toBe(1);
   expect(problems).toEqual([]);
 });
+
+// Spieler haben die Event-Leiste übersehen: Beim Laden erscheint einmal ein Hinweis, wohin man gehen soll.
+test('Ein neues Event meldet sich einmal mit einem Hinweis', async ({ page }) => {
+  await page.route('**/content/event.js', (route) => route.fulfill({ contentType: 'text/javascript', body: FAKE(lastDay) }));
+  await page.route('https://challenges.cloudflare.com/**', (route) => route.abort());
+  await page.goto('/?seed=7');
+  await page.waitForFunction(() => window.__overnight);
+  const toast = page.locator('#event-toast');
+  await expect(toast).toBeVisible();
+  await expect(page.locator('#event-toast-text')).toContainText('The Rough Draft');
+  await expect(page.locator('#event-toast-text')).toContainText('The Scarecrow');
+  await expect(page.locator('#event-box')).toHaveClass(/teaser/);
+  await page.click('#event-toast-close');
+  await expect(toast).toBeHidden();
+  await page.reload();
+  await page.waitForFunction(() => window.__overnight);
+  await page.waitForTimeout(800);
+  await expect(toast).toBeHidden();
+});

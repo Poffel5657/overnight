@@ -25,10 +25,11 @@ test('Zeitraffer zeigt die letzte Nacht und blättert', async ({ page }) => {
   await expect(page.locator('#caption-title')).toContainText('Day 2');
   const atlas = page.locator('#atlas');
   await expect(atlas).toHaveAttribute('aria-label', 'The world on day 2: The Meadow, The Rough Draft');
-  const wide = (await atlas.boundingBox()).width;
+  // Die Karte wird auf den Rahmen skaliert; gezeichnet wird ab Tag 2 aber mehr Welt.
+  const wide = await atlas.evaluate((canvas) => canvas.width);
   await page.click('#prev');
   await expect(atlas).toHaveAttribute('aria-label', 'The world on day 1: The Meadow');
-  expect((await atlas.boundingBox()).width).toBeLessThan(wide);
+  expect(await atlas.evaluate((canvas) => canvas.width)).toBeLessThan(wide);
   await expect(page.locator('#caption-title')).toContainText('Day 1');
   await expect(page.locator('#caption-play')).toHaveAttribute('href', '../day/001/');
   await page.keyboard.press('ArrowLeft');

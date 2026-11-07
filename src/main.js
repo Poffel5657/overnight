@@ -31,7 +31,7 @@ const state = createGame({
 });
 
 let glow = crtEnabled();
-const draw = createRenderer($('world'), { glow: () => glow });
+const draw = createRenderer($('world'), { glow: () => glow, marker: !archivedDay });
 
 const HP_CELLS = 14;
 

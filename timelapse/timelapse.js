@@ -1,7 +1,7 @@
 // Zeitraffer: eine Weltkarte pro Nacht, alle Gebiete nebeneinander. days.js mit den Welten aller
 // Nächte erzeugt der Deploy (.github/scripts/timelapse-days.mjs), atlas.js zeichnet daraus.
 import { DAYS } from './days.js';
-import { layout, drawAtlas } from './atlas.js';
+import { drawAtlas } from './atlas.js';
 
 const $ = (id) => document.getElementById(id);
 const pad3 = (n) => String(n).padStart(3, '0');
@@ -9,19 +9,6 @@ const slider = $('slider');
 const canvas = $('atlas');
 let index = DAYS.length - 1;
 let timer = null;
-// Breiteste Welt aller Nächte, in Feldern.
-const maxCols = Math.max(1, ...DAYS.map((day) => (day.world ? layout(day.world).bounds.w : 1)));
-let size = null;
-
-// Gleiche Feldgröße in jeder Nacht: Die größte Welt füllt die Breite, kleinere sind entsprechend schmaler.
-// Wird es zu klein zum Lesen (Handy), darf der Rahmen seitlich scrollen.
-function fit() {
-  if (!size) return;
-  const room = canvas.parentElement.clientWidth - 16;
-  const cell = Math.max(7, Math.min(22, room / maxCols));
-  canvas.style.width = `${Math.round(size.cols * cell)}px`;
-}
-
 function show(i) {
   if (!DAYS.length) return;
   index = Math.max(0, Math.min(DAYS.length - 1, i));
@@ -38,14 +25,13 @@ function show(i) {
   }
   canvas.hidden = false;
   const styles = getComputedStyle(document.documentElement);
-  size = drawAtlas(canvas, world, {
+  drawAtlas(canvas, world, {
     before: DAYS[index - 1]?.world ?? null,
     accent: styles.getPropertyValue('--accent').trim() || undefined,
     muted: styles.getPropertyValue('--muted').trim() || undefined,
   });
   const names = Object.values(world.maps).map((map) => map.name).join(', ');
   canvas.setAttribute('aria-label', `The world on day ${day.day}: ${names}`);
-  fit();
 }
 
 function stop() {
@@ -70,7 +56,6 @@ if (!DAYS.length) {
   document.querySelector('.controls').hidden = true;
 } else {
   slider.max = String(DAYS.length - 1);
-  window.addEventListener('resize', fit);
   slider.addEventListener('input', () => { stop(); show(Number(slider.value)); });
   $('prev').addEventListener('click', () => { stop(); show(index - 1); });
   $('next').addEventListener('click', () => { stop(); show(index + 1); });

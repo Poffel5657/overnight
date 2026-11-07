@@ -1,7 +1,7 @@
 // Zeichnet die Welt als Schriftzeichen auf das Canvas.
 import { MAPS } from '../content/world.js';
 import { CREATURES } from '../content/creatures.js';
-import { tileAt, visibleEntities } from './game.js';
+import { tileAt, visibleEntities, activeEvent } from './game.js';
 
 // Breite Bildschirme zeigen einen festen Ausschnitt von 25 x 13 Feldern.
 // Schmale Bildschirme (Handy hochkant) zeigen 12 Spalten mit großen Zeichen und so viele Zeilen,
@@ -21,7 +21,8 @@ function viewFor(frame) {
 const FONT = `bold ${Math.round(CELL * 0.72)}px ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace`;
 
 // glow: Funktion, die sagt, ob die Zeichen leicht leuchten sollen (CRT-Einstellung).
-export function createRenderer(canvas, { glow = () => false } = {}) {
+// marker: ob die Figur eines laufenden Events markiert wird (nicht in archivierten Nächten).
+export function createRenderer(canvas, { glow = () => false, marker = true } = {}) {
   const ctx = canvas.getContext('2d');
   const frame = canvas.parentElement;
   let VIEW_COLS = 0;
@@ -89,6 +90,28 @@ export function createRenderer(canvas, { glow = () => false } = {}) {
       cell(x - camX, y - camY, glyph, color, tileAt(s.map, x, y).bg);
 
     for (const e of visibleEntities(s)) figure(e.x, e.y, e.glyph, e.color);
+
+    // Event-Figur, mit der man noch nicht gesprochen hat: leuchtender Rahmen und ein "!" in der Ecke.
+    const event = marker && activeEvent();
+    const giver = event && !s.flags.eventsHeard?.[event.id] && visibleEntities(s).find((e) => e.id === event.giver);
+    if (giver) {
+      const gx = (giver.x - camX) * CELL;
+      const gy = (giver.y - camY) * CELL;
+      ctx.save();
+      ctx.strokeStyle = '#ffb347';
+      ctx.shadowColor = '#ffb347';
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(gx + 1, gy + 1, CELL - 2, CELL - 2);
+      // Abzeichen: gefülltes Kästchen oben rechts mit dunklem "!".
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffb347';
+      ctx.fillRect(gx + CELL - 12, gy - 4, 14, 16);
+      ctx.font = `bold ${Math.round(CELL * 0.45)}px ui-monospace, monospace`;
+      ctx.fillStyle = '#1a1006';
+      ctx.fillText('!', gx + CELL - 5, gy + 5);
+      ctx.restore();
+    }
     for (const c of s.creatures) {
       if (c.respawnAt === null) {
         const def = CREATURES[c.type];

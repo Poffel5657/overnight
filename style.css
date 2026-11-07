@@ -280,6 +280,16 @@ button:disabled { opacity: 0.5; cursor: default; background: transparent; color:
 .event-label, .event-title { color: var(--accent); }
 .event-together { color: var(--bright); }
 .event-mine { color: var(--good); }
+/* Solange man die Event-Figur nicht kennt, pulsiert die Leiste, damit sie auffällt. */
+.event-box.teaser { animation: event-pulse 1.6s ease-in-out infinite; }
+@keyframes event-pulse { 50% { box-shadow: 0 0 14px var(--accent); background: #2a1c08; } }
+.event-toast {
+  position: fixed; top: 72px; left: 50%; transform: translateX(-50%); z-index: 55;
+  width: min(460px, calc(100vw - 32px)); padding: 10px 14px; border: 2px solid var(--accent);
+  background: var(--panel); box-shadow: 0 0 24px rgba(255, 179, 71, 0.35);
+}
+.event-toast p { margin: 0 0 8px; }
+.event-toast-label { color: var(--accent); }
 
 /* ---------- Dialoge ---------- */
 
@@ -402,4 +412,5 @@ textarea:focus { outline: 1px solid var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   .crt-overlay, .cursor, .log li:last-child::after { animation: none; }
   .boot { transition: none; }
+  .event-box.teaser { animation: none; }
 }

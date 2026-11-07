@@ -10,6 +10,7 @@ import { EVENT } from '../content/event.js';
 import { MAPS } from '../content/world.js';
 
 const KEY = 'overnight.event';
+const TOAST_KEY = 'overnight.event-toast';
 
 function readLocal() {
   try {
@@ -17,6 +18,33 @@ function readLocal() {
   } catch {
     return null;
   }
+}
+
+// Kurzer Hinweis beim Laden, einmal pro Event und Browser, solange man die Figur noch nicht kennt:
+// Spieler haben die Event-Leiste allein oft übersehen.
+function showToast(giver, heard) {
+  const toast = document.getElementById('event-toast');
+  let seen = null;
+  try { seen = localStorage.getItem(TOAST_KEY); } catch { /* ohne Speicher eben bei jedem Laden */ }
+  if (!toast || heard() || seen === EVENT.id) return () => {};
+  let timer = null;
+  const hide = () => {
+    clearTimeout(timer);
+    toast.hidden = true;
+    try { localStorage.setItem(TOAST_KEY, EVENT.id); } catch { /* siehe oben */ }
+  };
+  document.getElementById('event-toast-text').textContent =
+    `${EVENT.title}. Something is going on in ${giver.place}. Find ${giver.name} (marked with ! on the map) to learn more.`;
+  document.getElementById('event-toast-close').addEventListener('click', hide);
+  // Erst nach der Bootsequenz zeigen, sonst liegt der Hinweis darunter.
+  const boot = document.getElementById('boot');
+  const open = () => {
+    if (boot && !boot.hidden) return setTimeout(open, 250);
+    toast.hidden = false;
+    timer = setTimeout(hide, 15000);
+  };
+  setTimeout(open, 400);
+  return hide;
 }
 
 function writeLocal(value) {
@@ -52,6 +80,7 @@ export function setupEvent({ archived, getStat, getFlags = () => ({}) }) {
   let total = null;
   let sending = false;
   let local = null;
+  const hideToast = showToast(giver, heard);
 
   function progress() {
     const today = berlinDay();
@@ -128,6 +157,7 @@ export function setupEvent({ archived, getStat, getFlags = () => ({}) }) {
   }
 
   function update() {
+    if (heard()) hideToast();
     const done = progress();
     if (SUGGEST_URL && heard() && !local.sent && !sending && done >= EVENT.need) contribute();
     draw(done);
