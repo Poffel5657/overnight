@@ -20,7 +20,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `content/event.js` | `EVENT` (oder `null`): `{ id, title, text, task, reward, stat, need, goal, startDay, endDay }`, Format prüft `tests/smoke/event.spec.js` |
 | `about/` | Seite „About Overnight“ für neue Besucher: was das Experiment ist, wie eine Nacht läuft, wie man mitmacht; zeigt die letzten Nächte aus `content/chronicle.js` (geschützt) |
 | `og.png`, `.github/scripts/og-card.mjs` | Vorschaubild für geteilte Links (1200 x 630). Der Deploy baut es jede Nacht aus dem neuesten Kartenbild und setzt `og:title` auf die Nacht; `og.png` im Repo ist der Ersatz |
-| `timelapse/` | Zeitraffer-Seite; `days.js` und `shots/` erzeugt der Deploy mit `.github/scripts/timelapse.mjs` (geschützt) |
+| `timelapse/` | Zeitraffer-Seite: pro Nacht eine Weltkarte aller Gebiete, über Türen nebeneinandergelegt (`atlas.js`), Änderungen zur Vornacht markiert; `days.js` erzeugt der Deploy mit `.github/scripts/timelapse-days.mjs` (geschützt) |
 | `LORE.md` | Weltlexikon: Orte, Figuren, Dinge, offene Fäden, Zeitleiste |
 | `content/ballot.js` | Stimmzettel `BALLOT = { day, options: [{ id, since, text }] }`, jede Nacht neu datiert (Format prüft `tests/smoke/vote.spec.js`) |
 | `content/tiles.js` | Geländetypen |
@@ -78,7 +78,7 @@ Aktuelle `SAVE_VERSION`: 1. Seit Tag 1 gibt es das optionale Feld `player.weapon
 
 ## Veröffentlichung
 
-Der Deploy nimmt außerdem für jede archivierte Nacht ein Bild auf (frischer Browser, `?seed=1`, nur das Canvas) und schreibt `timelapse/days.js`. Scheitert das, geht die Seite trotzdem raus.
+Der Deploy schreibt außerdem `timelapse/days.js`: pro archivierter Nacht Chronik-Eintrag und Welt als Daten (Karten, Gelände, Figuren, Türen) aus `day/NNN/content/`, ohne Browser. Ein neues Gebiet erscheint in der Weltkarte automatisch, wenn eine Tür (`to: { map }`) dorthin führt, sonst in einer Reihe darunter. Für das Vorschaubild nimmt `timelapse.mjs` pro Nacht ein Bild auf (frischer Browser, `?seed=1`, nur das Canvas). Scheitert etwas davon, geht die Seite trotzdem raus.
 
 Ein PR von `claude/day-NNN` wird von `.github/workflows/nightly-gate.yml` geprüft und gemergt, danach taggt der Workflow `day-NNN` und startet den Deploy. `.github/workflows/deploy.yml` baut die Seite aus `main` und legt für jeden Tag eine spielbare Kopie unter `day/NNN/` an. Fehlschläge lassen die Live-Seite unverändert.
 

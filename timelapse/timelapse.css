@@ -1,9 +1,12 @@
 .frame { margin: 0; display: flex; flex-direction: column; gap: 8px; }
-.frame img { width: 100%; height: auto; border: 1px solid var(--line); background: #07060a; min-height: 120px; }
+.atlas-frame { border: 1px solid var(--line); background: #050508; min-height: 120px; padding: 8px; overflow-x: auto; }
+/* Die Breite setzt timelapse.js: gleich große Felder in jeder Nacht, die Karte wächst mit der Welt. */
+.atlas-frame canvas { display: block; height: auto; max-width: none; image-rendering: auto; transition: width 0.4s ease; }
 .back { margin-left: auto; }
-.shell { max-width: 900px; }
+.shell { max-width: 1400px; }
 .frame figcaption p { margin: 2px 0; }
 .caption-title { color: var(--accent); }
 .frame a { color: var(--muted); font-size: 0.85rem; }
 .controls { display: flex; align-items: center; gap: 8px; }
 .controls input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .atlas-frame canvas { transition: none; } }

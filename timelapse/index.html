@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
   <title>Overnight Timelapse</title>
-  <meta name="description" content="Every night of Overnight, one picture each.">
+  <meta name="description" content="Every night of Overnight, the whole world on one map.">
   <link rel="icon" href="../icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="timelapse.css">
@@ -20,7 +20,7 @@
 
     <figure class="frame window">
       <h2 class="window-title">[ PLAYBACK ]</h2>
-      <img id="shot" alt="">
+      <div class="atlas-frame"><canvas id="atlas" role="img"></canvas></div>
       <figcaption>
         <p id="caption-title" class="caption-title"></p>
         <p id="caption-text"></p>
@@ -35,8 +35,8 @@
       <button id="play">Play</button>
     </div>
 
-    <p id="empty" class="fineprint" hidden>No pictures yet. They are taken every time the world changes.</p>
-    <p class="hint">Arrow keys move through the nights. Every picture is the first thing a new player saw on that day.</p>
+    <p id="empty" class="fineprint" hidden>No maps yet. They are drawn every time the world changes.</p>
+    <p class="hint">Arrow keys move through the nights. Every map shows the whole world as it stood that day, every place side by side, joined by its doors.</p>
   </main>
 </body>
 </html>

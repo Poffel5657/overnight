@@ -55,12 +55,17 @@ jobs:
           grep -q "$current/src/main.js" _site/index.html
           # Vorschaubild mit Version, damit Discord und Co. nicht ewig das alte zeigen.
           sed -i "s#/overnight/og.png\"#/overnight/og.png?v=${GITHUB_SHA::10}\"#" _site/index.html _site/about/index.html
-      # Zeitraffer: ein Bild pro archivierter Nacht. Scheitert das, geht die Seite trotzdem raus,
-      # dann mit der leeren Platzhalterliste.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
-      - name: Zeitraffer aufnehmen
+      # Zeitraffer: Weltkarte jeder archivierten Nacht als Daten, ohne Browser. Scheitert das, geht die
+      # Seite trotzdem raus, dann mit der leeren Platzhalterliste.
+      - name: Zeitraffer-Daten schreiben
+        continue-on-error: true
+        timeout-minutes: 2
+        run: node .github/scripts/timelapse-days.mjs _site
+      # Ein Bild pro Nacht, nur noch für das Vorschaubild geteilter Links.
+      - name: Vorschaubild aufnehmen
         continue-on-error: true
         # Ein langsamer Paketspiegel darf den Deploy nie aufhalten: dann eben ohne neue Bilder.
         timeout-minutes: 6
