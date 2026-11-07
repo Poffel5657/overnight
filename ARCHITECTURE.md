@@ -18,6 +18,8 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `src/rate.js` | Daumen hoch/runter für die letzte Nacht (`#rate-box`), schickt `{ day, value }` an `/rate`, einmal pro Nacht (geschützt) |
 | `src/event.js` | Community-Event: Anzeige `#event-box`, Tagesfortschritt in `localStorage` (`overnight.event`), meldet den Tagesbeitrag an `/event` des Workers, liest den Zähler per `GET /event?id=` (geschützt) |
 | `content/event.js` | `EVENT` (oder `null`): `{ id, title, text, task, reward, stat, need, goal, startDay, endDay }`, Format prüft `tests/smoke/event.spec.js` |
+| `about/` | Seite „About Overnight“ für neue Besucher: was das Experiment ist, wie eine Nacht läuft, wie man mitmacht; zeigt die letzten Nächte aus `content/chronicle.js` (geschützt) |
+| `og.png`, `.github/scripts/og-card.mjs` | Vorschaubild für geteilte Links (1200 x 630). Der Deploy baut es jede Nacht aus dem neuesten Kartenbild und setzt `og:title` auf die Nacht; `og.png` im Repo ist der Ersatz |
 | `timelapse/` | Zeitraffer-Seite; `days.js` und `shots/` erzeugt der Deploy mit `.github/scripts/timelapse.mjs` (geschützt) |
 | `LORE.md` | Weltlexikon: Orte, Figuren, Dinge, offene Fäden, Zeitleiste |
 | `content/ballot.js` | Stimmzettel `BALLOT = { day, options: [{ id, since, text }] }`, jede Nacht neu datiert (Format prüft `tests/smoke/vote.spec.js`) |

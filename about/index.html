@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" class="crt-on">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>About Overnight</title>
+  <meta name="description" content="A tiny RPG that an AI keeps building, one night at a time, while the players watch, suggest and vote.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Overnight">
+  <meta property="og:title" content="About Overnight">
+  <meta property="og:description" content="A tiny RPG that an AI keeps building, one night at a time, while the players watch, suggest and vote.">
+  <meta property="og:url" content="https://poffel5657.github.io/overnight/about/">
+  <meta property="og:image" content="https://poffel5657.github.io/overnight/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="about.css">
+  <script type="module" src="about.js"></script>
+</head>
+<body>
+  <div class="crt-overlay" aria-hidden="true"></div>
+  <main class="shell doc">
+    <header class="statusbar">
+      <h1 class="brand">OVERNIGHT // ABOUT</h1>
+      <p id="about-day" class="day"></p>
+      <a class="button back" href="../">Play</a>
+    </header>
+
+    <section class="window">
+      <h2 class="window-title">[ WHAT IS THIS? ]</h2>
+      <p class="lead">Overnight is a tiny role-playing game that is never finished.</p>
+      <p>Every night at midnight (Berlin time), the world gets bigger. An AI reads what the players asked for, picks what fits, writes the code, tests it and ships it, all on its own. In the game, nobody has met whoever does this. They call it <span class="accent">the Nightwright</span>.</p>
+      <p>Nobody plans the game in advance. What exists tomorrow depends on what happened today: what you suggested, what you voted for, what the community managed together. Every old version stays playable, so you can watch the world grow from a single meadow.</p>
+    </section>
+
+    <section class="window">
+      <h2 class="window-title">[ HOW A NIGHT WORKS ]</h2>
+      <ol class="steps">
+        <li><span class="step">00:00</span> The Nightwright wakes up with no memory. It reads its own notes: the plan, the chronicle, the story so far.</li>
+        <li><span class="step">READ</span> It reads the new ideas, counts the votes and the ratings of the last night.</li>
+        <li><span class="step">BUILD</span> It builds three things: at least one player idea, the winner of the vote, and one idea of its own that moves the story along. Every seventh night it tidies up instead.</li>
+        <li><span class="step">TEST</span> Over a hundred automatic checks make sure nothing broke and old save games still load. If a check fails, the night is not published.</li>
+        <li><span class="step">SHIP</span> A few minutes later the new version is live, and a picture of it lands in the timelapse.</li>
+      </ol>
+    </section>
+
+    <section class="window">
+      <h2 class="window-title">[ HOW YOU TAKE PART ]</h2>
+      <dl class="menu-list">
+        <dt>Suggest</dt><dd>One idea per night for something that should exist tomorrow.</dd>
+        <dt>Vote</dt><dd>Old ideas get a second chance. The favourite gets built.</dd>
+        <dt>Rate</dt><dd>Tell the Nightwright whether last night was any good. It listens.</dd>
+        <dt>Events</dt><dd>Sometimes someone in the world needs help from everyone. Talk to them.</dd>
+        <dt>Chat</dt><dd>Anonymous, and the names change every night.</dd>
+      </dl>
+      <p class="fineprint">No accounts. Ideas and votes are kept without your name or IP address. To allow one idea, one vote and one chat name per night, a scrambled fingerprint of your connection is kept for about a day.</p>
+    </section>
+
+    <section class="window">
+      <h2 class="window-title">[ LATELY ]</h2>
+      <ol id="about-recent" class="recent" reversed></ol>
+      <div class="buttons">
+        <a class="button" href="../timelapse/">Timelapse</a>
+        <a class="button" href="https://github.com/Poffel5657/overnight" target="_blank" rel="noopener">Code and chronicle</a>
+      </div>
+    </section>
+
+    <section class="window">
+      <h2 class="window-title">[ WHO ]</h2>
+      <p>Overnight is an experiment by FoxForge. Problems, questions, or something in the chat that should not be there: <a href="mailto:FoxForgeSupport@gmail.com">FoxForgeSupport@gmail.com</a> or <a href="https://github.com/Poffel5657/overnight/issues" target="_blank" rel="noopener">GitHub issues</a>.</p>
+    </section>
+
+    <p class="center"><a class="button play-cta" href="../">Play tonight's world</a></p>
+  </main>
+</body>
+</html>

@@ -240,6 +240,7 @@ function setupInput() {
 function setupArchiveNote() {
   if (!archivedDay) return;
   $('open-timelapse').href = '../../timelapse/';
+  $('open-about').href = '../../about/';
   const note = $('archive-note');
   note.hidden = false;
   note.append(`You are visiting the past: this is the game as it was on day ${Number(archivedDay)}. `);

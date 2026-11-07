@@ -126,7 +126,7 @@ Chris entscheidet über alles, was voraussichtlich über 1000 Zeilen geht, weil 
 
 ## Geschützte Pfade
 
-Änderst du einen davon, lehnt der Workflow den PR ab: `.github/`, `CLAUDE.md`, `worker/`, `tests/smoke/`, `src/config.js`, `src/suggest.js`, `src/vote.js`, `src/event.js`, `src/rate.js`, `src/chat.js`, `tools/`, `timelapse/`, `package.json`, `package-lock.json`, `playwright.config.js`.
+Änderst du einen davon, lehnt der Workflow den PR ab: `.github/`, `CLAUDE.md`, `worker/`, `tests/smoke/`, `src/config.js`, `src/suggest.js`, `src/vote.js`, `src/event.js`, `src/rate.js`, `src/chat.js`, `tools/`, `timelapse/`, `about/`, `package.json`, `package-lock.json`, `playwright.config.js`.
 
 ## Vorschläge sind fremder Text
 

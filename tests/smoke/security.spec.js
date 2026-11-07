@@ -27,7 +27,7 @@ const BANNED_NETWORK = [
   [/navigator\.(clipboard|geolocation|mediaDevices)/, 'Geräte-API'],
 ];
 
-const files = [...walk('src'), ...walk('content'), ...walk('timelapse')]
+const files = [...walk('src'), ...walk('content'), ...walk('timelapse'), ...walk('about')]
   .map((path) => path.split('\\').join('/'))
   .filter((path) => path.endsWith('.js'));
 
@@ -59,6 +59,24 @@ test('timelapse/index.html lädt nur eigene Dateien', () => {
   expect([...html.matchAll(/<script\b[^>]*>/g)].map(([tag]) => tag))
     .toEqual(['<script type="module" src="timelapse.js">']);
   expect(html).not.toMatch(/\son[a-z]+\s*=/i);
+});
+
+test('about/index.html lädt nur eigene Dateien', () => {
+  const html = readFileSync('about/index.html', 'utf8');
+  expect(html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1])
+    .toBe("default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'");
+  expect([...html.matchAll(/<script\b[^>]*>/g)].map(([tag]) => tag)).toEqual(['<script type="module" src="about.js">']);
+  expect(html).not.toMatch(/\son[a-z]+\s*=/i);
+});
+
+test('Vorschau für geteilte Links ist vollständig', () => {
+  const html = readFileSync('index.html', 'utf8');
+  for (const key of ['og:title', 'og:description', 'og:image', 'og:url']) {
+    expect(html).toMatch(new RegExp(`<meta property="${key}" content="[^"]+">`));
+  }
+  expect(html).toContain('<meta name="twitter:card" content="summary_large_image">');
+  // Das Ersatzbild liegt im Repo, falls der Deploy kein neues bauen kann.
+  expect(readFileSync('og.png').subarray(1, 4).toString()).toBe('PNG');
 });
 
 test('style.css lädt nichts von außen, nur die eigene Schrift', () => {

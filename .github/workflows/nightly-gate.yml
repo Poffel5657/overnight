@@ -56,7 +56,7 @@ jobs:
           gh api --paginate "repos/$REPO/pulls/$PR/files?per_page=100" --jq '.[]' > files.jsonl
           jq -r '.filename, (.previous_filename // empty)' files.jsonl | sort -u > paths.txt
 
-          protected='^(\.github/|CLAUDE\.md$|worker/|tests/smoke/|src/config\.js$|src/suggest\.js$|src/vote\.js$|src/event\.js$|src/rate\.js$|src/chat\.js$|tools/|timelapse/|package\.json$|package-lock\.json$|playwright\.config\.js$)'
+          protected='^(\.github/|CLAUDE\.md$|worker/|tests/smoke/|src/config\.js$|src/suggest\.js$|src/vote\.js$|src/event\.js$|src/rate\.js$|src/chat\.js$|tools/|about/|timelapse/|package\.json$|package-lock\.json$|playwright\.config\.js$)'
           if grep -E "$protected" paths.txt; then fail "PR ändert geschützte Pfade."; fi
 
           grep -qx 'PLAN.md' paths.txt || fail "PLAN.md wurde nicht aktualisiert."

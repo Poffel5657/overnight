@@ -34,7 +34,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          cp -r index.html style.css icon.svg icon-180.png src content fonts timelapse _site/
+          cp -r index.html style.css icon.svg icon-180.png og.png src content fonts timelapse about _site/
           for tag in $(git tag -l 'day-[0-9][0-9][0-9]'); do
             dir="_site/day/${tag#day-}"
             mkdir -p "$dir"
@@ -53,6 +53,8 @@ jobs:
           grep -q 'href="style.css"' _site/index.html && grep -q 'src="src/main.js"' _site/index.html
           sed -i "s#href=\"style.css\"#href=\"$current/style.css\"#; s#src=\"src/main.js\"#src=\"$current/src/main.js\"#" _site/index.html
           grep -q "$current/src/main.js" _site/index.html
+          # Vorschaubild mit Version, damit Discord und Co. nicht ewig das alte zeigen.
+          sed -i "s#/overnight/og.png\"#/overnight/og.png?v=${GITHUB_SHA::10}\"#" _site/index.html _site/about/index.html
       # Zeitraffer: ein Bild pro archivierter Nacht. Scheitert das, geht die Seite trotzdem raus,
       # dann mit der leeren Platzhalterliste.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -68,6 +70,10 @@ jobs:
           # Ohne --with-deps: Die Runner haben die Bibliotheken schon, und apt war schon einmal minutenlang hängen.
           npx playwright install chromium
           node .github/scripts/timelapse.mjs _site
+          # Vorschaubild für geteilte Links aus der neuesten Nacht, dazu der Titel der Nacht.
+          node .github/scripts/og-card.mjs _site
+          title=$(node -e "import('./_site/content/chronicle.js').then(({ CHRONICLE: c }) => { const e = c.at(-1); console.log(\`Overnight · Night \${e.day}: \${e.title}\`.replace(/[\"<>&#]/g, '')); })")
+          sed -i "s#<meta property=\"og:title\" content=\"Overnight\">#<meta property=\"og:title\" content=\"$title\">#" _site/index.html
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site
