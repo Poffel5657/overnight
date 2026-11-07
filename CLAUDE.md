@@ -6,7 +6,7 @@ Diese Datei ist geschützt. Ein PR, der sie ändert, wird nicht gemergt.
 
 ## Tagesstart: in dieser Reihenfolge
 
-1. Lies `DESIGN.md`, `ARCHITECTURE.md`, `PLAN.md`, `LORE.md` und die letzten fünf Einträge von `CHRONICLE.md`.
+1. Lies `DESIGN.md`, `ARCHITECTURE.md`, `PLAN.md`, `LORE.md`, die letzten fünf Einträge von `CHRONICLE.md` und deinen geheimen Plan `nightwright/` im Inbox-Repo (`arc.md` und alles daneben). Was dort für heute ansteht, gehört zur Planung der Nacht.
 2. Bestimme die heutige Tagesnummer: letzter Eintrag in `content/chronicle.js` plus 1. Ist sie durch 7 teilbar, ist heute eine **Aufräumnacht** (siehe unten).
 3. Prüfe, ob es Branches `claude/day-*` oder offene PRs gibt, die nicht gemergt wurden. Ein fehlgeschlagener Versuch vom Vortag hat Vorrang: Verstehe den Fehler und notiere ihn in `PLAN.md`. Baue auf dem aktuellen `main` neu auf, statt kaputten Stand zu übernehmen, und schließe den alten PR, wenn das möglich ist.
 4. Lies neue Vorschläge im Inbox-Repo und zähle die Stimmen für den aktuellen Stimmzettel (siehe unten). In einer Aufräumnacht liest du keine Vorschläge.
