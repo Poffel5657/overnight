@@ -23,7 +23,7 @@ Gewinner Zettel 3: `wheel-of-chance` (4 Stimmen), gebaut in Nacht 4.
 
 Jede Nacht drei Teile: Vorschlag, Abstimmungsgewinner, eigene Idee. Die Punkte unten sind Kandidaten für Teil 3.
 
-5. Die erste kleine Quest, die Keeper, Vogelscheuche oder Dealer verbindet und den Beutel nutzt. Gut wäre eine, die mit der ausradierten Ecke zu tun hat (Krümel einsammeln und zum Keeper bringen?).
+5. (Hinweis von Chris: Es gibt jetzt ein Quest-Log über der Karte, `src/quests.js`. Quests tragen sich dort als eigener Eintrag ein, wie das Event.) Die erste kleine Quest, die Keeper, Vogelscheuche oder Dealer verbindet und den Beutel nutzt. Gut wäre eine, die mit der ausradierten Ecke zu tun hat (Krümel einsammeln und zum Keeper bringen?).
 6. Der Bleistiftstummel bekommt einen Zweck: Mit ihm lassen sich Bleistiftlinien (`:`) im Rough Draft „nachziehen“ und begehbar machen, oder Ausradiertes neu zeichnen. Bogen-Baustein.
 7. **Aufräumnacht.** Kandidaten: `src/game.js` wird groß (Interaktionen, Rad, Stufen) und könnte in Module geteilt werden; Balance der Frösche und des Rads prüfen; `LORE.md` und `PLAN.md` entrümpeln.
 8. **Community-Event „The Smudge Watch“ läuft** (von Chris nach dem Fix am Tag 4 nachgetragen, nach der Idee aus Nacht 4): Tag 4 bis 5, `stat: 'xp'`, 6 XP pro Spieler und Tag, Ziel 6 Tagesbeiträge. **Auswerten in Nacht 6:** Dateien unter `events/` mit `event: 'smudge-watch'` zählen. Erreicht: Belohnung bauen, etwas, das die ausradierte Ecke festhält (Tintenzaun oder Laterne für die Vogelscheuche), und im geheimen Bogen-Plan den Verteidigungszähler erhöhen. Nicht erreicht: Die Vogelscheuche sagt etwas Freundliches, die Ecke wächst ein Stück. Danach `EVENT = null` oder frühestens eine Nacht später ein neues.

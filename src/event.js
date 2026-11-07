@@ -1,4 +1,5 @@
 // Community-Event. Geschützte Datei: Netzwerkzugriff wie suggest.js.
+// Angezeigt wird es als Eintrag #event-box im Quest-Log über der Karte (src/quests.js).
 // Ein Event beginnt bei einer Figur (EVENT.giver): Bis man mit ihr gesprochen hat, zeigt die Anzeige nur
 // einen Hinweis, wohin man gehen soll, und den Stand der Gemeinschaft. Danach die Aufgabe.
 // Jeder Spieler kann pro Nacht einmal beitragen: Sobald die Statistik seit dem Gespräch bzw. seit Tagesbeginn
@@ -8,6 +9,7 @@ import { berlinDay } from './suggest.js';
 import { activeEvent, currentDay } from './game.js';
 import { EVENT } from '../content/event.js';
 import { MAPS } from '../content/world.js';
+import { refreshQuestLog } from './quests.js';
 
 const KEY = 'overnight.event';
 const TOAST_KEY = 'overnight.event-toast';
@@ -34,7 +36,7 @@ function showToast(giver, heard) {
     try { localStorage.setItem(TOAST_KEY, EVENT.id); } catch { /* siehe oben */ }
   };
   document.getElementById('event-toast-text').textContent =
-    `${EVENT.title}. Something is going on in ${giver.place}. Find ${giver.name} (marked with ! on the map) to learn more.`;
+    `${EVENT.title}. Something is going on in ${giver.place}. Find ${giver.name} (marked with ! on the map) to learn more. Your quest log keeps track.`;
   document.getElementById('event-toast-close').addEventListener('click', hide);
   // Erst nach der Bootsequenz zeigen, sonst liegt der Hinweis darunter.
   const boot = document.getElementById('boot');
@@ -70,9 +72,11 @@ export function setupEvent({ archived, getStat, getFlags = () => ({}) }) {
   const box = document.getElementById('event-box');
   if (archived || !eventActive()) {
     box.hidden = true;
+    refreshQuestLog();
     return () => {};
   }
   box.hidden = false;
+  refreshQuestLog();
   const $ = (id) => document.getElementById(id);
   const giver = findGiver();
   const heard = () => Boolean(getFlags()?.eventsHeard?.[EVENT.id]);

@@ -161,3 +161,30 @@ test('Ein neues Event meldet sich einmal mit einem Hinweis', async ({ page }) =>
   await page.waitForTimeout(800);
   await expect(toast).toBeHidden();
 });
+
+// Das Event steht im Quest-Log über der Karte: kompakt, Details per Klick, ganz einklappbar.
+test('Das Event erscheint im Quest-Log über der Karte', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('overnight.event-toast', 'test-event'));
+  await page.route('**/content/event.js', (route) => route.fulfill({ contentType: 'text/javascript', body: FAKE(lastDay) }));
+  await page.route('https://challenges.cloudflare.com/**', (route) => route.abort());
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/?seed=7');
+  await page.waitForFunction(() => window.__overnight);
+  await expect(page.locator('#event-toast')).toBeHidden();
+  const log = page.locator('#quest-log');
+  await expect(log).toBeVisible();
+  // Das Log liegt im Kartenfenster.
+  await expect(page.locator('.map-frame #quest-log')).toHaveCount(1);
+  await expect(page.locator('#event-text')).toBeVisible();
+
+  await page.evaluate(() => { window.__overnight.state.flags.eventsHeard = { 'test-event': true }; window.__overnight.act('wait'); });
+  await expect(page.locator('#event-title')).toHaveText('Test Event');
+  await expect(page.locator('#event-mine')).toBeVisible();
+  await expect(page.locator('#event-text')).toBeHidden();
+  await page.click('#event-title');
+  await expect(page.locator('#event-text')).toBeVisible();
+
+  await page.click('#quest-toggle');
+  await expect(page.locator('#quest-list')).toBeHidden();
+  await expect(page.locator('#quest-toggle')).toHaveText('QUESTS: 1 ▸');
+});

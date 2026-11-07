@@ -96,24 +96,30 @@
 
     <p id="archive-note" class="archive-note" hidden></p>
 
-    <section id="event-box" class="event-box" hidden>
-      <p><span class="event-label">[ EVENT ]</span> <span id="event-title" class="event-title"></span> <span id="event-together" class="event-together"></span></p>
-      <p><span id="event-text"></span> <span id="event-mine" class="event-mine"></span></p>
-      <p id="event-reward" class="fineprint"></p>
-    </section>
-
-    <section id="event-toast" class="event-toast window" role="status" hidden>
-      <p class="event-toast-label">[ NEW EVENT ]</p>
-      <p id="event-toast-text"></p>
-      <button id="event-toast-close">Got it</button>
-    </section>
-
     <div class="layout">
     <div class="play">
       <section class="window window-map">
         <h2 class="window-title">[ MAP ] <span id="map-name" class="window-sub"></span></h2>
         <div class="map-frame">
           <canvas id="world" aria-label="Game world. Use the arrow keys or the on-screen buttons to move."></canvas>
+          <!-- Quest-Log wie ein Tracker über der Karte. Events (und später Quests) tragen sich hier ein. -->
+          <aside id="quest-log" class="quest-log" aria-label="Quest log" hidden>
+            <button id="quest-toggle" class="quest-head" aria-expanded="true" aria-controls="quest-list">QUESTS ▾</button>
+            <ol id="quest-list" class="quest-list">
+              <li id="event-box" class="quest event-box" hidden>
+                <p class="quest-title"><span class="event-label">EVENT</span> <span id="event-title" class="event-title"></span></p>
+                <p id="event-text" class="quest-text"></p>
+                <p id="event-mine" class="event-mine"></p>
+                <p id="event-together" class="event-together"></p>
+                <p id="event-reward" class="quest-fine"></p>
+              </li>
+            </ol>
+          </aside>
+          <section id="event-toast" class="event-toast window" role="status" hidden>
+            <p class="event-toast-label">[ NEW EVENT ]</p>
+            <p id="event-toast-text"></p>
+            <button id="event-toast-close">Got it</button>
+          </section>
         </div>
         <div class="pad" aria-label="Movement">
           <button data-action="up" aria-label="Move up">↑</button>
