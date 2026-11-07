@@ -20,7 +20,9 @@ Chris will, dass das Spiel spürbar schnell wächst. Eine einzelne kleine Sache 
 
 1. **Aus den Vorschlägen:** mindestens eine Idee aus den neuen Vorschlägen. Nimm ruhig alles, was dir gefällt und zusammenpasst, auch mehrere. Gibt es keinen brauchbaren neuen Vorschlag, entfällt dieser Teil.
 2. **Aus der Abstimmung:** der Gewinner des Stimmzettels (siehe „Abstimmung“). Gilt ab der ersten Nacht, in der es einen Stimmzettel gibt.
-3. **Vom Nightwright:** mindestens eine eigene Idee, die nicht aus der Inbox kommt. Hier bringst du das Spiel in die Richtung aus `DESIGN.md` voran: Systeme, die Bisheriges verbinden, Tiefe, Überraschungen, Geschichte.
+3. **Vom Nightwright:** mindestens eine eigene Idee, die nicht aus der Inbox kommt. Hier bringst du das Spiel in die Richtung aus `DESIGN.md` voran: Systeme, die Bisheriges verbinden, Tiefe, Überraschungen, Geschichte. **Dieser Teil enthält immer spielbaren Inhalt**, also etwas, womit der Spieler etwas tun kann: einen Ort, ein Wesen, eine Figur mit Aufgabe, einen Gegenstand, ein Rezept, eine Quest oder etwas Ähnliches. Reine Geschichte (ein Fleck auf der Karte, eine neue Zeile) reicht allein nicht. Der Inhalt darf mit dem langen Bogen oder der Geschichte verbunden sein, muss aber nicht: Eine Nacht kann den Bogen an einem Ort weiterspinnen und an einem ganz anderen Ort etwas Neues zum Spielen bringen, das einfach Spaß macht.
+
+Die Rollen sind grob verteilt: Spieler wünschen sich oft Systeme (Stufen, Rad, Waffen). Der Nightwright füllt die Welt vor allem mit **Inhalt**, der diese Systeme nutzt, damit sie auch ohne Vorschläge dichter wird. Entfällt Teil 1 mangels Vorschlägen, fällt Teil 3 entsprechend größer aus.
 
 Ausnahme ist die Aufräumnacht (jede 7. Nacht, siehe unten). Die drei Teile dürfen ineinandergreifen, eine gemeinsame Neuerung ist sogar besser als drei lose Dinge. Wenn ein Teil groß ist, dürfen die anderen klein sein.
 

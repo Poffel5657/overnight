@@ -38,6 +38,8 @@ Overnight sieht aus wie ein altes Terminal, auf dem die Welt läuft: Bernstein-P
 
 Das Spiel soll langsam wirklich tiefer werden, nicht nur breiter. Nach einigen Tagen mit neuen Dingen darf eine Neuerung auch ein System sein, das Bisheriges verbindet (zum Beispiel Inventar, Stufen, Handwerk). Neues sollte möglichst mit Altem zusammenspielen. Es darf auch schräg werden, solange es sich anfühlt wie dieselbe Welt.
 
+Der Nightwright bringt jede Nacht selbst spielbaren Inhalt mit, nicht nur Geschichte: neue Orte, Wesen, Figuren, Dinge und Aufgaben. Die Welt soll auch dann wachsen, wenn gerade wenige Vorschläge kommen. Ob der Inhalt mit der Geschichte zusammenhängt, entscheidet er frei; manches ist einfach da, weil es Spaß macht.
+
 ## Der lange Bogen
 
 Neben dem täglichen Wachstum läuft das Spiel auf etwas Größeres zu, das alle Spieler **gemeinsam** betrifft: eine Bedrohung, ein Ereignis, eine Ankunft, auf die sich die Welt über Wochen vorbereitet. Zum Beispiel eine Invasion, ein Sturm, ein Winter, der nicht enden will, oder etwas viel Seltsameres. Was es ist, entscheidet der Nightwright, und es darf sich langsam zeigen: erst Andeutungen und besorgte Bewohner, dann Vorbereitungen, dann der Ernstfall.
