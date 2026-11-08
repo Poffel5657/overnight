@@ -9,6 +9,8 @@ import { LEVELS, LEVEL_UP_TEXT } from '../content/levels.js';
 import { WHEEL } from '../content/wheel.js';
 import { EVENT } from '../content/event.js';
 import { QUESTS } from '../content/quests.js';
+import { SHOPS } from '../content/shops.js';
+import { SKILLS, SKILL_TEXT } from '../content/skills.js';
 
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const LOG_LIMIT = 50;
@@ -45,11 +47,14 @@ export const visibleEntities = (s) =>
 export const entityAt = (s, x, y) =>
   visibleEntities(s).find((e) => e.x === x && e.y === y);
 
-export const attackOf = (s) => s.player.atk + (ITEMS[s.player.weapon]?.atk ?? 0);
+// Knacks (seit Tag 6): Ränge aus content/skills.js geben atk und def dazu (maxHp sofort beim Lernen).
+const skillBonus = (s, stat) =>
+  SKILLS.reduce((sum, k) => sum + (s.player.skills?.[k.id] ?? 0) * (k[stat] ?? 0), 0);
+export const attackOf = (s) => s.player.atk + (ITEMS[s.player.weapon]?.atk ?? 0) + skillBonus(s, 'atk');
 // Rüstung (seit Tag 5): player.armor = { head, body, feet }, def wird vom Schaden abgezogen.
 export const ARMOR_SLOTS = ['head', 'body', 'feet'];
 export const defenseOf = (s) =>
-  Object.values(s.player.armor).reduce((sum, id) => sum + (ITEMS[id]?.def ?? 0), 0);
+  Object.values(s.player.armor).reduce((sum, id) => sum + (ITEMS[id]?.def ?? 0), 0) + skillBonus(s, 'def');
 const isWeapon = (id) => ITEMS[id]?.atk !== undefined;
 const isArmor = (id) => Boolean(ITEMS[id]?.slot);
 
@@ -99,6 +104,54 @@ export function equip(s, id) {
   return true;
 }
 
+// Fenster [ GEAR ] (seit Tag 6): Dinge mit heal aus dem Beutel benutzen. Kostet keine Runde.
+export function useItem(s, id) {
+  const item = ITEMS[id];
+  const index = s.player.bag.indexOf(id);
+  if (index < 0 || !item?.heal) return false;
+  if (s.player.hp >= s.player.maxHp) {
+    log(s, `You are already fully mended. The ${item.name} can wait.`);
+    return false;
+  }
+  s.player.bag.splice(index, 1);
+  s.player.hp = Math.min(s.player.maxHp, s.player.hp + item.heal);
+  log(s, `You drink the ${item.name}. HP ${s.player.hp}/${s.player.maxHp}.`);
+  return true;
+}
+
+// Läden (seit Tag 6, content/shops.js): kaufen kostet keine Runde. Rückgabe true, wenn gekauft.
+export function buy(s, shopId, itemId) {
+  const shop = SHOPS[shopId];
+  const offer = shop?.stock.find((o) => o.item === itemId);
+  if (!offer) return false;
+  if (countItem(s, shop.currency) < offer.price) {
+    log(s, `Not enough ${ITEMS[shop.currency].name}s. The ${ITEMS[itemId].name} costs ${offer.price}.`);
+    return false;
+  }
+  for (let i = 0; i < offer.price; i += 1) takeItem(s, shop.currency);
+  giveItem(s, itemId);
+  log(s, `You buy a ${ITEMS[itemId].name} for ${offer.price} ${ITEMS[shop.currency].name}s.`);
+  describeGain(s, itemId);
+  return true;
+}
+
+// Knacks (seit Tag 6): ein Punkt pro Aufstieg über Stufe 1, minus die schon vergebenen.
+export const skillPoints = (s) =>
+  s.player.level - 1 - SKILLS.reduce((sum, k) => sum + (s.player.skills?.[k.id] ?? 0), 0);
+
+export function learnSkill(s, id) {
+  const skill = SKILLS.find((k) => k.id === id);
+  const skills = (s.player.skills ??= {});
+  if (!skill || skillPoints(s) <= 0 || (skills[id] ?? 0) >= skill.max) return false;
+  skills[id] = (skills[id] ?? 0) + 1;
+  if (skill.maxHp) {
+    s.player.maxHp += skill.maxHp;
+    s.player.hp += skill.maxHp;
+  }
+  log(s, `${SKILL_TEXT} ${skill.name} ${skills[id]}/${skill.max}.`, 'new-tonight');
+  return true;
+}
+
 // Ergebnis einer neuen Sache für das Log: Waffen nennen den Schaden, Rüstung die Abwehr.
 function describeGain(s, id) {
   const item = ITEMS[id];
@@ -119,7 +172,7 @@ function gainXp(s, amount) {
     s.player.atk += step.atk ?? 0;
     s.player.hp = s.player.maxHp;
     log(s, LEVEL_UP_TEXT.replace('{level}', s.player.level), 'new-tonight');
-    const gains = [step.maxHp && `+${step.maxHp} max HP`, step.atk && `+${step.atk} attack`].filter(Boolean);
+    const gains = [step.maxHp && `+${step.maxHp} max HP`, step.atk && `+${step.atk} attack`, '1 knack point'].filter(Boolean);
     if (gains.length) log(s, `${gains.join(', ')}. You are fully mended.`);
   }
 }
@@ -167,11 +220,11 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     map: START.map,
     player: {
       x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null, bag: [], xp: 0, level: 1,
-      armor: { head: null, body: null, feet: null },
+      armor: { head: null, body: null, feet: null }, skills: {},
     },
     turn: 0,
     flags: {},
-    stats: { kills: 0, faints: 0, xp: 0 },
+    stats: { kills: 0, faints: 0, xp: 0, together: 0 },
     lastSeenDay: null,
     log: [],
     creatures: [],
@@ -194,6 +247,13 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     if (!Number.isInteger(s.player.xp) || s.player.xp < 0) s.player.xp = 0;
     if (!Number.isInteger(s.player.level) || !LEVELS[s.player.level - 1]) s.player.level = 1;
     if (!Number.isInteger(s.stats.xp)) s.stats.xp = 0;
+    if (!Number.isInteger(s.stats.together)) s.stats.together = 0;
+    // Stände von vor Tag 6 haben keine Knacks: Die Punkte ihrer Stufen warten dann im Fenster [ GEAR ].
+    const skills = saved.player?.skills ?? {};
+    s.player.skills = Object.fromEntries(SKILLS
+      .map((k) => [k.id, Math.min(k.max, Number.isInteger(skills[k.id]) && skills[k.id] > 0 ? skills[k.id] : 0)])
+      .filter(([, rank]) => rank > 0));
+    if (skillPoints(s) < 0) s.player.skills = {};
     s.player.hp = Math.min(Math.max(s.player.hp, 1), s.player.maxHp);
   }
   s.creatures = spawnCreatures(s, s.map);
@@ -215,7 +275,19 @@ export const INTERACTIONS = {
       log(s, `${e.name}: "${event.intro}"`, 'new-tonight');
       return;
     }
-    const quest = QUESTS.find((q) => q.giver === e.id && questState(s, q.id) !== 'done');
+    // Einmaliges Geschenk einer Figur (seit Tag 6), zum Beispiel als Dank für ein erreichtes Event.
+    if (e.gift && !s.flags.gifts?.[e.id]) {
+      (s.flags.gifts ??= {})[e.id] = true;
+      log(s, `${e.name}: "${e.gift.text}"`, 'new-tonight');
+      if (e.gift.item) {
+        giveItem(s, e.gift.item);
+        log(s, `You receive: ${ITEMS[e.gift.item].name}.`);
+        describeGain(s, e.gift.item);
+      }
+      if (e.gift.xp) gainXp(s, e.gift.xp);
+      return;
+    }
+    const quest = QUESTS.find((q) => q.giver === e.id && questOpen(s, q));
     if (quest && talkQuest(s, e, quest)) return;
     const remark = e.itemLines?.[s.player.weapon];
     const heard = (s.flags.heard ??= {});
@@ -237,6 +309,11 @@ export const INTERACTIONS = {
     giveItem(s, e.item);
     log(s, e.text, 'new-tonight');
     describeGain(s, e.item);
+  },
+  // Läden (Tag 6): Der Browser öffnet danach das Fenster [ SHOP ] (s.openShop, wird nicht gespeichert).
+  shop(s, e) {
+    s.openShop = e.shop;
+    log(s, SHOPS[e.shop].openText);
   },
   // Truhen (Tag 5): geben einmal ihren Inhalt und bleiben offen stehen (flags.opened).
   chest(s, e) {
@@ -309,32 +386,49 @@ export const INTERACTIONS = {
 // Quests (seit Tag 5, Daten in content/quests.js).
 export const questState = (s, id) => s.flags.quests?.[id] ?? null;
 
+// Fortschritt: bei Sammelquests die Zahl der Dinge, bei stat-Quests der Zuwachs seit dem Annehmen.
+export function questProgress(s, quest) {
+  if (quest.stat) return Math.max(0, (s.stats[quest.stat] ?? 0) - (s.flags.questBase?.[quest.id] ?? 0));
+  return countItem(s, quest.item);
+}
+
+// Kann die Quest gerade angeboten oder abgeschlossen werden? Tägliche Quests gibt es jede Nacht neu,
+// after verlangt, dass eine andere Quest schon erledigt ist.
+function questOpen(s, quest) {
+  if (quest.after && questState(s, quest.after) !== 'done') return false;
+  if (questState(s, quest.id) !== 'done') return true;
+  return quest.repeat === 'daily' && s.flags.questDay?.[quest.id] !== currentDay();
+}
+
 // Das Gespräch über eine Quest. Rückgabe false: Die Figur hat dazu gerade nichts zu sagen.
 function talkQuest(s, e, quest) {
   const quests = (s.flags.quests ??= {});
-  if (!quests[quest.id]) {
+  if (quests[quest.id] !== 'active') {
     if (quest.startItem && !hasItem(s, quest.startItem)) return false;
     quests[quest.id] = 'active';
+    if (quest.stat) (s.flags.questBase ??= {})[quest.id] = s.stats[quest.stat] ?? 0;
     log(s, `${e.name}: "${quest.offerText}"`, 'new-tonight');
     return true;
   }
-  if (countItem(s, quest.item) >= quest.count) {
-    for (let i = 0; i < quest.count; i += 1) takeItem(s, quest.item);
+  if (questProgress(s, quest) >= quest.count) {
+    if (!quest.stat) for (let i = 0; i < quest.count; i += 1) takeItem(s, quest.item);
     quests[quest.id] = 'done';
+    if (quest.repeat) (s.flags.questDay ??= {})[quest.id] = currentDay();
     log(s, `${e.name}: "${quest.doneText}"`, 'new-tonight');
-    if (quest.reward.item) {
-      giveItem(s, quest.reward.item);
-      log(s, `You receive: ${ITEMS[quest.reward.item].name}.`);
-      describeGain(s, quest.reward.item);
+    const { item, count = 1, xp } = quest.reward;
+    if (item) {
+      for (let i = 0; i < count; i += 1) giveItem(s, item);
+      log(s, `You receive: ${ITEMS[item].name}${count > 1 ? ` x${count}` : ''}.`);
+      describeGain(s, item);
     }
-    if (quest.reward.xp) gainXp(s, quest.reward.xp);
+    if (xp) gainXp(s, xp);
     return true;
   }
   // Abwechselnd erinnern und plaudern, damit die Figur ihre anderen Sätze nicht vergisst.
   const nag = (s.flags.questNag ??= {});
   nag[quest.id] = !nag[quest.id];
   if (!nag[quest.id]) return false;
-  log(s, `${e.name}: "${quest.remindText}" (${countItem(s, quest.item)}/${quest.count})`);
+  log(s, `${e.name}: "${quest.remindText}" (${questProgress(s, quest)}/${quest.count})`);
   return true;
 }
 
@@ -400,7 +494,7 @@ export function rewardKill(s, type, text) {
   if (def.boss) (s.flags.slain ??= {})[type] = true;
   s.stats.kills += 1;
   log(s, text);
-  if (def.boss) log(s, `The ${def.name} comes apart into ordinary crumbs and washes away.`, 'new-tonight');
+  if (def.boss) log(s, def.defeatText ?? `The ${def.name} is gone for good.`, 'new-tonight');
   for (const drop of def.drops ?? []) {
     if (random(s) >= drop.chance) continue;
     giveItem(s, drop.item);

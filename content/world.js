@@ -14,7 +14,7 @@ export const MAPS = {
       '  T....#B#.........~~.T  ',
       '  T.,..#.#........s~~~T  ',
       '  T....#.#.........~~.T  ',
-      '  T....#.#.....,......T  ',
+      '  .....#.#.....,......T  ',
       '   T....................  ',
       '   T..,..........,....T  ',
       '    TT...........,..TT   ',
@@ -35,12 +35,15 @@ export const MAPS = {
       "You look sturdier than you did. Fighting rats is good for you, apparently. Nobody tell the rats.",
           "Frogs keep tracking grey crumbs onto my meadow. If you find one, show me. I have a feeling about them.",
           "If you drink from the well when you're already fine, mind the edge. It's deeper than it was.",
+          "Have you seen them? Pale shapes, walking about like you. Echoes, I call them. The Nightwright drew more than one of you.",
+          'There is a gate in the western trees now. It ticks. I went through. There is a whole town in there, and a Mayor, who wound me up.',
         ],
         // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
         itemLines: {
           stick: "Is that a stick? It wasn't there yesterday. Rats respect a good stick. Mostly.",
           'stone-spear': "A spear! Now we're a settlement with a weapons industry. Don't tell the rats.",
           'drain-hook': "That came out of the sump? Then the sump is a little emptier. Good. I never liked the sump.",
+          wrench: 'A wrench from Mainspring. They make tools over there that actually fit your hand. Show-offs.',
         },
       },
       {
@@ -58,11 +61,17 @@ export const MAPS = {
       },
       {
         id: 'sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 10, y: 8,
-        text: 'OVERNIGHT. Population: you. Yesterday this sign did not exist.',
+        text: 'OVERNIGHT. Population: you, and the Echoes. Someone has corrected this sign in pencil.',
       },
       {
         id: 'stick', kind: 'pickup', item: 'stick', name: 'Stick', glyph: '/', color: '#b98a52', x: 20, y: 8,
         text: 'You pick up a stick. It is very straight, as if someone made it on purpose last night.',
+      },
+      // Tag 6: Ein tickendes Messingtor in den westlichen Bäumen führt nach Mainspring (Gewinner von Zettel 5).
+      {
+        id: 'west-gate', kind: 'door', name: 'Brass gate', glyph: '+', color: '#c9a04f', x: 2, y: 7,
+        to: { map: 'town', x: 2, y: 6 },
+        text: 'The brass gate ticks twice and lets you through. On the other side, everything is winding.',
       },
       // Tag 5: Wer gesund ist und trotzdem trinkt, rutscht hinein (down) und landet in den Kanälen.
       {
@@ -89,9 +98,9 @@ export const MAPS = {
       'T..,...........:.....:',
       'T.........,.....:...: ',
       'T.................:..:',
-      'T....,.............:  ',
-      'T.......,..e......:.: ',
-      'T.........eeee..::.:  ',
+      'T....,.....i.......:  ',
+      'T.......,..ei.....:.: ',
+      'T........ieeeei.::.:  ',
       ' TTTTTTTTTeeeeee::::  ',
     ],
     entities: [
@@ -115,7 +124,15 @@ export const MAPS = {
           "Frogs crawled out of the rubbed bit. They look half finished. I don't think they're meant to scare.",
           'If the rubbing-out spreads, someone ought to keep watch. I would, but I am attached to this pole.',
           'There is a grate in the grass now. Things gurgle under it. I preferred not knowing that.',
+          'You kept watch, all of you. Somebody inked a line round the rubbed bit overnight. It has not crept an inch since.',
+          'Those pale walkers are Echoes. More of you! I tried to scare one. It waved. I did not know what to do with my arms.',
         ],
+        // Tag 6: Dank für die Wache (Event "The Smudge Watch" erreicht). Einmal pro Spieler.
+        gift: {
+          item: 'straw-hat',
+          xp: 5,
+          text: 'You held the watch, you and the others. The corner has stopped spreading. Take my spare hat. They made it first, after all.',
+        },
         itemLines: {
           stick: "A stick! I'm mostly sticks myself. Be gentle with it.",
           'stone-spear': "Is that a stick with a rock on it? Please don't introduce me to the workbench.",
@@ -129,10 +146,16 @@ export const MAPS = {
           'The wheel is free once a night. After that it takes buttons. Frogs have buttons. Do not ask me why.',
           "Where did I come from? Same as you. One night I wasn't, and then I was, holding a wheel.",
           'Business has been good since the corner got rubbed out. People want surprises when things go missing.',
+          'The stall is painted in at last. Tonics, tea, a rock. Buttons only. I do not take echoes.',
+          'Lots of new faces about. Pale ones. Good. More customers, more surprises.',
         ],
         itemLines: {
           'stone-spear': 'Nice spear. Not for sale? Pity. Everything is for sale, eventually.',
         },
+      },
+      // Tag 6: Der Stand des Dealers (Ware in content/shops.js).
+      {
+        id: 'dealer-stall', kind: 'shop', shop: 'dealer', name: "Dealer's stall", glyph: '=', color: '#b6d96a', x: 15, y: 7,
       },
       {
         id: 'wheel', kind: 'wheel', name: 'Wheel of Chance', glyph: '¤', color: '#f2c56b', x: 17, y: 6,
@@ -192,7 +215,7 @@ export const MAPS = {
       // Leise Vorbereitung auf etwas, das noch geheim ist.
       {
         id: 'footprints', kind: 'sign', name: 'Footprints', glyph: '"', color: '#8fb8c8', x: 13, y: 9,
-        text: 'Wet footprints, a little smaller than yours, lead east and stop at the wall. They are not yours.',
+        text: 'Wet footprints of every size now, crossing and recrossing yours. The Echoes have been down here too.',
       },
       {
         id: 'drains-crumb', kind: 'pickup', item: 'crumb', name: 'Grey crumb', glyph: '·', color: '#d6c3cf', x: 18, y: 11,
@@ -222,4 +245,69 @@ export const MAPS = {
       { type: 'crumb-heap', x: 26, y: 9 },
     ],
   },
+  // Tag 6 (Gewinner von Zettel 5): Mainspring, eine Stadt aus Messing und Uhrwerk hinter dem Messingtor im Westen der Wiese.
+  // Im Osten der Winding Yard mit Uhrwerkmäusen und der Overwound Clock, die man besser zu mehreren angeht.
+  town: {
+    name: 'Mainspring',
+    tiles: [
+      'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
+      'MooooooMMMMMQQQQQMMMMooooooooM',
+      'MoooooooooooQQQQQoooMooooooooM',
+      'Mooo%%ooooooooooooooMooooooooM',
+      'MooooooMooooooooooooMooo%%oooM',
+      'MooooooMooooooooooooMooooooooM',
+      'MooooooooooooooooooooooooooooM',
+      'MooooooooooooooooooooooooooooM',
+      'MoooooooooooooooooooMooooooooM',
+      'Mooo%ooooooooooo%%ooMooooooooM',
+      'MoooooooooooooooooooMooooooooM',
+      'MoooooooooooooooooooMooooooooM',
+      'MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM',
+    ],
+    entities: [
+      {
+        id: 'town-gate', kind: 'door', name: 'Brass gate', glyph: '+', color: '#c9a04f', x: 1, y: 6,
+        to: { map: 'meadow', x: 3, y: 7 },
+        text: 'The gate ticks you back out onto the meadow. It is very quiet without all the clocks.',
+      },
+      {
+        id: 'town-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 3, y: 5,
+        text: 'MAINSPRING. Population: wound daily. Please keep your fingers out of the gears.',
+      },
+      {
+        id: 'tinker', kind: 'npc', name: 'The Tinker', glyph: 'T', color: '#e0a35f', x: 3, y: 2,
+        lines: [
+          'Mind the gears. I fix things. Mostly the town. The town mostly needs fixing.',
+          'We were drawn in all at once, the whole town, already ticking. Nobody remembers being wound. Somebody must have.',
+          'The mice in the Winding Yard were meant to carry springs to me. Now they just carry them.',
+          'There is something big in the yard. Wound far too tight. I would not go alone. Go with an Echo or two.',
+        ],
+        itemLines: {
+          wrench: 'Treat that wrench well. It has opinions about bolts.',
+          'stone-spear': 'A spear made of a rock and a stick? Charming. Primitive, but charming.',
+        },
+      },
+      {
+        id: 'mayor', kind: 'npc', name: 'The Mayor', glyph: 'M', color: '#f2c56b', x: 14, y: 4,
+        lines: [
+          'Welcome to Mainspring, citizen! Population: everyone who has been wound today.',
+          'The clock tower keeps the town going. If the clock stops, we all stop. No pressure.',
+          'I have a key in my back. Please do not mention it. Everyone has one. It is rude to point.',
+          'The meadow folk seem nice. Your Keeper did not have a key at all. I wound him anyway, out of politeness.',
+        ],
+      },
+      {
+        id: 'yard-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 22, y: 6,
+        text: 'THE WINDING YARD. Loose mice. One loose clock. Visit in company.',
+      },
+    ],
+    spawns: [
+      { type: 'mouse', x: 9, y: 9 },
+      { type: 'mouse', x: 24, y: 2 },
+      { type: 'mouse', x: 27, y: 6 },
+      { type: 'mouse', x: 23, y: 10 },
+      { type: 'overwound-clock', x: 27, y: 10 },
+    ],
+  },
 };
+

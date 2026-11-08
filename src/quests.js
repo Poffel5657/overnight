@@ -75,17 +75,19 @@ function questItem(quest) {
   return li;
 }
 
-// quests: Liste aus content/quests.js. stateOf(id) = 'active' | 'done' | null, have(item) = Anzahl.
-export function updateQuests(quests, stateOf, have) {
+// quests: Liste aus content/quests.js. stateOf(id) = 'active' | 'done' | null, progress(quest) = bisher geschafft.
+export function updateQuests(quests, stateOf, progress) {
   if (!$('quest-list')) return;
   let changed = false;
   for (const quest of quests) {
     const active = stateOf(quest.id) === 'active';
     if (!active && !questItems.has(quest.id)) continue;
+    // Ein neuer Eintrag zählt als Änderung, sonst bliebe das Log ohne Event unsichtbar.
+    if (!questItems.has(quest.id)) changed = true;
     const li = questItem(quest);
     if (li.hidden === active) changed = true;
     li.hidden = !active;
-    const n = Math.min(have(quest.item), quest.count);
+    const n = Math.min(progress(quest), quest.count);
     li.querySelector('.quest-progress').textContent = `${quest.progressLabel} ${n}/${quest.count}${n >= quest.count ? ` · ${quest.returnText}` : ''}`;
   }
   if (changed) refreshQuestLog();

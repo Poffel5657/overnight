@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "town",
+  "player": { "x": 10, "y": 6, "hp": 15, "maxHp": 21, "atk": 2, "weapon": "wrench", "bag": ["button", "tonic", "strong-tea", "spring", "stone-spear"], "xp": 26, "level": 4, "armor": { "head": "straw-hat", "body": "button-mail", "feet": "rubber-boots" }, "skills": { "sharp": 1, "sturdy": 1 } },
+  "turn": 800,
+  "flags": { "talk": { "keeper": 13, "mayor": 2 }, "taken": { "stick": true, "pointy-rock": true }, "quests": { "grey-crumbs": "done", "loose-springs": "done", "winding-duty": "done", "many-hands": "active" }, "questDay": { "winding-duty": 6 }, "questBase": { "many-hands": 1 }, "gifts": { "scarecrow": true }, "wheelDay": 6, "spins": 5 },
+  "stats": { "kills": 48, "faints": 2, "xp": 26, "together": 2 },
+  "lastSeenDay": 6
+}

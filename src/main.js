@@ -1,7 +1,7 @@
 // Verbindet Spiellogik, Darstellung und Bedienung im Browser.
 import {
   act, attackOf, countItem, createGame, currentDay, defenseOf, equip, log, nextLevelXp, questState, ARMOR_SLOTS,
-  applyWorld, isAttack, leaveWorld, rewardKill, takeBite,
+  applyWorld, isAttack, leaveWorld, rewardKill, takeBite, buy, useItem, learnSkill, skillPoints, questProgress,
 } from './game.js';
 import { createRenderer } from './render.js';
 import { loadSave, saveKey, writeSave } from './save.js';
@@ -21,6 +21,8 @@ import { CREATURES } from '../content/creatures.js';
 import { BALLOT } from '../content/ballot.js';
 import { QUESTS } from '../content/quests.js';
 import { PRESENCE } from '../content/presence.js';
+import { SHOPS } from '../content/shops.js';
+import { SKILLS } from '../content/skills.js';
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
@@ -139,20 +141,92 @@ function drawGear() {
     const item = ITEMS[id];
     let button = null;
     if (item.atk !== undefined || item.slot) {
-      button = document.createElement('button');
-      button.className = 'gear-equip';
-      button.textContent = item.slot ? 'Wear' : 'Wield';
-      button.addEventListener('click', () => {
-        equip(state, id);
-        writeSave(key, state);
-        refresh();
-        drawGear();
-      });
+      button = gearButton(item.slot ? 'Wear' : 'Wield', () => equip(state, id));
+    } else if (item.heal) {
+      button = gearButton('Use', () => useItem(state, id));
     }
     return gearRow(n > 1 ? `x${n}` : 'BAG', id, button);
   });
   $('gear-bag').replaceChildren(...rows);
   $('gear-empty').hidden = rows.length > 0;
+  drawKnacks();
+}
+
+// Knopf im Fenster [ GEAR ]: führt die Aktion aus, speichert und zeichnet alles neu.
+function gearButton(label, action) {
+  const button = document.createElement('button');
+  button.className = 'gear-equip';
+  button.textContent = label;
+  button.addEventListener('click', () => {
+    action();
+    writeSave(key, state);
+    refresh();
+    drawGear();
+  });
+  return button;
+}
+
+// Knacks (seit Tag 6): Punkte aus Aufstiegen in Ränge stecken.
+function drawKnacks() {
+  const points = skillPoints(state);
+  $('gear-points').textContent = points > 0
+    ? `${points} knack point${points > 1 ? 's' : ''} to spend.`
+    : 'Every level after the first gives one knack point.';
+  $('gear-knacks').replaceChildren(...SKILLS.map((skill) => {
+    const rank = state.player.skills?.[skill.id] ?? 0;
+    const row = document.createElement('li');
+    row.className = 'gear-row';
+    row.dataset.skill = skill.id;
+    const kind = document.createElement('span');
+    kind.className = 'gear-kind';
+    kind.textContent = `${rank}/${skill.max}`;
+    const name = document.createElement('span');
+    name.className = 'gear-name';
+    name.textContent = skill.name;
+    row.append(kind, name);
+    if (points > 0 && rank < skill.max) row.append(gearButton('Learn', () => learnSkill(state, skill.id)));
+    const text = document.createElement('span');
+    text.className = 'gear-text';
+    text.textContent = skill.text;
+    row.append(text);
+    return row;
+  }));
+}
+
+// Fenster [ SHOP ] (seit Tag 6): öffnet sich, wenn man in einen Stand läuft (state.openShop).
+let shopId = null;
+
+function drawShop() {
+  const shop = SHOPS[shopId];
+  if (!shop) return;
+  $('shop-title').textContent = `[ ${shop.name.toUpperCase()} ]`;
+  $('shop-greeting').textContent = shop.greeting;
+  const purse = ITEMS[shop.currency];
+  $('shop-purse').textContent = `You have ${countItem(state, shop.currency)} ${purse.name}s.`;
+  $('shop-stock').replaceChildren(...shop.stock.map((offer) => {
+    const row = gearRow(`${offer.price}×`, offer.item, null);
+    row.dataset.item = offer.item;
+    const button = document.createElement('button');
+    button.className = 'gear-equip';
+    button.textContent = 'Buy';
+    button.disabled = countItem(state, shop.currency) < offer.price;
+    button.addEventListener('click', () => {
+      buy(state, shopId, offer.item);
+      writeSave(key, state);
+      refresh();
+      drawShop();
+    });
+    row.querySelector('.gear-name').after(button);
+    return row;
+  }));
+}
+
+function openShop() {
+  if (!state.openShop) return;
+  shopId = state.openShop;
+  state.openShop = null;
+  drawShop();
+  if (!$('shop-dialog').open) $('shop-dialog').showModal();
 }
 
 function setupGear() {
@@ -206,7 +280,7 @@ function refresh() {
   draw(state);
   drawHud();
   drawLog();
-  updateQuests(QUESTS, (id) => questState(state, id), (item) => countItem(state, item));
+  updateQuests(QUESTS, (id) => questState(state, id), (quest) => questProgress(state, quest));
   $('log-peek').textContent = state.log.at(-1)?.text ?? '';
 }
 
@@ -316,6 +390,7 @@ function run(action) {
   updateEvent();
   presence.moved();
   if (state.outbox?.length) presence.send(state.outbox.splice(0));
+  openShop();
 }
 
 // Chatnachrichten als Sprechblase über der Figur, die sie geschrieben hat. Chat und Echos haben
@@ -385,6 +460,8 @@ function setupEchoes() {
       if (!def) return;
       const others = by.filter((p) => p.id !== presence.myId()).map((p) => p.name);
       if (mine) {
+        // Siege zusammen mit einem Echo zählen für die Quest "Many Hands" (seit Tag 6).
+        if (others.length) state.stats.together = (state.stats.together ?? 0) + 1;
         const text = others.length
           ? `Together with ${others.join(' and ')} you defeat the ${def.name}.`
           : `You defeat the ${def.name}.`;

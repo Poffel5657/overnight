@@ -13,17 +13,5 @@
 //   goal: 20,                         // so viele Tagesbeiträge braucht es insgesamt
 //   startDay: 4, endDay: 6,           // läuft vom Tag startDay bis einschließlich endDay
 // }
-export const EVENT = {
-  id: 'smudge-watch',
-  title: 'The Smudge Watch',
-  giver: 'scarecrow',
-  intro: "Keep watch on that rubbed-out corner for me? I can't leave my pole. Earn some experience out here, and if enough of you help, the corner gets something to hold it.",
-  text: 'The Scarecrow wants someone to keep watch on the rubbed-out corner. It cannot leave its pole.',
-  task: 'Earn 6 XP.',
-  reward: 'Hold the line, and the corner gets something to hold it in place.',
-  stat: 'xp',
-  need: 6,
-  goal: 6,
-  startDay: 4,
-  endDay: 5,
-};
+// Tag 6: "The Smudge Watch" (Tag 4 bis 5) ist ausgewertet: 13 Beiträge bei Ziel 6, erreicht. Frühestens Tag 7 ein neues.
+export const EVENT = null;
