@@ -22,6 +22,15 @@ const FONT = `bold ${Math.round(CELL * 0.72)}px ui-monospace, "DejaVu Sans Mono"
 
 // glow: Funktion, die sagt, ob die Zeichen leicht leuchten sollen (CRT-Einstellung).
 // marker: ob die Figur eines laufenden Events markiert wird (nicht in archivierten Nächten).
+// Lebensbalken für Gegner: null, wenn keiner nötig ist (unverletzt und kein Boss), sonst Anteil und Farbe.
+export function hpBar(hp, maxHp, boss = false) {
+  if (!(maxHp > 0) || hp <= 0) return null;
+  const ratio = Math.min(hp / maxHp, 1);
+  if (ratio >= 1 && !boss) return null;
+  const color = ratio > 0.6 ? '#9ccf6a' : ratio > 0.3 ? '#ffb347' : '#e05a47';
+  return { ratio, color };
+}
+
 // echoes: Funktion, die { list, color, chatOf } für andere Spieler auf dieser Karte liefert (siehe main.js).
 export function createRenderer(canvas, { glow = () => false, marker = true, echoes = null } = {}) {
   const ctx = canvas.getContext('2d');
@@ -65,6 +74,21 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
       ctx.fillText(glyph, col * CELL + CELL / 2, row * CELL + CELL / 2 + 1);
     }
   };
+
+  // Dünner Balken an der Unterkante des Feldes, dunkler Grund, Füllung nach Rest-HP.
+  function drawHpBar(col, row, bar) {
+    if (!bar) return;
+    const x = col * CELL + 3;
+    const y = row * CELL + CELL - 5;
+    const width = CELL - 6;
+    ctx.save();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(11, 9, 6, 0.85)';
+    ctx.fillRect(x - 1, y - 1, width + 2, 5);
+    ctx.fillStyle = bar.color;
+    ctx.fillRect(x, y, Math.max(1, Math.round(width * bar.ratio)), 3);
+    ctx.restore();
+  }
 
   // Kamera folgt dem Spieler, sobald eine Karte größer als der Ausschnitt ist.
   const cameraAxis = (pos, size, view) =>
@@ -120,6 +144,7 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
       if (c.respawnAt === null) {
         const def = CREATURES[c.type];
         figure(c.x, c.y, def.glyph, def.color);
+        drawHpBar(c.x - camX, c.y - camY, hpBar(c.hp, def.hp, def.boss));
       }
     }
     drawEchoes(s, camX, camY, figure);
