@@ -34,7 +34,7 @@ const fakeSocket = () => {
   };
 };
 
-test('Echos: nur mit ?echoes=1 vor dem Starttag, dann Anzeige, Position und Gesten', async ({ page }) => {
+test('Echos: nur mit ?echoes=1 vor dem Starttag, dann Anzeige und Position', async ({ page }) => {
   await page.addInitScript(fakeSocket);
   await page.setViewportSize({ width: 1280, height: 800 });
 
@@ -42,7 +42,6 @@ test('Echos: nur mit ?echoes=1 vor dem Starttag, dann Anzeige, Position und Gest
   await page.waitForFunction(() => window.__overnight);
   if (await page.evaluate(() => window.__overnight.day) < PRESENCE.fromDay) {
     expect(await page.evaluate(() => window.__presence.length)).toBe(0);
-    await expect(page.locator('#emotes')).toBeHidden();
   }
 
   await page.goto('/?seed=7&echoes=1');
@@ -57,20 +56,15 @@ test('Echos: nur mit ?echoes=1 vor dem Starttag, dann Anzeige, Position und Gest
   await expect(page.locator('#echo-count')).toHaveText('· 1 here · 1 out there');
   expect(await page.evaluate(() => window.__overnight.echoes.here().map((p) => p.name))).toEqual(['tinker-3f2']);
 
-  // Andere bewegen sich und winken; das Log zeigt es als Text.
+  // Andere bewegen sich. Gesten gibt es nicht mehr (seit den Sprechblasen aus dem Chat): Der Server
+  // schickt keine, und eine alte Nachricht dieser Art wird verworfen.
   await page.evaluate(() => {
     const ws = window.__presence[0];
     ws.emit('message', { data: JSON.stringify({ t: 'pos', id: 'aa11', name: 'tinker-3f2', map: window.__overnight.state.map, x: 3, y: 1 }) });
     ws.emit('message', { data: JSON.stringify({ t: 'emote', id: 'aa11', e: 'wave' }) });
   });
-  await expect(page.locator('#log li').last()).toContainText('tinker-3f2 waves.');
-  expect(await page.evaluate(() => window.__overnight.echoes.bubbleOf('aa11'))).toBe('o/');
-
-  // Selbst winken: Knopf und Taste.
-  await page.click('#emotes button[data-emote="wave"]');
-  await page.keyboard.press(PRESENCE.emotes.find((e) => e.id === 'cheer').key);
-  const emotes = await page.evaluate(() => window.__presence[0].sent.filter((m) => m.t === 'emote'));
-  expect(emotes).toEqual([{ t: 'emote', e: 'wave' }, { t: 'emote', e: 'cheer' }]);
+  expect(await page.evaluate(() => window.__overnight.echoes.here()[0].x)).toBe(3);
+  await expect(page.locator('#log')).not.toContainText('waves');
 
   // Ein Schritt meldet die neue Position (gedrosselt, aber sie kommt an).
   const before = await page.evaluate(() => window.__presence[0].sent.length);

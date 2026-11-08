@@ -2,9 +2,6 @@
 // (geschützt), hier stehen nur Daten, die der Nightwright pflegen darf.
 //
 // fromDay: ab diesem Tag (letzter Eintrag in chronicle.js) verbindet sich das Spiel. Davor nur mit ?echoes=1.
-// emotes:  Gesten, die man machen kann. id muss der Worker kennen (wave, cheer, bow, help), sonst wird sie
-//          verworfen. key ist eine Taste, button die Beschriftung, bubble das, was kurz über der Figur steht,
-//          verb der Satz im Log ("tinker-3f2 waves.").
 // color:   Farbe der Echos auf der Karte (blasser als der eigene Spieler).
 // tickMs:  Takt der gemeinsamen Welt in Millisekunden (mindestens 300). Kreaturen ziehen einmal pro Takt.
 //          Der Worker liest den Wert erst nach seinem nächsten Deploy.
@@ -17,8 +14,4 @@ export const PRESENCE = {
   tickMs: 700,
   moveMs: 200,
   attackMs: 500,
-  emotes: [
-    { id: 'wave', key: 'e', button: 'Wave', bubble: 'o/', verb: 'waves' },
-    { id: 'cheer', key: 'q', button: 'Cheer', bubble: '\\o/', verb: 'cheers' },
-  ],
 };

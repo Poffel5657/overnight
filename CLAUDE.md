@@ -9,10 +9,10 @@ Diese Datei ist geschützt. Ein PR, der sie ändert, wird nicht gemergt.
 1. Lies `DESIGN.md`, `ARCHITECTURE.md`, `PLAN.md`, `LORE.md`, die letzten fünf Einträge von `CHRONICLE.md` und deinen geheimen Plan `nightwright/` im Inbox-Repo (`arc.md` und alles daneben). Was dort für heute ansteht, gehört zur Planung der Nacht.
 2. Bestimme die heutige Tagesnummer: letzter Eintrag in `content/chronicle.js` plus 1. Ist sie durch 7 teilbar, ist heute eine **Aufräumnacht** (siehe unten).
 3. Prüfe, ob es Branches `claude/day-*` oder offene PRs gibt, die nicht gemergt wurden. Ein fehlgeschlagener Versuch vom Vortag hat Vorrang: Verstehe den Fehler und notiere ihn in `PLAN.md`. Baue auf dem aktuellen `main` neu auf, statt kaputten Stand zu übernehmen, und schließe den alten PR, wenn das möglich ist.
-4. Lies neue Vorschläge im Inbox-Repo und zähle die Stimmen für den aktuellen Stimmzettel (siehe unten). In einer Aufräumnacht liest du keine Vorschläge.
+4. Lies neue Vorschläge im Inbox-Repo und zähle die Stimmen für den aktuellen Stimmzettel (siehe unten).
 5. Ist ein Community-Event gestern zu Ende gegangen, werte es aus (siehe „Community-Events“).
 6. Lies die Bewertungen der letzten Nacht (siehe „Bewertungen“).
-7. Entscheide, was heute Nacht entsteht: die drei Teile aus „Bauen“, in einer Aufräumnacht nur Aufräumen und Abstimmungsgewinner. `PLAN.md` ist die Vorlage, aber eine bessere Idee oder ein guter Vorschlag darf den Plan ändern.
+7. Entscheide, was heute Nacht entsteht: die drei Teile aus „Bauen“, in einer Aufräumnacht zusätzlich Code-Review und Aufräumen. `PLAN.md` ist die Vorlage, aber eine bessere Idee oder ein guter Vorschlag darf den Plan ändern.
 
 ## Bauen
 
@@ -24,11 +24,11 @@ Chris will, dass das Spiel spürbar schnell wächst. Eine einzelne kleine Sache 
 
 Die Rollen sind grob verteilt: Spieler wünschen sich oft Systeme (Stufen, Rad, Waffen). Der Nightwright füllt die Welt vor allem mit **Inhalt**, der diese Systeme nutzt, damit sie auch ohne Vorschläge dichter wird. Entfällt Teil 1 mangels Vorschlägen, fällt Teil 3 entsprechend größer aus.
 
-Ausnahme ist die Aufräumnacht (jede 7. Nacht, siehe unten). Die drei Teile dürfen ineinandergreifen, eine gemeinsame Neuerung ist sogar besser als drei lose Dinge. Wenn ein Teil groß ist, dürfen die anderen klein sein.
+Das gilt auch in der Aufräumnacht (jede 7. Nacht, siehe unten), dort kommt danach noch das Aufräumen dazu. Die drei Teile dürfen ineinandergreifen, eine gemeinsame Neuerung ist sogar besser als drei lose Dinge. Wenn ein Teil groß ist, dürfen die anderen klein sein.
 
 - **Nutze das Budget.** Die 1000 Zeilen sind ausdrücklich zum Ausnutzen da, und Inhalte in `content/`, Tests und Doku zählen nicht einmal mit. Eine Nacht mit 100 Zeilen Code ist in der Regel zu wenig. Plane so, dass das Spiel jede Nacht deutlich mehr wird, und entwickle es mutig weiter.
 - Trotzdem gilt: Alles, was live geht, muss fertig und getestet sein. Lieber zwei fertige Teile als drei halbe. Fehlt ein Teil, begründe das in `CHRONICLE.md`.
-- Höchstens 1000 geänderte Zeilen außerhalb von `content/`, `tests/` und Doku. Darüber lehnt der Workflow den PR ab, außer Chris hat den großen Umbau freigegeben (siehe unten).
+- Höchstens 1000 geänderte Zeilen außerhalb von `content/`, `tests/` und Doku (in der Aufräumnacht 2000). Darüber lehnt der Workflow den PR ab, außer Chris hat den großen Umbau freigegeben (siehe unten).
 - Aufräumen ist erlaubt und erwünscht, wenn der Code sonst unübersichtlich wird, ersetzt aber nicht die Neuerung.
 - Neue Inhalte gehören möglichst als Daten nach `content/`. Baue Systeme erst, wenn die Inhalte sie brauchen.
 - Die Spielwelt nimmt die Neuerung wahr: Der Keeper oder ein anderes Wesen sagt etwas dazu, wenn es passt. Spieltexte sind Englisch und folgen dem Ton aus `DESIGN.md`.
@@ -37,13 +37,16 @@ Ausnahme ist die Aufräumnacht (jede 7. Nacht, siehe unten). Die drei Teile dür
 
 ## Aufräumnacht: jede 7. Nacht
 
-An Tagen, deren Nummer durch 7 teilbar ist (7, 14, 21 …), wächst das Spiel bewusst wenig. Das Tempo der anderen Nächte hinterlässt Spuren, und diese Nacht gleicht sie aus.
+An Tagen, deren Nummer durch 7 teilbar ist (7, 14, 21 …), wächst das Spiel **genauso wie sonst**: alle drei Teile aus „Bauen“, mit Vorschlägen, Abstimmungsgewinner und eigener Idee. Das Tempo der Nächte hinterlässt aber Spuren, deshalb kommt **danach** ein zweiter Durchgang über den ganzen Code dazu.
 
-- **Code aufräumen** ist die Hauptarbeit: Doppeltes zusammenführen, große Funktionen teilen, Daten nach `content/` verlagern, tote Pfade entfernen, Namen klären, Lücken in den Tests schließen, Balance prüfen (sind Gegner, Waffen und Belohnungen noch stimmig?). Verhalten, das Spieler kennen, bleibt gleich, außer es war ein Fehler.
-- **Als einzige Neuerung** baust du den Gewinner der Abstimmung. Keine Vorschläge, keine eigene Idee.
-- **Vorschläge bleiben liegen.** Du liest sie nicht und archivierst sie nicht; die nächste Nacht hat dadurch etwas Vorrat. Stimmen und Event-Beiträge archivierst du wie immer.
-- Auch `LORE.md`, `PLAN.md` und `ARCHITECTURE.md` werden in dieser Nacht entrümpelt: Veraltetes raus, Widersprüche auflösen.
-- Die 1000-Zeilen-Grenze gilt auch hier. Der Chronik-Eintrag für Spieler darf ehrlich sagen, dass heute aufgeräumt wurde, im Ton der Welt („The Nightwright swept up.“).
+1. **Erst bauen.** Die Neuerungen der Nacht fertig bauen und testen wie in jeder Nacht.
+2. **Dann Code-Review.** Lies den Code der letzten sieben Nächte (`git log` seit dem letzten `day-*`-Tag, der durch 7 teilbar ist) und die neuen Teile von heute kritisch durch wie ein Reviewer: Fehler, Grenzfälle, alte Spielstände, gemeinsame Welt (siehe „Gemeinsame Welt“), Performance, unklare Stellen. Was du findest, behebst du.
+3. **Dann aufräumen und optimieren:** Doppeltes zusammenführen, große Funktionen und Dateien teilen (zum Beispiel `src/game.js` in Module), Daten nach `content/` verlagern, tote Pfade entfernen, Namen klären, unnötige Arbeit pro Zug oder pro Bild vermeiden. Verhalten, das Spieler kennen, bleibt gleich, außer es war ein Fehler.
+4. **Dann testen:** Lücken in den Tests schließen, besonders für Systeme ohne eigenen Tagestest, und Balance prüfen (sind Gegner, Waffen und Belohnungen noch stimmig?). Alle Tests müssen am Ende grün sein.
+5. **Doku entrümpeln:** `LORE.md`, `PLAN.md` und `ARCHITECTURE.md`: Veraltetes raus, Widersprüche auflösen.
+
+- Die Grenze liegt in dieser Nacht bei **2000 Zeilen** (1000 für die Neuerungen, 1000 fürs Aufräumen); der Workflow erkennt die Aufräumnacht an der Tagesnummer. Reicht es nicht für beides, haben die Neuerungen Vorrang, und der Rest des Aufräumens kommt als Punkt in `PLAN.md`.
+- Im Chronik-Eintrag für Spieler stehen die Neuerungen wie sonst; das Aufräumen darf ein Halbsatz im Ton der Welt sein („… and then the Nightwright swept up.“). In `CHRONICLE.md` bekommt das Review einen eigenen Abschnitt: was gefunden, was behoben, was aufgeräumt wurde.
 
 ## Der lange Bogen
 
@@ -159,8 +162,6 @@ Am Ende jeder Nacht, nachdem der PR offen ist, räumst du das Inbox-Repo auf. Du
 - `votes/X` nach `archive/day-NNN/votes/X` für jede Stimme, die du in dieser Nacht gelesen hast, gezählt oder nicht,
 - `ratings/X` nach `archive/day-NNN/ratings/X` für jede Bewertung, die du in dieser Nacht gelesen hast,
 - `events/X` nach `archive/day-NNN/events/X`, aber nur Beiträge zu einem Event, das du in dieser Nacht ausgewertet hast. Beiträge zu einem laufenden Event bleiben liegen.
-
-In einer Aufräumnacht bleiben alle Vorschläge unter `suggestions/` liegen.
 
 Verschiebe nur Dateien, die du in dieser Nacht gesehen hast; was danach eintrifft, bleibt für die nächste Nacht liegen. Baue den Branch auf dem aktuellen `origin/main` des Inbox-Repos auf, ein Commit genügt. Der Workflow `archive.yml` im Inbox-Repo prüft, dass nur so verschoben wurde, übernimmt es nach `main` und löscht den Branch. Klappt der Push nicht, vermerke das in deiner Abschlussmeldung; die nächste Nacht holt das Aufräumen nach. Das Aufräumen darf nie verhindern, dass der Spiel-PR entsteht.
 

@@ -1,14 +1,13 @@
 // Echos und gemeinsame Welt. Geschützte Datei: Netzwerkzugriff wie chat.js.
-// Das Spiel meldet dem Worker die eigene Position (Karte, x, y), Gesten aus einer festen Liste, Treffer
+// Das Spiel meldet dem Worker die eigene Position (Karte, x, y), Treffer
 // auf Kreaturen ({ t: 'hit', id, dmg }) und Besucher vom Glücksrad ({ t: 'summon', type, x, y }).
-// Zurück kommen Positionen und Gesten der anderen mit ihren anonymen Tagesnamen, der Stand der Kreaturen
+// Zurück kommen Positionen der anderen mit ihren anonymen Tagesnamen, der Stand der Kreaturen
 // der eigenen Karte ('world'), Bisse ('bite') und gemeinsame Siege ('slain'). Kein Freitext.
 // Alles kommt als Text ins DOM (textContent), nie als HTML.
 import { SUGGEST_URL } from './config.js';
 
 const SEND_GAP_MS = 150;
 const HIDDEN_CLOSE_MS = 60_000;
-const BUBBLE_MS = 3500;
 const NAME = /^[a-z]+-[0-9a-f]{3}$/;
 const ID = /^[0-9a-f]{1,12}$/;
 const CREATURE_ID = /^c\d{1,6}$/;
@@ -39,7 +38,6 @@ export function readMessage(raw, knownMap) {
     return peer && { t: 'pos', ...peer };
   }
   if (data?.t === 'gone' && ID.test(String(data.id))) return { t: 'gone', id: data.id };
-  if (data?.t === 'emote' && ID.test(String(data.id)) && typeof data.e === 'string') return { t: 'emote', id: data.id, e: data.e };
   if (data?.t === 'world' && KIND.test(String(data.map))) {
     if (data.creatures === null) return { t: 'world', map: data.map, creatures: null };
     if (!Array.isArray(data.creatures)) return null;
@@ -60,18 +58,17 @@ function readPeer(p, knownMap) {
 }
 
 // enabled: ob Echos heute an sind. getPosition(): { map, x, y } des Spielers. knownMap(id): gibt es die Karte?
-// onChange(): neu zeichnen. onEmote(peer, emote): jemand auf derselben Karte hat eine Geste gemacht.
+// onChange(): neu zeichnen.
 // onWorld(map, creatures | null), onBite(type), onSlain(type, by, mine), onLost(): gemeinsame Welt.
-// Gibt { moved, emote, send, here, total, bubbleOf } zurück; bei ausgeschalteten Echos tun alle nichts.
+// Gibt { moved, send, myId, here, total } zurück; bei ausgeschalteten Echos tun alle nichts.
 export function setupPresence({
-  archived, enabled, emotes, getPosition, knownMap, onChange, onEmote,
+  archived, enabled, getPosition, knownMap, onChange,
   onWorld = () => {}, onBite = () => {}, onSlain = () => {}, onLost = () => {},
 }) {
-  const idle = { moved() {}, emote() {}, send() {}, myId: () => null, here: () => [], total: () => 0, bubbleOf: () => null, active: false };
+  const idle = { moved() {}, send() {}, myId: () => null, here: () => [], total: () => 0, active: false };
   if (archived || !enabled || !SUGGEST_URL) return idle;
 
   const peers = new Map();
-  const bubbles = new Map();
   let ws = null;
   let ready = false;
   let retry = null;
@@ -109,12 +106,6 @@ export function setupPresence({
     for (const message of messages) if (OUTGOING.has(message?.t)) ws.send(JSON.stringify(message));
   }
 
-  function emote(id) {
-    if (!ready || !emotes.some((e) => e.id === id)) return false;
-    ws.send(JSON.stringify({ t: 'emote', e: id }));
-    return true;
-  }
-
   function connect() {
     clearTimeout(retry);
     const url = new URL('presence', SUGGEST_URL);
@@ -137,14 +128,6 @@ export function setupPresence({
         peers.set(data.id, { ...peers.get(data.id), ...data });
       } else if (data.t === 'gone') {
         peers.delete(data.id);
-        bubbles.delete(data.id);
-      } else if (data.t === 'emote') {
-        const peer = peers.get(data.id);
-        const kind = emotes.find((e) => e.id === data.e);
-        if (!peer || !kind || peer.map !== getPosition().map) return;
-        bubbles.set(peer.id, { text: kind.bubble, until: Date.now() + BUBBLE_MS });
-        setTimeout(onChange, BUBBLE_MS + 50);
-        onEmote(peer, kind);
       } else if (data.t === 'world') {
         if (data.map === getPosition().map) onWorld(data.map, data.creatures);
         return;
@@ -193,10 +176,5 @@ export function setupPresence({
     const map = getPosition().map;
     return [...peers.values()].filter((p) => p.map === map);
   };
-  const bubbleOf = (id) => {
-    const bubble = bubbles.get(id);
-    if (!bubble || bubble.until < Date.now()) return null;
-    return bubble.text;
-  };
-  return { moved, emote, send, myId: () => myId, here, total: () => peers.size, bubbleOf, active: true };
+  return { moved, send, myId: () => myId, here, total: () => peers.size, active: true };
 }

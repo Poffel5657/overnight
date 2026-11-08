@@ -54,8 +54,7 @@ test('Nachrichten werden streng geprüft', () => {
   expect(parseMessage('{"t":"pos","map":"meadow","x":-1,"y":4}')).toBeNull();
   expect(parseMessage('{"t":"pos","map":"meadow","x":1.5,"y":4}')).toBeNull();
   expect(parseMessage('{"t":"pos","map":"meadow","x":3,"y":9999}')).toBeNull();
-  expect(parseMessage('{"t":"emote","e":"wave"}')).toEqual({ t: 'emote', e: 'wave' });
-  expect(parseMessage('{"t":"emote","e":"hello mom"}')).toBeNull();
+  expect(parseMessage('{"t":"emote","e":"wave"}')).toBeNull();
   expect(parseMessage('{"t":"say","text":"hi"}')).toBeNull();
   expect(parseMessage('{"t":"hit","id":"c3","dmg":2}')).toEqual({ t: 'hit', id: 'c3', dmg: 2 });
   expect(parseMessage('{"t":"hit","id":"c3","dmg":500}')).toBeNull();
@@ -75,24 +74,19 @@ test('Eimer: erst BUCKET_SIZE auf einmal, dann nur noch nachgefüllt', () => {
   expect(takeToken(bucket, 1000).ok).toBe(true);
 });
 
-test('Zwei Spieler sehen einander, Gesten kommen an, Weggehen wird gemeldet', async () => {
+test('Zwei Spieler sehen einander, Weggehen wird gemeldet', async () => {
   const { room, sockets, remove } = makeRoom();
   const a = (await connect(room, FP_A)).webSocket;
   expect(a.inbox[0]).toMatchObject({ t: 'hello', peers: [] });
   expect(a.inbox[0].name).toMatch(/^[a-z]+-aaa$/);
   await say(room, a, { t: 'pos', map: 'meadow', x: 5, y: 6 });
-  // Gesten vor der ersten Position gehen nicht raus, danach schon.
   const b = (await connect(room, FP_B)).webSocket;
   expect(b.inbox[0].peers).toEqual([{ id: a.inbox[0].id, name: a.inbox[0].name, map: 'meadow', x: 5, y: 6 }]);
-  await say(room, b, { t: 'emote', e: 'wave' });
-  expect(a.inbox.filter((m) => m.t === 'emote')).toEqual([]);
   await say(room, b, { t: 'pos', map: 'meadow', x: 7, y: 6 });
   expect(a.inbox.filter((m) => m.t === 'pos').at(-1)).toMatchObject({ t: 'pos', id: b.inbox[0].id, x: 7, y: 6 });
   // Der Sender bekommt sein eigenes Echo nicht zurück, aber den Stand der Karte.
   expect(b.inbox.filter((m) => m.t === 'pos')).toEqual([]);
   expect(b.inbox.find((m) => m.t === 'world')).toMatchObject({ t: 'world', map: 'meadow' });
-  await say(room, b, { t: 'emote', e: 'wave' });
-  expect(a.inbox.at(-1)).toEqual({ t: 'emote', id: b.inbox[0].id, e: 'wave' });
   // Der Fingerabdruck verlässt den Raum nie.
   expect(JSON.stringify(a.inbox)).not.toContain(FP_B);
   expect(JSON.stringify(b.inbox)).not.toContain(FP_A);

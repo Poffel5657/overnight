@@ -1,5 +1,5 @@
 // Echos: Spieler sehen einander in der Welt. Ein Raum als Durable Object, WebSocket mit Hibernation-API.
-// Es laufen nur Positionen und Gesten aus einer festen Liste, nie Freitext. Namen vergibt der Server aus
+// Es laufen nur Positionen, Treffer und Besucher vom Glücksrad, nie Freitext. Namen vergibt der Server aus
 // dem Tages-Fingerabdruck (dieselben anonymen Namen wie im Chat), niemand wählt seinen eigenen.
 // Gespeichert wird nichts: Alles, was der Raum wissen muss, hängt als Attachment am jeweiligen Socket.
 //
@@ -26,7 +26,6 @@ export const SUMMON_GAP_MS = 20_000;
 // Schläge schneller als PRESENCE.attackMs verwirft der Server; etwas Spielraum für schwankende Verbindungen.
 export const HIT_GAP_MS = Math.round((PRESENCE.attackMs ?? 500) * 0.7);
 const CREATURE_ID = /^c\d{1,6}$/;
-export const EMOTES = ['wave', 'cheer', 'bow', 'help'];
 const MAP_PATTERN = /^[a-z0-9-]{1,32}$/;
 const MAX_COORD = 255;
 
@@ -43,7 +42,6 @@ export function parseMessage(raw) {
   if (data?.t === 'pos' && MAP_PATTERN.test(String(data.map)) && coord(data.x) && coord(data.y)) {
     return { t: 'pos', map: data.map, x: data.x, y: data.y };
   }
-  if (data?.t === 'emote' && EMOTES.includes(data.e)) return { t: 'emote', e: data.e };
   if (data?.t === 'hit' && CREATURE_ID.test(String(data.id)) && Number.isInteger(data.dmg) && data.dmg >= 1 && data.dmg <= 99) {
     return { t: 'hit', id: data.id, dmg: data.dmg };
   }
@@ -255,10 +253,7 @@ export class PresenceRoom {
       info.summonAt = Date.now();
       ws.serializeAttachment(info);
       this.sendWorld(info.map);
-      return;
     }
-    // Gesten nur, wenn man schon irgendwo steht.
-    if (message.t === 'emote' && info.map) this.broadcast({ t: 'emote', id: info.id, e: message.e }, ws);
   }
 
   drop(ws, info, code, reason) {

@@ -22,7 +22,7 @@ const FONT = `bold ${Math.round(CELL * 0.72)}px ui-monospace, "DejaVu Sans Mono"
 
 // glow: Funktion, die sagt, ob die Zeichen leicht leuchten sollen (CRT-Einstellung).
 // marker: ob die Figur eines laufenden Events markiert wird (nicht in archivierten Nächten).
-// echoes: Funktion, die { list, bubbleOf, color } für andere Spieler auf dieser Karte liefert (siehe presence.js).
+// echoes: Funktion, die { list, color, chatOf } für andere Spieler auf dieser Karte liefert (siehe main.js).
 export function createRenderer(canvas, { glow = () => false, marker = true, echoes = null } = {}) {
   const ctx = canvas.getContext('2d');
   const frame = canvas.parentElement;
@@ -176,8 +176,7 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
     lines.forEach((l, i) => ctx.fillText(l, left + width / 2, y + 3 + lineHeight * (i + 0.5)));
   }
 
-  // Echos: andere Spieler als blasses "@", Name klein darüber, Geste kurz als Sprechblase,
-  // Chatnachricht als große Sprechblase (auch über dem eigenen Spieler).
+  // Chatnachricht als Sprechblase über dem Schreiber (auch über dem eigenen Spieler).
   function drawChats(s, camX, camY) {
     const info = echoes?.();
     if (!info?.chatOf) return;
@@ -195,6 +194,7 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
     ctx.restore();
   }
 
+  // Echos: andere Spieler als blasses "@", Name klein darüber.
   function drawEchoes(s, camX, camY, figure) {
     const info = echoes?.();
     if (!info?.list.length) return;
@@ -205,13 +205,11 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
     for (const peer of info.list) {
       const px = (peer.x - camX) * CELL + CELL / 2;
       const py = (peer.y - camY) * CELL;
-      const bubble = info.bubbleOf(peer.id);
-      const label = bubble ?? peer.name;
-      const width = ctx.measureText(label).width + 6;
+      const width = ctx.measureText(peer.name).width + 6;
       ctx.fillStyle = 'rgba(11, 9, 6, 0.75)';
       ctx.fillRect(px - width / 2, py - 7, width, 12);
-      ctx.fillStyle = bubble ? '#ffb347' : info.color;
-      ctx.fillText(label, px, py);
+      ctx.fillStyle = info.color;
+      ctx.fillText(peer.name, px, py);
     }
     ctx.restore();
   }
