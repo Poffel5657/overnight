@@ -94,7 +94,8 @@ test('Zwei Spieler sehen einander, Gesten kommen an, Weggehen wird gemeldet', as
   await say(room, b, { t: 'emote', e: 'wave' });
   expect(a.inbox.at(-1)).toEqual({ t: 'emote', id: b.inbox[0].id, e: 'wave' });
   // Der Fingerabdruck verlässt den Raum nie.
-  expect(JSON.stringify(a.inbox)).not.toContain('bbbb');
+  expect(JSON.stringify(a.inbox)).not.toContain(FP_B);
+  expect(JSON.stringify(b.inbox)).not.toContain(FP_A);
   expect(sockets()).toHaveLength(2);
   remove(b);
   await room.webSocketClose(b, 1005);
