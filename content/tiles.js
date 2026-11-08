@@ -42,4 +42,24 @@ export const TILES = {
   },
   'p': { name: 'plank', glyph: '=', fg: '#a8703a', bg: '#0c2826', walkable: true },
   'B': { name: 'bed', glyph: '=', fg: '#e0705f', bg: '#2a2219', walkable: true },
+  // Seit Tag 6: Tinte. Hält die ausradierte Ecke fest (Belohnung des Events "The Smudge Watch").
+  'i': {
+    name: 'ink line', glyph: '|', fg: '#7f9cf5', bg: '#10142a', walkable: false,
+    bump: 'Fresh ink. It has dried hard. Nothing rubs through this.',
+  },
+  // Seit Tag 6: Mainspring, die Stadt aus Messing und Uhrwerk.
+  'o': { name: 'cobbles', glyph: '·', fg: '#8a7550', bg: '#1d1710', walkable: true },
+  'M': {
+    name: 'brass', glyph: '#', fg: '#c9a04f', bg: '#2a1f0e', walkable: false,
+    bump: 'Brass, warm to the touch. Somewhere inside, it ticks.',
+  },
+  'Q': {
+    name: 'clock tower', glyph: 'Θ', fg: '#f2c56b', bg: '#2a1f0e', walkable: false,
+    bump: 'The clock tower. It is either very early or very late. It refuses to say which.',
+  },
+  '%': {
+    name: 'gear pit', glyph: '%', fg: '#b58b45', bg: '#120d07', walkable: false,
+    bump: 'Gears the size of wagon wheels turn down there. Best keep your fingers.',
+  },
 };
+

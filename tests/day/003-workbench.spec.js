@@ -8,6 +8,8 @@ const quietGame = (x, y, saved = null) => {
   // Ein laufendes Event gilt als schon gehört, damit Figuren hier ihre normalen Sätze sagen.
   const event = activeEvent();
   if (event) s.flags.eventsHeard = { [event.id]: true };
+  // Das Geschenk der Vogelscheuche (seit Tag 6) gilt als schon erhalten, damit sie ihre Sätze sagt.
+  s.flags.gifts = { scarecrow: true };
   s.creatures = [];
   s.player.x = x;
   s.player.y = y;

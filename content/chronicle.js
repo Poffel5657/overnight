@@ -37,4 +37,11 @@ export const CHRONICLE = [
     title: 'Down the well',
     text: 'You won the vote: drink from the well when you are already fine and you slip into the drains. Chests hold armour, the Keeper has a first quest, and behind a locked gate something made of crumbs is waiting.',
   },
+  {
+    day: 6,
+    date: '2026-11-09',
+    title: 'Not alone, and wound up',
+    text: 'You are not alone out here any more: the pale shapes are Echoes, and you can fight beside them. You won the vote: Mainspring, a clockwork town, ticks behind a brass gate in the west. The Dealer finally sells things, favours come back every night, and levels give knack points.',
+  },
 ];
+

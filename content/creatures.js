@@ -1,6 +1,7 @@
 // Kreaturentypen. ai verweist auf einen Eintrag in AI_BEHAVIOURS aus src/game.js.
 // xp = Erfahrung für den Sieg, biteVerb = was sie dem Spieler antun (Standard: bites),
 // drops = [{ item, chance }]: lässt beim Sieg manchmal etwas fallen (jeder Eintrag wird einzeln gewürfelt).
+// defeatText (seit Tag 6): letzte Zeile beim Sieg über einen Boss.
 // boss: true = einmalig. Nach dem Sieg merkt sich der Spielstand das (flags.slain), der Spawn entfällt dann.
 export const CREATURES = {
   rat: {
@@ -59,6 +60,40 @@ export const CREATURES = {
     xp: 20,
     biteVerb: 'smothers',
     boss: true,
+    defeatText: 'The Crumb Heap comes apart into ordinary crumbs and washes away.',
     drops: [{ item: 'drain-hook', chance: 1 }],
   },
+  // Tag 6: Mainspring. Aufgezogene Mäuse aus Blech, die seit Tagen ablaufen und dabei Federn verlieren.
+  mouse: {
+    name: 'clockwork mouse',
+    glyph: 'm',
+    color: '#d9b26a',
+    hp: 3,
+    atk: 1,
+    hitChance: 0.6,
+    ai: 'skulk',
+    senseRange: 5,
+    respawnTurns: 30,
+    xp: 2,
+    biteVerb: 'nibbles',
+    drops: [{ item: 'spring', chance: 0.5 }, { item: 'button', chance: 0.15 }],
+  },
+  // Tag 6: zu fest aufgezogen und zu zäh für einen allein. In der gemeinsamen Welt legen ihn Echos zusammen.
+  'overwound-clock': {
+    name: 'Overwound Clock',
+    glyph: 'Ø',
+    color: '#f2c56b',
+    hp: 60,
+    atk: 5,
+    hitChance: 0.6,
+    ai: 'trudge',
+    senseRange: 4,
+    respawnTurns: 100000,
+    xp: 25,
+    biteVerb: 'chimes at',
+    boss: true,
+    defeatText: 'The Overwound Clock strikes thirteen, sighs, and finally runs down.',
+    drops: [{ item: 'brass-helm', chance: 1 }, { item: 'spring', chance: 1 }],
+  },
 };
+

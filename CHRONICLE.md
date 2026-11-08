@@ -68,3 +68,33 @@ Drei Spieler haben das beeinflusst: Einer wünschte sich Kisten mit Rüstungstei
 Warum: Die Abstimmung war eindeutig, und die Kanäle brauchten Inhalt. Die drei Vorschläge passten fast wörtlich zu dem, was ein neuer, gefährlicherer Ort braucht: Rüstung, Truhen, einen Gegner am Ende. Die Quest verbindet die Wiese, den Rough Draft und die Kanäle und bringt den Bogen weiter, ohne zu viel zu verraten.
 
 Community-Event: „The Smudge Watch“ läuft heute noch (letzter Tag 5). Bisher liegen 7 Beiträge vor, Ziel ist 6. Ausgewertet wird in Nacht 6.
+
+Bewertung (nachgetragen in Nacht 6): 4 Daumen hoch, 0 runter. Kanäle, Rüstung, Boss und Quest kamen an.
+
+## Tag 6 (2026-11-09): Nicht allein, und aufgezogen
+
+Die erste Nacht in der gemeinsamen Welt. Drei Teile, die sich gegenseitig brauchen: Mainspring ist der Ort, die Vorschläge geben ihm Läden, tägliche Gefallen und einen Fähigkeitenbaum, und der Nightwright erzählt, wer die blassen Gestalten sind, und gibt ihnen etwas, das man nur zusammen schafft.
+
+**Teil 1, aus den Vorschlägen: der Stand des Dealers, tägliche Gefallen und Knacks.**
+- Der Dealer hat jetzt einen Stand (`=`) neben dem Rad. Hineinlaufen öffnet das neue Fenster `[ SHOP ]`: fizzy tonic (heilt 5, 2 Knöpfe), strong tea (heilt 12, 4 Knöpfe), ein spitzer Stein (3) und ein Sieb (6). Getränke trinkt man im Fenster GEAR mit „Use“. Ware liegt als Daten in `content/shops.js`.
+- Quests können täglich wiederkommen (`repeat: 'daily'`): Der Mayor in Mainspring will jede Nacht zwei Federn, der Dealer zwei graue Krümel (erst nach „Grey Crumbs“). Belohnung Knöpfe und etwas Erfahrung, damit der Stand etwas zu tun hat.
+- **Knacks**, ein kleiner Fähigkeitenbaum: Jeder Aufstieg über Stufe 1 gibt einen Punkt, den man im Fenster GEAR in Sturdy (+3 max HP), Sharp (+1 Angriff) oder Thick-skinned (+1 Abwehr) steckt, je höchstens drei Ränge. Bei Stufe 10 sind alle neun verteilt. Alte Spielstände bekommen die Punkte ihrer Stufe nachträglich.
+- Einfluss: Ein Spieler wünschte sich, dass der Dealer Tränke und Material verkauft und wiederholbare Aufgaben gibt; ein anderer einen Baum, in dem man Angriff und Abwehr selbst steigert. Beides fast vollständig gebaut. Ein dritter wünschte sich eine Stadt mit Berufen (Bergbau, Kräuter, Alchemie …), tiefere Kanäle mit zweitem Boss und einen größeren Beutel: Die Stadt kam über die Abstimmung, der zweite Boss steht in Mainspring, die Berufe sind notiert. Außerdem notiert: ein Magierturm mit Lehrling und Zaubern aus Büchern, ein Heckenlabyrinth mit einem Zentauren, dessen Tritten man ausweichen muss. Beide stehen jetzt auf dem Stimmzettel.
+
+**Teil 2, aus der Abstimmung: Mainspring.** Zettel 5: Stadt aus Dampf und Zahnrädern 4 Stimmen, Hütte wächst 1, weitere Waffen 0, Zwergenkapelle 0, tieferer Teich 0. Hinter einem tickenden Messingtor in den westlichen Bäumen der Wiese liegt **Mainspring** (30 x 13): Messing, Kopfsteinpflaster, Zahnradgruben (`%`) und ein Uhrturm. Der **Tinker** (`T`) repariert die Stadt und will drei Federn („Loose Springs“), dafür gibt es den **Messingschraubenschlüssel** (Angriff +4, ein Stück vom Wunsch nach mehr Waffen). Der **Mayor** (`M`) hat einen Schlüssel im Rücken und den täglichen Gefallen. Im Winding Yard im Osten laufen **Uhrwerkmäuse** (`m`, 3 HP, verlieren Federn), und dort wartet die **Overwound Clock** (`Ø`, 60 HP, schlägt mit 5), zu fest aufgezogen und ausdrücklich nicht für einen allein gedacht. Sie hinterlässt einen **Messinghelm** (Abwehr 2).
+
+**Teil 3, vom Nightwright: die Echos, „Many Hands“ und die Tinte.**
+- Die Enthüllung: Die nassen Fußspuren in den Kanälen waren keine Geister. Der Nightwright hat mehr als einen Wanderer in dieselbe Welt gezeichnet, die Bewohner nennen sie **Echoes**. Das Schild auf der Wiese ist mit Bleistift korrigiert („Population: you, and the Echoes“), die Fußspuren haben jetzt jede Größe, Keeper, Vogelscheuche und Dealer reden darüber.
+- Spielbar: Der Keeper gibt nach „Grey Crumbs“ die Quest **„Many Hands“**: drei Kreaturen zusammen mit einem Echo besiegen (beide müssen treffen). Dafür zählt `stats.together`, und Quests können jetzt statt Gegenständen einen Wert aus `state.stats` verlangen. Belohnung: zwei Flaschen Tee und 8 XP. Die Overwound Clock ist das passende Gegenstück: ein Boss, der zusammen viel leichter ist.
+- Event-Belohnung: Die Wache hat gehalten. Um die ausradierte Ecke zieht sich jetzt eine Tintenlinie (`|`), und sie hat sich keinen Zoll weiter ausgebreitet. Die Vogelscheuche schenkt jedem, der vorbeikommt, einmal ihren Ersatzhut (Abwehr 1) und 5 XP. Figuren können dafür jetzt ein einmaliges `gift` haben.
+
+Warum: Die Abstimmung war eindeutig, und die gemeinsame Welt geht heute live. Mainspring gibt allen einen neuen Ort, an dem man sich trifft, und die Bewertungen (Tag 3 bis 5 nur Daumen hoch) und Wünsche zeigen, dass Tiefe ankommt: Ausrüstung, Fortschritt, Bosse. Der Stand gibt den Knöpfen endlich einen Zweck, die täglichen Gefallen einen Grund, jede Nacht wiederzukommen.
+
+Community-Event: „The Smudge Watch“ ist ausgewertet: 13 Beiträge bei Ziel 6, erreicht. Belohnung gebaut (Tinte, Hut). Kein neues Event heute (frühestens Nacht 7).
+
+Bewertung von Tag 5: 4 hoch, 0 runter.
+
+Nicht neu, aber gefunden: Das Quest-Log blieb ohne laufendes Event unsichtbar, wenn eine Quest neu hinzukam (der neue Eintrag galt nicht als Änderung). Behoben in `src/quests.js`.
+
+Problem: Der geschützte Smoke-Test `tests/smoke/presence.spec.js` („Echos: nur mit ?echoes=1 …“) ist zeitabhängig. Seine vier Züge vom Start in der Hütte enden wieder auf dem Startfeld; kommen sie innerhalb von 150 ms nach der ersten Positionsmeldung, schickt die Drosselung keine neue Position, und der Test wartet vergeblich. Auf unverändertem `main` scheitert er hier etwa einmal in drei Läufen, mit Tag 6 öfter. Chris ist informiert.
+
