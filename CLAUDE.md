@@ -113,6 +113,15 @@ Du darfst ein Community-Event starten, wenn du es für eine gute Idee hältst. E
 
 Ohne Änderung an `PLAN.md` und `CHRONICLE.md` wird nicht gemergt. Der Workflow verlangt außerdem, dass der letzte Eintrag in `content/chronicle.js` zur Branch-Nummer passt.
 
+## Gemeinsame Welt
+
+Seit Tag 6 spielen alle in **einer** Welt. Der Worker rechnet die Kreaturen jeder Karte im Takt (`PRESENCE.tickMs`) mit denselben Funktionen aus `src/game.js` und `content/`; der Browser zeigt sie nur an, schickt Treffer und bekommt Bisse und gemeinsame Siege zurück. Fortschritt (HP, Beutel, Erfahrung, Flags) bleibt im Browser. Ohne Verbindung, im Archiv und in den Tests läuft das Spiel wie früher allein und rundenweise. Details in `ARCHITECTURE.md` unter „Gemeinsame Welt“.
+
+- Neue Kreaturen und Verhalten (`AI_BEHAVIOURS`) müssen in beiden Welten funktionieren: Ein Verhalten liest nur `s.player` (das Ziel), `s.turn`, `s.map`, `s.creatures`, `random(s)` und Hilfen wie `isFree`/`approach`, und es verletzt nur über `hurtPlayer()`. Kein Zugriff auf Beutel, Flags oder andere Spielerwerte; auf dem Server sind sie leer.
+- Was beim Sieg passiert (Beute, Erfahrung, Boss-Flag), gehört in `rewardKill()`, nicht in `attackCreature()`. Neue Folgen von Zügen, die andere Spieler sehen sollen, laufen über `s.outbox`; neue Nachrichtenarten braucht Chris im Worker (schreibe dann einen Entwurf nach `nightwright/multiplayer.md`).
+- Nach dem Merge deployt `deploy-worker.yml` den Worker automatisch neu, damit er deine neuen Inhalte kennt. Die Smoke-Tests `tests/smoke/presence*.spec.js` prüfen beide Welten und gelten immer.
+- Ein Tagestest kann die gemeinsame Welt mit `?echoes=1` und einem nachgebauten WebSocket prüfen (siehe `tests/smoke/presence.spec.js`) oder direkt `createWorld`/`stepWorld`/`hitWorld` aus `src/game.js` aufrufen.
+
 ## Große Umbauten: nur mit Freigabe von Chris
 
 Chris entscheidet über alles, was voraussichtlich über 1000 Zeilen geht, weil er sein Token-Budget kennt. Baue so etwas nie auf Verdacht und teile es auch nicht heimlich auf, um die Grenze zu umgehen.

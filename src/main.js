@@ -1,6 +1,7 @@
 // Verbindet Spiellogik, Darstellung und Bedienung im Browser.
 import {
   act, attackOf, countItem, createGame, currentDay, defenseOf, equip, log, nextLevelXp, questState, ARMOR_SLOTS,
+  applyWorld, leaveWorld, rewardKill, takeBite,
 } from './game.js';
 import { createRenderer } from './render.js';
 import { loadSave, saveKey, writeSave } from './save.js';
@@ -16,6 +17,7 @@ import { crtEnabled, reducedMotion, setupBoot, setupCountdown, setupCrt } from '
 import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
 import { MAPS } from '../content/world.js';
+import { CREATURES } from '../content/creatures.js';
 import { BALLOT } from '../content/ballot.js';
 import { QUESTS } from '../content/quests.js';
 import { PRESENCE } from '../content/presence.js';
@@ -40,7 +42,7 @@ const state = createGame({
 
 let glow = crtEnabled();
 // Echos (andere Spieler) werden weiter unten verbunden; bis dahin gibt es keine.
-let presence = { here: () => [], bubbleOf: () => null, total: () => 0, moved() {}, emote() {}, active: false };
+let presence = { here: () => [], bubbleOf: () => null, total: () => 0, moved() {}, emote() {}, send() {}, myId: () => null, active: false };
 const draw = createRenderer($('world'), {
   glow: () => glow,
   marker: !archivedDay,
@@ -273,12 +275,22 @@ function setupTonight() {
 
 let updateEvent = () => {};
 
+// In der gemeinsamen Welt läuft die Zeit von selbst; mehr als ein Zug pro ACTION_GAP_MS geht nicht.
+const ACTION_GAP_MS = 110;
+let lastAction = 0;
+
 function perform(action) {
+  if (state.shared) {
+    const now = Date.now();
+    if (now - lastAction < ACTION_GAP_MS) return;
+    lastAction = now;
+  }
   act(state, action);
   writeSave(key, state);
   refresh();
   updateEvent();
   presence.moved();
+  if (state.outbox?.length) presence.send(state.outbox.splice(0));
 }
 
 // Anzeige über der Karte: wie viele Echos hier und insgesamt unterwegs sind.
@@ -309,6 +321,41 @@ function setupEchoes() {
     onEmote: (peer, emote) => {
       log(state, `${peer.name} ${emote.verb}.`, 'echo');
       drawLog();
+    },
+    // Gemeinsame Welt: Kreaturen vom Server, oder zurück zur eigenen, wenn er die Karte nicht kennt.
+    onWorld: (map, creatures) => {
+      if (map !== state.map) return;
+      if (creatures === null) leaveWorld(state);
+      else applyWorld(state, creatures);
+      draw(state);
+    },
+    onBite: (type) => {
+      const mapBefore = state.map;
+      takeBite(state, type);
+      writeSave(key, state);
+      refresh();
+      updateEvent();
+      if (state.map !== mapBefore) presence.moved();
+    },
+    onSlain: (type, by, mine) => {
+      const def = CREATURES[type];
+      if (!def) return;
+      const others = by.filter((p) => p.id !== presence.myId()).map((p) => p.name);
+      if (mine) {
+        const text = others.length
+          ? `Together with ${others.join(' and ')} you defeat the ${def.name}.`
+          : `You defeat the ${def.name}.`;
+        rewardKill(state, type, text);
+        writeSave(key, state);
+      } else if (others.length) {
+        log(state, `${others.join(' and ')} defeated the ${def.name}.`, 'echo');
+      }
+      refresh();
+      updateEvent();
+    },
+    onLost: () => {
+      leaveWorld(state);
+      draw(state);
     },
   });
   if (!presence.active) return;

@@ -84,3 +84,72 @@ test('Echos: nur mit ?echoes=1 vor dem Starttag, dann Anzeige, Position und Gest
   await expect(page.locator('#echo-count')).toHaveText('· alone');
 });
 
+
+test('Gemeinsame Welt im Spiel: Kreaturen vom Server, Treffer, gemeinsamer Sieg, Biss, Rückfall auf solo', async ({ page }) => {
+  await page.addInitScript(fakeSocket);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/?seed=7&echoes=1');
+  await page.waitForFunction(() => window.__overnight && window.__presence.length === 1 && window.__presence[0].sent.length > 0);
+
+  // Der Server schickt eine Ratte direkt rechts neben den Spieler.
+  await page.evaluate(() => {
+    const s = window.__overnight.state;
+    window.__presence[0].emit('message', { data: JSON.stringify({ t: 'world', map: s.map, turn: 1, creatures: [
+      { id: 'c7', type: 'rat', x: s.player.x + 1, y: s.player.y, hp: 2 },
+      { id: 'c8', type: 'no-such-creature', x: 1, y: 1, hp: 2 },
+    ] }) });
+  });
+  const s1 = await page.evaluate(() => ({ shared: window.__overnight.state.shared, creatures: window.__overnight.state.creatures.map((c) => c.id) }));
+  expect(s1).toEqual({ shared: true, creatures: ['c7'] });
+
+  // Zug nach rechts ist ein Treffer, der an den Server geht. Die Ratte bewegt sich nicht von selbst.
+  const xpBefore = await page.evaluate(() => window.__overnight.state.player.xp);
+  await page.evaluate(() => window.__overnight.act('right'));
+  const hit = await page.evaluate(() => window.__presence[0].sent.filter((m) => m.t === 'hit'));
+  expect(hit).toHaveLength(1);
+  expect(hit[0]).toMatchObject({ t: 'hit', id: 'c7' });
+  expect(hit[0].dmg).toBeGreaterThan(0);
+
+  // Sieg zusammen mit tinker-3f2: Erfahrung für mich, Log nennt den anderen.
+  await page.evaluate(() => window.__presence[0].emit('message', { data: JSON.stringify({
+    t: 'slain', id: 'c7', type: 'rat', by: [{ id: 'ff00', name: 'scribe-abc' }, { id: 'aa11', name: 'tinker-3f2' }],
+  }) }));
+  await expect.poll(() => page.evaluate(() => window.__overnight.state.player.xp)).toBeGreaterThan(xpBefore);
+  await expect(page.locator('#log')).toContainText('Together with tinker-3f2 you defeat the rat.');
+
+  // Sieg nur durch andere: keine Erfahrung, nur eine Zeile.
+  const xpMid = await page.evaluate(() => window.__overnight.state.player.xp);
+  await page.evaluate(() => window.__presence[0].emit('message', { data: JSON.stringify({
+    t: 'slain', id: 'c9', type: 'rat', by: [{ id: 'aa11', name: 'tinker-3f2' }],
+  }) }));
+  await expect(page.locator('#log')).toContainText('tinker-3f2 defeated the rat.');
+  expect(await page.evaluate(() => window.__overnight.state.player.xp)).toBe(xpMid);
+
+  // Biss vom Server kostet HP.
+  const hp = await page.evaluate(() => window.__overnight.state.player.hp);
+  await page.evaluate(() => window.__presence[0].emit('message', { data: JSON.stringify({ t: 'bite', type: 'rat' }) }));
+  expect(await page.evaluate(() => window.__overnight.state.player.hp)).toBe(hp - 1);
+
+  // Verbindung weg: eigene Welt mit eigenen Kreaturen, Züge bewegen sie wieder selbst.
+  await page.evaluate(() => window.__presence[0].emit('close', {}));
+  const s2 = await page.evaluate(() => ({ shared: window.__overnight.state.shared, n: window.__overnight.state.creatures.length }));
+  expect(s2.shared).toBe(false);
+  expect(s2.n).toBeGreaterThan(0);
+});
+
+test('Gemeinsame Welt: Server kennt die Karte nicht, dann bleibt sie solo', async ({ page }) => {
+  await page.addInitScript(fakeSocket);
+  await page.goto('/?seed=7&echoes=1');
+  await page.waitForFunction(() => window.__overnight && window.__presence.length === 1 && window.__presence[0].sent.length > 0);
+  await page.evaluate(() => {
+    const s = window.__overnight.state;
+    window.__presence[0].emit('message', { data: JSON.stringify({ t: 'world', map: s.map, creatures: [] }) });
+  });
+  expect(await page.evaluate(() => window.__overnight.state.shared)).toBe(true);
+  await page.evaluate(() => {
+    const s = window.__overnight.state;
+    window.__presence[0].emit('message', { data: JSON.stringify({ t: 'world', map: s.map, creatures: null }) });
+  });
+  expect(await page.evaluate(() => window.__overnight.state.shared)).toBe(false);
+  expect(await page.evaluate(() => window.__overnight.state.creatures.length)).toBeGreaterThan(0);
+});

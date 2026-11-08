@@ -127,11 +127,13 @@ function gainXp(s, amount) {
 export const creatureAt = (s, x, y) =>
   s.creatures.find((c) => c.respawnAt === null && c.x === x && c.y === y);
 
+// s.others: andere Spieler in der gemeinsamen Welt (nur auf dem Server gesetzt), auf deren Feld nichts tritt.
 const isFree = (s, x, y) =>
   tileAt(s.map, x, y).walkable &&
   !entityAt(s, x, y) &&
   !creatureAt(s, x, y) &&
-  !(s.player.x === x && s.player.y === y);
+  !(s.player.x === x && s.player.y === y) &&
+  !s.others?.some((p) => p.x === x && p.y === y);
 
 const distance = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
@@ -148,11 +150,13 @@ function spawnCreatures(s, mapId) {
 }
 
 // Wechselt die Karte. Kreaturen der neuen Karte erscheinen frisch, nie auf dem Ankunftsfeld.
+// In der gemeinsamen Welt schickt der Server die Kreaturen der neuen Karte; bis dahin ist sie leer.
 function enterMap(s, mapId, x, y) {
   s.map = mapId;
   s.player.x = x;
   s.player.y = y;
-  s.creatures = spawnCreatures(s, mapId).filter((c) => !(c.x === x && c.y === y));
+  s.creatures = s.shared ? [] : spawnCreatures(s, mapId).filter((c) => !(c.x === x && c.y === y));
+  s.worldMap = null;
 }
 
 // saved: migrierter Spielstand aus save.js oder null für ein neues Spiel.
@@ -354,7 +358,10 @@ export const WHEEL_EFFECTS = {
     const spot = Object.values(DIRS)
       .map(([dx, dy]) => ({ x: s.player.x + dx, y: s.player.y + dy }))
       .find(({ x, y }) => isFree(s, x, y));
-    if (spot) s.creatures.push(newCreature(w.creature, spot.x, spot.y, true));
+    if (!spot) return;
+    // In der gemeinsamen Welt setzt der Server den Besucher, damit alle ihn sehen.
+    if (s.shared) s.outbox.push({ t: 'summon', type: w.creature, x: spot.x, y: spot.y });
+    else s.creatures.push(newCreature(w.creature, spot.x, spot.y, true));
   },
 };
 
@@ -369,30 +376,49 @@ function spinWheel(s) {
 function attackCreature(s, c) {
   const def = CREATURES[c.type];
   const weapon = ITEMS[s.player.weapon];
+  // Gemeinsame Welt: Der Server zieht die HP ab und meldet den Sieg allen, die mitgekämpft haben.
+  if (s.shared) {
+    s.outbox.push({ t: 'hit', id: c.id, dmg: attackOf(s) });
+    c.hp -= attackOf(s);
+    log(s, weapon ? `You ${weapon.hitVerb} the ${def.name}.` : `You hit the ${def.name}.`);
+    return;
+  }
   c.hp -= attackOf(s);
   if (c.hp <= 0) {
     c.respawnAt = s.turn + def.respawnTurns;
     if (c.once || def.boss) s.creatures.splice(s.creatures.indexOf(c), 1);
-    if (def.boss) (s.flags.slain ??= {})[c.type] = true;
-    s.stats.kills += 1;
-    log(s, weapon ? `You ${weapon.hitVerb} the ${def.name}. It leaves.` : `You squash the ${def.name}.`);
-    if (def.boss) log(s, `The ${def.name} comes apart into ordinary crumbs and washes away.`, 'new-tonight');
-    for (const drop of def.drops ?? []) {
-      if (random(s) >= drop.chance) continue;
-      giveItem(s, drop.item);
-      log(s, `The ${def.name} leaves a ${ITEMS[drop.item].name} behind.`);
-      describeGain(s, drop.item);
-    }
-    gainXp(s, def.xp ?? 0);
+    rewardKill(s, c.type, weapon ? `You ${weapon.hitVerb} the ${def.name}. It leaves.` : `You squash the ${def.name}.`);
   } else {
     log(s, weapon ? `You ${weapon.hitVerb} the ${def.name}.` : `You hit the ${def.name}.`);
   }
 }
 
+// Sieg über eine Kreatur: Zähler, Boss-Flag, Beute, Erfahrung. text ist die erste Logzeile.
+export function rewardKill(s, type, text) {
+  const def = CREATURES[type];
+  if (!def) return;
+  if (def.boss) (s.flags.slain ??= {})[type] = true;
+  s.stats.kills += 1;
+  log(s, text);
+  if (def.boss) log(s, `The ${def.name} comes apart into ordinary crumbs and washes away.`, 'new-tonight');
+  for (const drop of def.drops ?? []) {
+    if (random(s) >= drop.chance) continue;
+    giveItem(s, drop.item);
+    log(s, `The ${def.name} leaves a ${ITEMS[drop.item].name} behind.`);
+    describeGain(s, drop.item);
+  }
+  gainXp(s, def.xp ?? 0);
+}
+
 // Rüstung zieht ihre Abwehr vom Schaden ab, ein Punkt geht immer durch.
 export const damageFrom = (s, def) => Math.max(1, def.atk - defenseOf(s));
 
+// Auf dem Server (s.onHurt) trifft der Biss einen echten Spieler; sein Browser rechnet den Schaden.
 function hurtPlayer(s, def) {
+  if (s.onHurt) {
+    s.onHurt(def);
+    return false;
+  }
   s.player.hp -= damageFrom(s, def);
   log(s, `The ${def.name} ${def.biteVerb ?? 'bites'} you.`, 'danger');
   if (s.player.hp <= 0) {
@@ -475,6 +501,8 @@ export const AI_BEHAVIOURS = {
 
 function endTurn(s) {
   s.turn += 1;
+  // In der gemeinsamen Welt bewegt der Server die Kreaturen im Takt, nicht der eigene Zug.
+  if (s.shared) return;
   for (const c of s.creatures) {
     if (c.respawnAt === null) continue;
     if (s.turn >= c.respawnAt && distance(c.spawn, s.player) > 5 && isFree(s, c.spawn.x, c.spawn.y)) {
@@ -523,4 +551,103 @@ export function act(s, action) {
   s.player.y = y;
   endTurn(s);
   return true;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Gemeinsame Welt (seit Tag 6). Der Server (worker/presence.js) führt pro Karte eine Welt mit
+// createWorld() und rechnet sie im Takt mit stepWorld(). Dafür nutzt er dieselben AI_BEHAVIOURS:
+// Jede Kreatur sieht als s.player den nächsten Spieler, Bisse gehen über s.onHurt an dessen Browser.
+// Im Browser setzt applyWorld() die Kreaturen vom Server, takeBite() rechnet einen Biss,
+// rewardKill() einen gemeinsamen Sieg. s.shared und s.outbox werden nie gespeichert.
+
+// Nach einem Sieg kommen Bosse in der gemeinsamen Welt nach dieser Zahl Takte wieder, damit Spätere sie auch treffen.
+export const WORLD_BOSS_RESPAWN = 900;
+
+export function createWorld(mapId, seed = 1) {
+  let next = 0;
+  const creatures = MAPS[mapId].spawns.map((spawn) => ({ ...newCreature(spawn.type, spawn.x, spawn.y), id: `c${next++}` }));
+  return { map: mapId, turn: 0, seed: seed | 0, creatures, next, hitters: {} };
+}
+
+const nearest = (c, players) => players.reduce((best, p) => (!best || distance(c, p) < distance(c, best) ? p : best), null);
+
+// Ein Takt. players: [{ id, x, y }] auf dieser Karte. Rückgabe: Bisse [{ id, type }].
+export function stepWorld(world, players) {
+  const bites = [];
+  world.turn += 1;
+  const base = { map: world.map, turn: world.turn, seed: world.seed, flags: {}, creatures: world.creatures, others: players };
+  for (const c of world.creatures) {
+    if (c.respawnAt === null || world.turn < c.respawnAt) continue;
+    const view = { ...base, player: { x: -99, y: -99 } };
+    if (players.every((p) => distance(c.spawn, p) > 5) && isFree(view, c.spawn.x, c.spawn.y)) {
+      Object.assign(c, { x: c.spawn.x, y: c.spawn.y, hp: CREATURES[c.type].hp, respawnAt: null });
+      delete world.hitters[c.id];
+    }
+  }
+  if (!players.length) return bites;
+  for (const c of world.creatures) {
+    const def = CREATURES[c.type];
+    if (c.respawnAt !== null || !def || !AI_BEHAVIOURS[def.ai]) continue;
+    const target = nearest(c, players);
+    const view = {
+      ...base,
+      seed: world.seed,
+      player: { x: target.x, y: target.y },
+      others: players.filter((p) => p !== target),
+      onHurt: () => bites.push({ id: target.id, type: c.type }),
+    };
+    AI_BEHAVIOURS[def.ai](view, c, def);
+    world.seed = view.seed;
+  }
+  return bites;
+}
+
+// Ein Spieler trifft eine Kreatur. Rückgabe: null (ungültig), { killed: false } oder { killed: true, type, hitters }.
+export function hitWorld(world, id, dmg, player) {
+  const c = world.creatures.find((x) => x.id === id && x.respawnAt === null);
+  if (!c || distance(c, player) !== 1) return null;
+  const def = CREATURES[c.type];
+  c.hp -= dmg;
+  const hitters = (world.hitters[c.id] ??= []);
+  if (!hitters.includes(player.id)) hitters.push(player.id);
+  if (c.hp > 0) return { killed: false };
+  delete world.hitters[c.id];
+  if (c.once) world.creatures.splice(world.creatures.indexOf(c), 1);
+  else c.respawnAt = world.turn + (def.boss ? WORLD_BOSS_RESPAWN : def.respawnTurns);
+  return { killed: true, type: c.type, hitters };
+}
+
+// Besucher vom Glücksrad in der gemeinsamen Welt. Nur Kreaturen, die das Rad wirklich bringt.
+export function summonWorld(world, type, x, y) {
+  if (!WHEEL.wedges.some((w) => w.effect === 'visitor' && w.creature === type)) return false;
+  const view = { map: world.map, flags: {}, creatures: world.creatures, player: { x: -99, y: -99 }, others: [] };
+  if (!isFree(view, x, y)) return false;
+  world.creatures.push({ ...newCreature(type, x, y, true), id: `c${world.next++}` });
+  return true;
+}
+
+// Browser: Kreaturen vom Server übernehmen. Unbekannte Arten (ältere Spielversion) bleiben weg.
+export function applyWorld(s, creatures) {
+  s.shared = true;
+  s.worldMap = s.map;
+  s.outbox ??= [];
+  s.creatures = creatures
+    .filter((c) => CREATURES[c.type])
+    .map((c) => ({ id: c.id, type: c.type, x: c.x, y: c.y, hp: c.hp, spawn: { x: c.x, y: c.y }, respawnAt: null, once: false }));
+}
+
+// Browser: zurück zur eigenen Welt (keine Verbindung, oder der Server kennt diese Karte nicht).
+export function leaveWorld(s) {
+  if (!s.shared) return;
+  s.shared = false;
+  s.worldMap = null;
+  s.outbox = [];
+  s.creatures = spawnCreatures(s, s.map).filter((c) => !(c.x === s.player.x && c.y === s.player.y));
+}
+
+// Browser: Biss vom Server. Rückgabe true, wenn der Spieler ohnmächtig wurde (und auf der Wiese aufwacht).
+export function takeBite(s, type) {
+  const def = CREATURES[type];
+  if (!def) return false;
+  return hurtPlayer(s, def);
 }

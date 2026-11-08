@@ -1,6 +1,8 @@
-// Echos: andere Spieler in derselben Welt. Geschützte Datei: Netzwerkzugriff wie chat.js.
-// Das Spiel meldet dem Worker nur die eigene Position (Karte, x, y) und Gesten aus einer festen Liste.
-// Zurück kommen Positionen und Gesten der anderen mit ihren anonymen Tagesnamen. Kein Freitext.
+// Echos und gemeinsame Welt. Geschützte Datei: Netzwerkzugriff wie chat.js.
+// Das Spiel meldet dem Worker die eigene Position (Karte, x, y), Gesten aus einer festen Liste, Treffer
+// auf Kreaturen ({ t: 'hit', id, dmg }) und Besucher vom Glücksrad ({ t: 'summon', type, x, y }).
+// Zurück kommen Positionen und Gesten der anderen mit ihren anonymen Tagesnamen, der Stand der Kreaturen
+// der eigenen Karte ('world'), Bisse ('bite') und gemeinsame Siege ('slain'). Kein Freitext.
 // Alles kommt als Text ins DOM (textContent), nie als HTML.
 import { SUGGEST_URL } from './config.js';
 
@@ -9,7 +11,16 @@ const HIDDEN_CLOSE_MS = 60_000;
 const BUBBLE_MS = 3500;
 const NAME = /^[a-z]+-[0-9a-f]{3}$/;
 const ID = /^[0-9a-f]{1,12}$/;
+const CREATURE_ID = /^c\d{1,6}$/;
+const KIND = /^[a-z0-9-]{1,32}$/;
 const coord = (v) => Number.isInteger(v) && v >= 0 && v <= 255;
+const OUTGOING = new Set(['hit', 'summon']);
+
+function readCreature(c) {
+  if (!c || !CREATURE_ID.test(String(c.id)) || !KIND.test(String(c.type))) return null;
+  if (!coord(c.x) || !coord(c.y) || !Number.isInteger(c.hp)) return null;
+  return { id: c.id, type: c.type, x: c.x, y: c.y, hp: c.hp };
+}
 
 // Liest eine Nachricht vom Worker. Unbekanntes oder Kaputtes wird verworfen.
 export function readMessage(raw, knownMap) {
@@ -29,6 +40,16 @@ export function readMessage(raw, knownMap) {
   }
   if (data?.t === 'gone' && ID.test(String(data.id))) return { t: 'gone', id: data.id };
   if (data?.t === 'emote' && ID.test(String(data.id)) && typeof data.e === 'string') return { t: 'emote', id: data.id, e: data.e };
+  if (data?.t === 'world' && KIND.test(String(data.map))) {
+    if (data.creatures === null) return { t: 'world', map: data.map, creatures: null };
+    if (!Array.isArray(data.creatures)) return null;
+    return { t: 'world', map: data.map, creatures: data.creatures.map(readCreature).filter(Boolean) };
+  }
+  if (data?.t === 'bite' && KIND.test(String(data.type))) return { t: 'bite', type: data.type };
+  if (data?.t === 'slain' && CREATURE_ID.test(String(data.id)) && KIND.test(String(data.type)) && Array.isArray(data.by)) {
+    const by = data.by.filter((p) => ID.test(String(p?.id)) && NAME.test(String(p?.name))).map((p) => ({ id: p.id, name: p.name }));
+    return { t: 'slain', id: data.id, type: data.type, by };
+  }
   return null;
 }
 
@@ -40,9 +61,13 @@ function readPeer(p, knownMap) {
 
 // enabled: ob Echos heute an sind. getPosition(): { map, x, y } des Spielers. knownMap(id): gibt es die Karte?
 // onChange(): neu zeichnen. onEmote(peer, emote): jemand auf derselben Karte hat eine Geste gemacht.
-// Gibt { moved, emote, here, total, bubbleOf } zurück; bei ausgeschalteten Echos tun alle nichts.
-export function setupPresence({ archived, enabled, emotes, getPosition, knownMap, onChange, onEmote }) {
-  const idle = { moved() {}, emote() {}, here: () => [], total: () => 0, bubbleOf: () => null, active: false };
+// onWorld(map, creatures | null), onBite(type), onSlain(type, by, mine), onLost(): gemeinsame Welt.
+// Gibt { moved, emote, send, here, total, bubbleOf } zurück; bei ausgeschalteten Echos tun alle nichts.
+export function setupPresence({
+  archived, enabled, emotes, getPosition, knownMap, onChange, onEmote,
+  onWorld = () => {}, onBite = () => {}, onSlain = () => {}, onLost = () => {},
+}) {
+  const idle = { moved() {}, emote() {}, send() {}, myId: () => null, here: () => [], total: () => 0, bubbleOf: () => null, active: false };
   if (archived || !enabled || !SUGGEST_URL) return idle;
 
   const peers = new Map();
@@ -55,6 +80,7 @@ export function setupPresence({ archived, enabled, emotes, getPosition, knownMap
   let lastSent = 0;
   let sendTimer = null;
   let sentKey = '';
+  let myId = null;
 
   const sendPosition = () => {
     clearTimeout(sendTimer);
@@ -76,6 +102,13 @@ export function setupPresence({ archived, enabled, emotes, getPosition, knownMap
     else sendTimer = setTimeout(sendPosition, wait);
   }
 
+  // Treffer und Besucher aus state.outbox. Nur bekannte Arten gehen raus.
+  function send(messages) {
+    if (!ready) return;
+    sendPosition();
+    for (const message of messages) if (OUTGOING.has(message?.t)) ws.send(JSON.stringify(message));
+  }
+
   function emote(id) {
     if (!ready || !emotes.some((e) => e.id === id)) return false;
     ws.send(JSON.stringify({ t: 'emote', e: id }));
@@ -94,6 +127,7 @@ export function setupPresence({ archived, enabled, emotes, getPosition, knownMap
       if (!data) return;
       if (data.t === 'hello') {
         ready = true;
+        myId = data.id;
         backoff = 3000;
         peers.clear();
         for (const peer of data.peers) peers.set(peer.id, peer);
@@ -111,6 +145,15 @@ export function setupPresence({ archived, enabled, emotes, getPosition, knownMap
         bubbles.set(peer.id, { text: kind.bubble, until: Date.now() + BUBBLE_MS });
         setTimeout(onChange, BUBBLE_MS + 50);
         onEmote(peer, kind);
+      } else if (data.t === 'world') {
+        if (data.map === getPosition().map) onWorld(data.map, data.creatures);
+        return;
+      } else if (data.t === 'bite') {
+        onBite(data.type);
+        return;
+      } else if (data.t === 'slain') {
+        onSlain(data.type, data.by, data.by.some((p) => p.id === myId));
+        return;
       }
       onChange();
     });
@@ -119,6 +162,7 @@ export function setupPresence({ archived, enabled, emotes, getPosition, knownMap
       ws = null;
       ready = false;
       peers.clear();
+      onLost();
       onChange();
       if (document.hidden) return;
       retry = setTimeout(connect, backoff);
@@ -133,6 +177,7 @@ export function setupPresence({ archived, enabled, emotes, getPosition, knownMap
     ready = false;
     peers.clear();
     socket?.close();
+    onLost();
     onChange();
   }
 
@@ -153,5 +198,5 @@ export function setupPresence({ archived, enabled, emotes, getPosition, knownMap
     if (!bubble || bubble.until < Date.now()) return null;
     return bubble.text;
   };
-  return { moved, emote, here, total: () => peers.size, bubbleOf, active: true };
+  return { moved, emote, send, myId: () => myId, here, total: () => peers.size, bubbleOf, active: true };
 }
