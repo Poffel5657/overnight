@@ -124,9 +124,77 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
     }
     drawEchoes(s, camX, camY, figure);
     figure(s.player.x, s.player.y, '@', '#ffffff');
+    drawChats(s, camX, camY);
   }
 
-  // Echos: andere Spieler als blasses "@", Name klein darüber, Geste kurz als Sprechblase.
+  // Sprechblase aus dem Chat über einer Figur: höchstens drei Zeilen, mit Spitze nach unten.
+  const BUBBLE_CHARS = 24;
+  const BUBBLE_LINES = 3;
+  function wrap(text) {
+    const lines = [];
+    let line = '';
+    for (const word of text.split(' ')) {
+      const parts = word.match(new RegExp(`.{1,${BUBBLE_CHARS}}`, 'g')) ?? [''];
+      for (const part of parts) {
+        if (!line) line = part;
+        else if (line.length + 1 + part.length <= BUBBLE_CHARS) line += ` ${part}`;
+        else {
+          lines.push(line);
+          line = part;
+        }
+      }
+    }
+    if (line) lines.push(line);
+    if (lines.length > BUBBLE_LINES) {
+      lines.length = BUBBLE_LINES;
+      lines[BUBBLE_LINES - 1] = `${lines[BUBBLE_LINES - 1].slice(0, BUBBLE_CHARS - 1)}…`;
+    }
+    return lines;
+  }
+
+  function speech(px, top, text) {
+    const lines = wrap(text);
+    const lineHeight = Math.round(CELL * 0.38);
+    ctx.font = `${Math.round(CELL * 0.34)}px ui-monospace, monospace`;
+    const width = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 10;
+    const height = lines.length * lineHeight + 6;
+    const viewWidth = VIEW_COLS * CELL;
+    // Am Rand nicht aus dem Bild ragen.
+    const left = Math.min(Math.max(px - width / 2, 2), viewWidth - width - 2);
+    const y = Math.max(top - height - 6, 2);
+    ctx.fillStyle = 'rgba(11, 9, 6, 0.9)';
+    ctx.strokeStyle = '#ffb347';
+    ctx.lineWidth = 1;
+    ctx.fillRect(left, y, width, height);
+    ctx.strokeRect(left + 0.5, y + 0.5, width - 1, height - 1);
+    ctx.beginPath();
+    ctx.moveTo(px - 4, y + height);
+    ctx.lineTo(px, y + height + 5);
+    ctx.lineTo(px + 4, y + height);
+    ctx.fill();
+    ctx.fillStyle = '#ffe2b0';
+    lines.forEach((l, i) => ctx.fillText(l, left + width / 2, y + 3 + lineHeight * (i + 0.5)));
+  }
+
+  // Echos: andere Spieler als blasses "@", Name klein darüber, Geste kurz als Sprechblase,
+  // Chatnachricht als große Sprechblase (auch über dem eigenen Spieler).
+  function drawChats(s, camX, camY) {
+    const info = echoes?.();
+    if (!info?.chatOf) return;
+    const chats = [];
+    const own = info.chatOf(null);
+    if (own) chats.push({ x: s.player.x, y: s.player.y, text: own });
+    for (const peer of info.list) {
+      const text = info.chatOf(peer.name);
+      if (text) chats.push({ x: peer.x, y: peer.y, text });
+    }
+    if (!chats.length) return;
+    ctx.save();
+    ctx.shadowBlur = 0;
+    for (const chat of chats) speech((chat.x - camX) * CELL + CELL / 2, (chat.y - camY) * CELL - 4, chat.text);
+    ctx.restore();
+  }
+
   function drawEchoes(s, camX, camY, figure) {
     const info = echoes?.();
     if (!info?.list.length) return;

@@ -122,8 +122,13 @@ export function setupChat({ archived }) {
         showMode();
       } else if (data.type === 'msg') {
         add(data.message);
+        // Sprechblase über der Figur auf der Karte (main.js). Nur neue Nachrichten, nicht der Verlauf.
+        document.dispatchEvent(new CustomEvent('overnight:chat', {
+          detail: { id: data.message.id, name: data.message.name, text: data.message.text, mine: data.message.name === myName },
+        }));
         if (status.textContent.startsWith('Nobody')) say('');
       } else if (data.type === 'hide') {
+        document.dispatchEvent(new CustomEvent('overnight:chat-hide', { detail: { id: Number(data.id) } }));
         list.querySelector(`[data-id="${Number(data.id)}"]`)?.remove();
       } else if (data.type === 'error') {
         say(String(data.text ?? 'That did not work.'));

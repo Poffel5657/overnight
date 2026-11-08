@@ -9,6 +9,11 @@ const fakeSocket = () => {
       this.url = String(url);
       this.sent = [];
       this.listeners = {};
+      if (this.url.includes('/chat')) {
+        window.__chat = this;
+        setTimeout(() => this.emit('message', { data: JSON.stringify({ type: 'hello', name: 'scribe-abc', history: [] }) }), 0);
+        return;
+      }
       if (!this.url.includes('/presence')) return;
       window.__presence.push(this);
       const peers = [
@@ -152,4 +157,26 @@ test('Gemeinsame Welt: Server kennt die Karte nicht, dann bleibt sie solo', asyn
   });
   expect(await page.evaluate(() => window.__overnight.state.shared)).toBe(false);
   expect(await page.evaluate(() => window.__overnight.state.creatures.length)).toBeGreaterThan(0);
+});
+
+test('Chatnachrichten erscheinen als Sprechblase über dem, der sie schreibt', async ({ page }) => {
+  await page.addInitScript(fakeSocket);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/?seed=7&echoes=1');
+  await page.waitForFunction(() => window.__overnight && window.__chat && window.__overnight.echoes.here().length === 1);
+  const say = (id, name, text) => page.evaluate(([i, n, t]) => window.__chat.emit('message', {
+    data: JSON.stringify({ type: 'msg', message: { id: i, ts: Date.now(), name: n, text: t } }),
+  }), [id, name, text]);
+  await say(11, 'tinker-3f2', 'over here, by the well!');
+  expect(await page.evaluate(() => window.__overnight.chatBubble('tinker-3f2'))).toBe('over here, by the well!');
+  // Eigene Nachricht: Blase über dem eigenen Spieler.
+  await say(12, 'scribe-abc', 'coming <b>now</b>');
+  expect(await page.evaluate(() => window.__overnight.chatBubble(null))).toBe('coming <b>now</b>');
+  // Versteckte Nachricht verschwindet auch von der Karte.
+  await page.evaluate(() => window.__chat.emit('message', { data: JSON.stringify({ type: 'hide', id: 11 }) }));
+  expect(await page.evaluate(() => window.__overnight.chatBubble('tinker-3f2'))).toBeNull();
+  // Langer Text bricht ohne Fehler um.
+  await say(13, 'tinker-3f2', 'x'.repeat(200));
+  await page.evaluate(() => window.__overnight.act('wait'));
+  expect(await page.evaluate(() => window.__overnight.chatBubble('tinker-3f2'))).toHaveLength(200);
 });

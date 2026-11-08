@@ -46,7 +46,7 @@ let presence = { here: () => [], bubbleOf: () => null, total: () => 0, moved() {
 const draw = createRenderer($('world'), {
   glow: () => glow,
   marker: !archivedDay,
-  echoes: () => ({ list: presence.here(), bubbleOf: presence.bubbleOf, color: PRESENCE.color }),
+  echoes: () => ({ list: presence.here(), bubbleOf: presence.bubbleOf, color: PRESENCE.color, chatOf }),
 });
 
 const HP_CELLS = 14;
@@ -293,6 +293,29 @@ function perform(action) {
   if (state.outbox?.length) presence.send(state.outbox.splice(0));
 }
 
+// Chatnachrichten als Sprechblase über der Figur, die sie geschrieben hat. Chat und Echos haben
+// denselben anonymen Tagesnamen, darüber findet die Blase ihr "@". null steht für den eigenen Spieler.
+const CHAT_BUBBLE_MS = 7000;
+const chatBubbles = new Map();
+function chatOf(name) {
+  const bubble = chatBubbles.get(name);
+  return bubble && bubble.until > Date.now() ? bubble.text : null;
+}
+function setupChatBubbles() {
+  document.addEventListener('overnight:chat', (event) => {
+    const { id, name, text, mine } = event.detail ?? {};
+    if (typeof text !== 'string' || typeof name !== 'string') return;
+    chatBubbles.set(mine ? null : name, { id, text, until: Date.now() + CHAT_BUBBLE_MS });
+    draw(state);
+    setTimeout(() => draw(state), CHAT_BUBBLE_MS + 50);
+  });
+  // Gemeldete oder versteckte Nachrichten verschwinden auch von der Karte.
+  document.addEventListener('overnight:chat-hide', (event) => {
+    for (const [key, bubble] of chatBubbles) if (bubble.id === event.detail?.id) chatBubbles.delete(key);
+    draw(state);
+  });
+}
+
 // Anzeige über der Karte: wie viele Echos hier und insgesamt unterwegs sind.
 function drawEchoCount() {
   const label = $('echo-count');
@@ -480,6 +503,7 @@ setupInput();
 greet();
 refresh();
 setupEchoes();
+setupChatBubbles();
 
 // Stabile Schnittstelle für die Tests. Nicht entfernen, nur erweitern.
 window.__overnight = {
@@ -487,4 +511,5 @@ window.__overnight = {
   day: currentDay(),
   act: perform,
   get echoes() { return presence; },
+  chatBubble: (name = null) => chatOf(name),
 };
