@@ -67,6 +67,9 @@ test('Echos: nur mit ?echoes=1 vor dem Starttag, dann Anzeige und Position', asy
   await expect(page.locator('#log')).not.toContainText('waves');
 
   // Ein Schritt meldet die neue Position (gedrosselt, aber sie kommt an).
+  // Erst die Drossel (SEND_GAP_MS) ablaufen lassen: Die vier Schritte enden wieder auf dem Startfeld,
+  // und kämen sie alle innerhalb der Drossel, ginge zu Recht keine neue Position mehr raus.
+  await page.waitForTimeout(300);
   const before = await page.evaluate(() => window.__presence[0].sent.length);
   for (const action of ['right', 'left', 'down', 'up']) await page.evaluate((a) => window.__overnight.act(a), action);
   await page.waitForFunction((n) => window.__presence[0].sent.length > n, before);

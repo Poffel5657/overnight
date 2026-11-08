@@ -78,7 +78,8 @@ test('Handy: Steuerkreuz liegt über der Karte, Log lässt sich einklappen', asy
   await page.click('#log-toggle');
   await expect(page.locator('#log')).toBeHidden();
   await expect(page.locator('#log-peek')).toBeVisible();
-  expect((await page.locator('#world').boundingBox()).height).toBeGreaterThan(before);
+  // Wiederholt messen: Auf langsamen Runnern steht das neue Layout nicht sofort.
+  await expect.poll(async () => (await page.locator('#world').boundingBox()).height).toBeGreaterThan(before);
   // Das Steuerkreuz bewegt den Spieler weiterhin.
   const turn = await page.evaluate(() => window.__overnight.state.turn);
   await page.click('[data-action="wait"]');
@@ -106,7 +107,8 @@ test('PC: Log lässt sich einklappen, die Karte wird größer', async ({ page })
   await page.click('#log-toggle');
   await expect(page.locator('#log')).toBeHidden();
   await expect(page.locator('#log-peek')).toBeVisible();
-  expect((await page.locator('#world').boundingBox()).height).toBeGreaterThan(before);
+  // Wiederholt messen: Auf langsamen Runnern steht das neue Layout nicht sofort.
+  await expect.poll(async () => (await page.locator('#world').boundingBox()).height).toBeGreaterThan(before);
 });
 
 test('Bootsequenz blockiert weder Tasten noch Klicks', async ({ page }) => {
