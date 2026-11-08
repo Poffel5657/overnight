@@ -23,6 +23,8 @@ export const TICK_MS = Math.max(300, PRESENCE.tickMs ?? 700);
 // Eine leere Karte bleibt so lange bestehen, damit kurzes Hin und Her die Kreaturen nicht neu setzt.
 export const EMPTY_KEEP_MS = 60_000;
 export const SUMMON_GAP_MS = 20_000;
+// Schläge schneller als PRESENCE.attackMs verwirft der Server; etwas Spielraum für schwankende Verbindungen.
+export const HIT_GAP_MS = Math.round((PRESENCE.attackMs ?? 500) * 0.7);
 const CREATURE_ID = /^c\d{1,6}$/;
 export const EMOTES = ['wave', 'cheer', 'bow', 'help'];
 const MAP_PATTERN = /^[a-z0-9-]{1,32}$/;
@@ -185,6 +187,7 @@ export class PresenceRoom {
       bucket: { tokens: BUCKET_SIZE, at: Date.now() },
       strikes: 0,
       summonAt: 0,
+      hitAt: 0,
     };
     server.serializeAttachment(info);
     // Wer gerade wo steht. Wer noch keine Position gemeldet hat, ist noch nicht in der Welt.
@@ -228,6 +231,10 @@ export class PresenceRoom {
     }
     ws.serializeAttachment(info);
     if (message.t === 'hit' && info.map) {
+      const now = Date.now();
+      if (now - info.hitAt < HIT_GAP_MS) return;
+      info.hitAt = now;
+      ws.serializeAttachment(info);
       const entry = this.worlds.get(info.map);
       const result = entry && hitWorld(entry.world, message.id, message.dmg, { id: info.id, x: info.x, y: info.y });
       if (!result) return;

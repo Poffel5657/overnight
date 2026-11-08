@@ -1,7 +1,7 @@
 // Verbindet Spiellogik, Darstellung und Bedienung im Browser.
 import {
   act, attackOf, countItem, createGame, currentDay, defenseOf, equip, log, nextLevelXp, questState, ARMOR_SLOTS,
-  applyWorld, leaveWorld, rewardKill, takeBite,
+  applyWorld, isAttack, leaveWorld, rewardKill, takeBite,
 } from './game.js';
 import { createRenderer } from './render.js';
 import { loadSave, saveKey, writeSave } from './save.js';
@@ -275,16 +275,41 @@ function setupTonight() {
 
 let updateEvent = () => {};
 
-// In der gemeinsamen Welt läuft die Zeit von selbst; mehr als ein Zug pro ACTION_GAP_MS geht nicht.
-const ACTION_GAP_MS = 110;
-let lastAction = 0;
+// In der gemeinsamen Welt läuft die Zeit von selbst. Spieler haben deshalb Abklingzeiten:
+// ein Schritt pro PRESENCE.moveMs, ein Schlag pro PRESENCE.attackMs. Ein Tastendruck kurz vor Ablauf
+// wird vorgemerkt, damit gehaltene Tasten gleichmäßig laufen; frühere werden verworfen.
+const BUFFER_MS = 70;
+let readyAt = 0;
+let queued = null;
+let queueTimer = null;
 
 function perform(action) {
-  if (state.shared) {
-    const now = Date.now();
-    if (now - lastAction < ACTION_GAP_MS) return;
-    lastAction = now;
+  if (!state.shared) {
+    run(action);
+    return;
   }
+  const wait = readyAt - Date.now();
+  if (wait > BUFFER_MS) return;
+  queued = action;
+  clearTimeout(queueTimer);
+  if (wait > 0) queueTimer = setTimeout(pump, wait);
+  else pump();
+}
+
+function pump() {
+  const action = queued;
+  queued = null;
+  if (!action) return;
+  if (!state.shared) {
+    run(action);
+    return;
+  }
+  const gap = isAttack(state, action) ? PRESENCE.attackMs : PRESENCE.moveMs;
+  run(action);
+  readyAt = Date.now() + (gap ?? 200);
+}
+
+function run(action) {
   act(state, action);
   writeSave(key, state);
   refresh();

@@ -180,3 +180,49 @@ test('Chatnachrichten erscheinen als Sprechblase über dem, der sie schreibt', a
   await page.evaluate(() => window.__overnight.act('wait'));
   expect(await page.evaluate(() => window.__overnight.chatBubble('tinker-3f2'))).toHaveLength(200);
 });
+
+test('Gemeinsame Welt: Spieler haben Abklingzeiten für Schritte und Schläge, allein nicht', async ({ page }) => {
+  await page.addInitScript(fakeSocket);
+  await page.goto('/?seed=7&echoes=1');
+  await page.waitForFunction(() => window.__overnight && window.__presence.length === 1 && window.__presence[0].sent.length > 0);
+
+  // Allein (noch keine Welt vom Server): drei Züge sofort hintereinander gehen alle durch.
+  await page.evaluate(() => { for (const a of ['down', 'down', 'up']) window.__overnight.act(a); });
+  expect((await page.evaluate(() => window.__overnight.state.turn))).toBeGreaterThanOrEqual(3);
+
+  // Gemeinsame Welt ohne Kreaturen: gespammte Schritte werden gebremst.
+  await page.evaluate(() => {
+    const s = window.__overnight.state;
+    window.__presence[0].emit('message', { data: JSON.stringify({ t: 'world', map: s.map, creatures: [] }) });
+  });
+  const before = await page.evaluate(() => window.__overnight.state.turn);
+  await page.evaluate(() => { for (let i = 0; i < 20; i += 1) window.__overnight.act(i % 2 ? 'up' : 'down'); });
+  expect(await page.evaluate(() => window.__overnight.state.turn)).toBe(before + 1);
+  // Gehaltene Taste: im Takt von moveMs geht es weiter.
+  const held = await page.evaluate(async () => {
+    const t0 = window.__overnight.state.turn;
+    const end = Date.now() + 1000;
+    while (Date.now() < end) {
+      window.__overnight.act('wait');
+      await new Promise((r) => setTimeout(r, 30));
+    }
+    return window.__overnight.state.turn - t0;
+  });
+  expect(held).toBeGreaterThanOrEqual(3);
+  expect(held).toBeLessThanOrEqual(6);
+
+  // Schläge: zwei sofort hintereinander ergeben nur einen Treffer.
+  await page.waitForTimeout(600);
+  await page.evaluate(() => {
+    const s = window.__overnight.state;
+    window.__presence[0].emit('message', { data: JSON.stringify({ t: 'world', map: s.map, creatures: [
+      { id: 'c5', type: 'crumb-heap', x: s.player.x + 1, y: s.player.y, hp: 30 },
+    ] }) });
+    window.__overnight.act('right');
+    window.__overnight.act('right');
+  });
+  expect(await page.evaluate(() => window.__presence[0].sent.filter((m) => m.t === 'hit').length)).toBe(1);
+  await page.waitForTimeout(600);
+  await page.evaluate(() => window.__overnight.act('right'));
+  expect(await page.evaluate(() => window.__presence[0].sent.filter((m) => m.t === 'hit').length)).toBe(2);
+});

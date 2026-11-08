@@ -602,6 +602,12 @@ export function stepWorld(world, players) {
   return bites;
 }
 
+// Browser: Wäre dieser Zug ein Angriff? Für die Abklingzeiten in der gemeinsamen Welt.
+export function isAttack(s, action) {
+  const dir = DIRS[action];
+  return Boolean(dir && creatureAt(s, s.player.x + dir[0], s.player.y + dir[1]));
+}
+
 // Ein Spieler trifft eine Kreatur. Rückgabe: null (ungültig), { killed: false } oder { killed: true, type, hitters }.
 export function hitWorld(world, id, dmg, player) {
   const c = world.creatures.find((x) => x.id === id && x.respawnAt === null);

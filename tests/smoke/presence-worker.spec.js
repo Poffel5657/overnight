@@ -2,7 +2,7 @@
 import { expect, test } from '@playwright/test';
 import worker from '../../worker/index.js';
 import {
-  PresenceRoom, parseMessage, takeToken, BUCKET_SIZE, MAX_PER_PERSON, MAX_STRIKES,
+  PresenceRoom, parseMessage, takeToken, BUCKET_SIZE, HIT_GAP_MS, MAX_PER_PERSON, MAX_STRIKES,
 } from '../../worker/presence.js';
 import { MAPS } from '../../content/world.js';
 import { CREATURES } from '../../content/creatures.js';
@@ -157,11 +157,23 @@ test('Gemeinsame Welt: alle sehen dieselben Kreaturen, Siege gehören allen, die
   const spot = besides(target);
   await say(room, a, { t: 'pos', map: 'meadow', ...spot });
   await say(room, b, { t: 'pos', map: 'meadow', ...spot });
-  // Schlag von weit weg zählt nicht.
-  await say(room, a, { t: 'hit', id: 'c999', dmg: 1 });
-  const hp = CREATURES[target.type].hp;
-  await say(room, a, { t: 'hit', id: target.id, dmg: 1 });
-  await say(room, b, { t: 'hit', id: target.id, dmg: hp });
+  // Die Uhr läuft im Test von Hand, damit die Abklingzeit für Schläge (HIT_GAP_MS) prüfbar ist.
+  const realNow = Date.now;
+  let clock = realNow();
+  Date.now = () => clock;
+  try {
+    // Unbekannte Kreatur zählt nicht.
+    await say(room, a, { t: 'hit', id: 'c999', dmg: 1 });
+    clock += HIT_GAP_MS + 1;
+    const hp = CREATURES[target.type].hp;
+    await say(room, a, { t: 'hit', id: target.id, dmg: 1 });
+    // Zu schnell hinterher: verworfen, die Kreatur lebt noch.
+    await say(room, a, { t: 'hit', id: target.id, dmg: hp });
+    expect(a.inbox.some((m) => m.t === 'slain')).toBe(false);
+    await say(room, b, { t: 'hit', id: target.id, dmg: hp });
+  } finally {
+    Date.now = realNow;
+  }
   const slainA = a.inbox.find((m) => m.t === 'slain');
   expect(slainA).toMatchObject({ id: target.id, type: target.type });
   expect(slainA.by.map((p) => p.id).sort()).toEqual([a.inbox[0].id, b.inbox[0].id].sort());
