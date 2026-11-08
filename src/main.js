@@ -10,6 +10,7 @@ import { setupEvent } from './event.js';
 import { setupQuestLog, updateQuests } from './quests.js';
 import { setupRating } from './rate.js';
 import { setupChat } from './chat.js';
+import { setupPresence } from './presence.js';
 import { CONTACT_EMAIL } from './config.js';
 import { crtEnabled, reducedMotion, setupBoot, setupCountdown, setupCrt } from './terminal.js';
 import { CHRONICLE } from '../content/chronicle.js';
@@ -17,6 +18,7 @@ import { ITEMS } from '../content/items.js';
 import { MAPS } from '../content/world.js';
 import { BALLOT } from '../content/ballot.js';
 import { QUESTS } from '../content/quests.js';
+import { PRESENCE } from '../content/presence.js';
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
@@ -37,7 +39,13 @@ const state = createGame({
 });
 
 let glow = crtEnabled();
-const draw = createRenderer($('world'), { glow: () => glow, marker: !archivedDay });
+// Echos (andere Spieler) werden weiter unten verbunden; bis dahin gibt es keine.
+let presence = { here: () => [], bubbleOf: () => null, total: () => 0, moved() {}, emote() {}, active: false };
+const draw = createRenderer($('world'), {
+  glow: () => glow,
+  marker: !archivedDay,
+  echoes: () => ({ list: presence.here(), bubbleOf: presence.bubbleOf, color: PRESENCE.color }),
+});
 
 const HP_CELLS = 14;
 
@@ -270,6 +278,65 @@ function perform(action) {
   writeSave(key, state);
   refresh();
   updateEvent();
+  presence.moved();
+}
+
+// Anzeige über der Karte: wie viele Echos hier und insgesamt unterwegs sind.
+function drawEchoCount() {
+  const label = $('echo-count');
+  if (!presence.active) {
+    label.hidden = true;
+    return;
+  }
+  const here = presence.here().length;
+  const total = presence.total();
+  label.hidden = false;
+  label.textContent = total === 0 ? '· alone' : `· ${here} here · ${total} out there`;
+}
+
+function setupEchoes() {
+  const echoParam = new URLSearchParams(location.search).get('echoes') === '1';
+  presence = setupPresence({
+    archived: Boolean(archivedDay),
+    enabled: echoParam || currentDay() >= PRESENCE.fromDay,
+    emotes: PRESENCE.emotes,
+    getPosition: () => ({ map: state.map, x: state.player.x, y: state.player.y }),
+    knownMap: (id) => Object.hasOwn(MAPS, id),
+    onChange: () => {
+      draw(state);
+      drawEchoCount();
+    },
+    onEmote: (peer, emote) => {
+      log(state, `${peer.name} ${emote.verb}.`, 'echo');
+      drawLog();
+    },
+  });
+  if (!presence.active) return;
+  const box = $('emotes');
+  for (const emote of PRESENCE.emotes) {
+    const button = document.createElement('button');
+    button.textContent = emote.button;
+    button.dataset.emote = emote.id;
+    button.addEventListener('click', () => doEmote(emote));
+    box.append(button);
+  }
+  box.hidden = false;
+  document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || document.querySelector('dialog[open]')) return;
+    if (event.target.closest?.('input, textarea, select, [contenteditable]')) return;
+    if (document.body.classList.contains('chat-open')) return;
+    const emote = PRESENCE.emotes.find((e) => e.key === event.key);
+    if (!emote) return;
+    event.preventDefault();
+    doEmote(emote);
+  });
+  drawEchoCount();
+}
+
+function doEmote(emote) {
+  if (!presence.emote(emote.id)) return;
+  log(state, `You ${emote.verb.replace(/s$/, '')}.`, 'echo');
+  drawLog();
 }
 
 // Begrüßung: Wer wiederkommt, erfährt, was seit dem letzten Besuch entstanden ist.
@@ -365,10 +432,12 @@ updateEvent = setupEvent({ archived: Boolean(archivedDay), getStat: (name) => st
 setupInput();
 greet();
 refresh();
+setupEchoes();
 
 // Stabile Schnittstelle für die Tests. Nicht entfernen, nur erweitern.
 window.__overnight = {
   get state() { return state; },
   day: currentDay(),
   act: perform,
+  get echoes() { return presence; },
 };

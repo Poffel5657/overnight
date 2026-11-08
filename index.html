@@ -99,7 +99,7 @@
     <div class="layout">
     <div class="play">
       <section class="window window-map">
-        <h2 class="window-title">[ MAP ] <span id="map-name" class="window-sub"></span></h2>
+        <h2 class="window-title">[ MAP ] <span id="map-name" class="window-sub"></span> <span id="echo-count" class="window-sub echo-count" hidden></span></h2>
         <div class="map-frame">
           <canvas id="world" aria-label="Game world. Use the arrow keys or the on-screen buttons to move."></canvas>
           <!-- Quest-Log wie ein Tracker über der Karte. Events (und später Quests) tragen sich hier ein. -->
@@ -135,6 +135,7 @@
         <p id="hp-meter" class="hp-meter" aria-hidden="true"></p>
         <p id="items" class="chips" aria-hidden="true"></p>
         <button id="open-gear" class="gear-button" aria-haspopup="dialog">Gear</button>
+        <span id="emotes" class="emotes" hidden></span>
         <div id="rate-box" class="rate-box" hidden>
           <span id="rate-question"></span>
           <button data-rate="up" aria-label="I liked it">GOOD</button>

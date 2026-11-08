@@ -4,7 +4,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 
 // Der Chat verbindet sich am PC beim Start. Im Test wird die Verbindung nur aufgezeichnet, nicht aufgebaut;
 // erlaubt ist ausschließlich der eigene Worker.
-const CHAT_SOCKET = /^wss:\/\/overnight-suggestions\.overnight-rpg\.workers\.dev\/chat(\?|$)/;
+// Seit den Echos kommt der Socket für andere Spieler (/presence) dazu.
+const CHAT_SOCKET = /^wss:\/\/overnight-suggestions\.overnight-rpg\.workers\.dev\/(chat|presence)(\?|$)/;
 // Der eigene Worker darf beim Start gefragt werden (zum Beispiel der Zählerstand eines Events).
 // Im Test antwortet eine Attrappe, damit nichts an den echten Worker geht. Alle anderen Hosts bleiben verboten.
 const WORKER_ORIGIN = 'https://overnight-suggestions.overnight-rpg.workers.dev';

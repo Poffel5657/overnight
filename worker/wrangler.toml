@@ -29,3 +29,12 @@ class_name = "ChatRoom"
 [[migrations]]
 tag = "v1-chat"
 new_sqlite_classes = ["ChatRoom"]
+
+# Echos (andere Spieler in der Welt): ein Raum für alle Karten, ohne gespeicherte Daten.
+[[durable_objects.bindings]]
+name = "PRESENCE"
+class_name = "PresenceRoom"
+
+[[migrations]]
+tag = "v2-presence"
+new_sqlite_classes = ["PresenceRoom"]

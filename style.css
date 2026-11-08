@@ -172,6 +172,10 @@ canvas {
 .chip { padding: 0 6px; border: 1px solid var(--line); color: var(--bright); }
 .chip-kind { color: var(--muted); }
 .gear-button { font-size: 18px; padding: 0 6px; }
+.emotes { display: inline-flex; gap: 6px; }
+.emotes[hidden] { display: none; }
+.emotes button { font-size: 18px; padding: 0 6px; }
+.echo-count { opacity: 0.75; }
 
 /* Fenster [ GEAR ] (seit Tag 5) */
 .gear-stats { color: var(--bright); white-space: pre-wrap; }

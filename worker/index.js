@@ -3,9 +3,10 @@
 // einem Vorschlag und einer Stimme pro Nacht bleibt nur ein Fingerabdruck, der sich täglich ändert und
 // nach gut einem Tag verfällt.
 import { ChatRoom, nameFor } from './chat.js';
+import { PresenceRoom } from './presence.js';
 
-// Der Chatraum ist ein Durable Object; Cloudflare findet die Klasse über diesen Export.
-export { ChatRoom };
+// Chatraum und Echo-Raum sind Durable Objects; Cloudflare findet die Klassen über diesen Export.
+export { ChatRoom, PresenceRoom };
 
 const ALLOWED_ORIGIN = 'https://poffel5657.github.io';
 const MAX_LENGTH = 300;
@@ -184,12 +185,25 @@ async function handleChat(request, env, path, url) {
   return reply(404);
 }
 
+// Echos: andere Spieler in der Welt. Kein Captcha, denn es laufen nur Positionen und feste Gesten.
+// Der Name kommt aus demselben Tages-Fingerabdruck wie im Chat.
+async function handlePresence(request, env) {
+  if (request.headers.get('Origin') !== ALLOWED_ORIGIN) return reply(403);
+  if (request.headers.get('Upgrade') !== 'websocket') return reply(426);
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  const headers = new Headers(request.headers);
+  headers.set('X-Presence-Fp', await fingerprint(ip, berlinDay(), env.IP_HASH_SECRET));
+  const room = env.PRESENCE.get(env.PRESENCE.idFromName('world'));
+  return room.fetch(new Request(request.url, { headers }));
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return reply(204);
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '');
     if (path === '/chat' || path.startsWith('/chat/')) return handleChat(request, env, path, url);
+    if (path === '/presence') return handlePresence(request, env);
 
     // Zwischenstand eines Stimmzettels, öffentlich lesbar. Nur Anzeige, maßgeblich sind die Dateien.
     if (request.method === 'GET' && path === '/vote') {

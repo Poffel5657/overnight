@@ -22,7 +22,8 @@ const FONT = `bold ${Math.round(CELL * 0.72)}px ui-monospace, "DejaVu Sans Mono"
 
 // glow: Funktion, die sagt, ob die Zeichen leicht leuchten sollen (CRT-Einstellung).
 // marker: ob die Figur eines laufenden Events markiert wird (nicht in archivierten Nächten).
-export function createRenderer(canvas, { glow = () => false, marker = true } = {}) {
+// echoes: Funktion, die { list, bubbleOf, color } für andere Spieler auf dieser Karte liefert (siehe presence.js).
+export function createRenderer(canvas, { glow = () => false, marker = true, echoes = null } = {}) {
   const ctx = canvas.getContext('2d');
   const frame = canvas.parentElement;
   let VIEW_COLS = 0;
@@ -121,7 +122,30 @@ export function createRenderer(canvas, { glow = () => false, marker = true } = {
         figure(c.x, c.y, def.glyph, def.color);
       }
     }
+    drawEchoes(s, camX, camY, figure);
     figure(s.player.x, s.player.y, '@', '#ffffff');
+  }
+
+  // Echos: andere Spieler als blasses "@", Name klein darüber, Geste kurz als Sprechblase.
+  function drawEchoes(s, camX, camY, figure) {
+    const info = echoes?.();
+    if (!info?.list.length) return;
+    for (const peer of info.list) figure(peer.x, peer.y, '@', info.color);
+    ctx.save();
+    ctx.shadowBlur = 0;
+    ctx.font = `${Math.round(CELL * 0.3)}px ui-monospace, monospace`;
+    for (const peer of info.list) {
+      const px = (peer.x - camX) * CELL + CELL / 2;
+      const py = (peer.y - camY) * CELL;
+      const bubble = info.bubbleOf(peer.id);
+      const label = bubble ?? peer.name;
+      const width = ctx.measureText(label).width + 6;
+      ctx.fillStyle = 'rgba(11, 9, 6, 0.75)';
+      ctx.fillRect(px - width / 2, py - 7, width, 12);
+      ctx.fillStyle = bubble ? '#ffb347' : info.color;
+      ctx.fillText(label, px, py);
+    }
+    ctx.restore();
   }
   return draw;
 }

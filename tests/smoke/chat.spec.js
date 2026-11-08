@@ -9,6 +9,8 @@ const fakeSocket = () => {
       this.url = String(url);
       this.sent = [];
       this.listeners = {};
+      // Echos (/presence) haben eigene Tests; hier zählen nur Chat-Sockets.
+      if (this.url.includes('/presence')) return;
       window.__sockets.push(this);
       const withTicket = this.url.includes('ticket=');
       const history = [

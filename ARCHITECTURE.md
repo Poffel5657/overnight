@@ -18,6 +18,8 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `src/rate.js` | Daumen hoch/runter für die letzte Nacht (`#rate-box`), schickt `{ day, value }` an `/rate`, einmal pro Nacht (geschützt) |
 | `src/quests.js` | Quest-Log `#quest-log`: Tracker oben rechts über der Karte, einklappbar (`localStorage` `overnight.quest-log`). Einträge sind `<li class="quest">` in `#quest-list`, kompakt (Titel, Fortschritt), Beschreibung `.quest-text` und Kleingedrucktes `.quest-fine` nach Klick. Wer Einträge ein- oder ausblendet, ruft `refreshQuestLog()` auf. Quests aus `content/quests.js` trägt `updateQuests()` ein (`li.quest.quest-entry[data-quest]`, Titel, Fortschritt `.quest-progress`, Aufgabe), aufgerufen in `refresh()` |
 | `src/event.js` | Community-Event: Eintrag `#event-box` im Quest-Log (pulsiert, bis man die Figur kennt), einmaliger Hinweis `#event-toast` mitten auf der Karte beim Laden (`localStorage` `overnight.event-toast`), Tagesfortschritt in `localStorage` (`overnight.event`), meldet den Tagesbeitrag an `/event` des Workers, liest den Zähler per `GET /event?id=` (geschützt) |
+| `src/presence.js` | Echos (andere Spieler): WebSocket an `/presence` des Workers, schickt nur `{ t: 'pos', map, x, y }` (gedrosselt) und `{ t: 'emote', e }`, empfängt `hello`/`pos`/`gone`/`emote` mit anonymen Tagesnamen. Aktiv ab `PRESENCE.fromDay` oder mit `?echoes=1`, nie im Archiv; trennt nach 60 s im Hintergrund (geschützt) |
+| `content/presence.js` | `PRESENCE = { fromDay, color, emotes: [{ id, key, button, bubble, verb }] }`. Gesten-IDs muss der Worker kennen (`wave`, `cheer`, `bow`, `help` in `worker/presence.js`); neue IDs braucht Chris im Worker |
 | `content/event.js` | `EVENT` (oder `null`): `{ id, title, text, task, reward, stat, need, goal, startDay, endDay }`, Format prüft `tests/smoke/event.spec.js` |
 | `about/` | Seite „About Overnight“ für neue Besucher: was das Experiment ist, wie eine Nacht läuft, wie man mitmacht; zeigt die letzten Nächte aus `content/chronicle.js` (geschützt) |
 | `og.png`, `.github/scripts/og-card.mjs` | Vorschaubild für geteilte Links (1200 x 630). Der Deploy baut es jede Nacht aus dem neuesten Kartenbild und setzt `og:title` auf die Nacht; `og.png` im Repo ist der Ersatz |
@@ -70,6 +72,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 - **Kreaturen:** `ai` wählt das Verhalten aus `AI_BEHAVIOURS` in `src/game.js`. Bisher: `skulk` (Ratten), `hop` (Frösche, seit Tag 4: jede ungerade Runde Pause, sonst zwei Schritte), `lurk` (Aale, seit Tag 5: bewegen sich nie, beißen daneben) und `trudge` (Krümelhaufen: ein Schritt jede gerade Runde). Gemeinsames Heranlaufen in `approach()`. `biteVerb` ändert die Angriffsmeldung. Kreaturen mit `once: true` (Besucher vom Rad) werden beim Sieg entfernt statt neu gesetzt. Besiegte Kreaturen kommen nach `respawnTurns` zurück, wenn der Spieler weit genug weg ist.
 - **Zufall:** Immer `random(s)` aus `src/game.js` verwenden, nie `Math.random()`, sonst sind Tests nicht wiederholbar.
 - **Karten:** `content/world.js` hat bisher `meadow` (Start), `draft` (Rough Draft, seit Tag 2) und `drains` (seit Tag 5, 32 x 13, größer als der Ausschnitt; Leiter zum Brunnen, Gitter zum Rough Draft, Sumpf hinter `sump-gate`). Geländezeichen der Kanäle: `W` Backstein, `_` Boden, `c` Kanal, `p` Planke. Jeder Kartenwechsel läuft über `enterMap()` in `src/game.js`, das die Kreaturen der Zielkarte frisch setzt. Die Anzeige oben zeigt den `name` der Karte.
+- **Echos (seit Tag 6):** andere Spieler auf derselben Karte erscheinen als blasses `@` in `PRESENCE.color`, Name klein darüber, eine Geste kurz als Sprechblase (`render.js`, Option `echoes`). Über der Karte steht `#echo-count` („· 2 here · 5 out there“), unter der HP-Leiste die Gesten-Knöpfe `#emotes` (Tasten aus `PRESENCE.emotes`). Echos sind keine Objekte der Spiellogik: Sie blockieren nichts, kämpfen nicht und sind nicht im Spielstand. Gemeinsames Spiel baut auf Gesten auf (z. B. eine Figur, die nur antwortet, wenn zwei Spieler gleichzeitig `help` zeigen) und braucht für neue Nachrichtenarten Chris im Worker. `window.__overnight.echoes` gibt `here()`, `total()`, `bubbleOf(id)`, `active`.
 - **Niederlage:** Spieler wacht am `START` mit vollen HP auf, die Kreaturen werden neu gesetzt (auch aus anderen Karten zurück auf die Wiese).
 
 ## Spielstand
@@ -80,7 +83,7 @@ Aktuelle `SAVE_VERSION`: 1. Seit Tag 1 gibt es das optionale Feld `player.weapon
 
 ## Testschnittstelle
 
-`window.__overnight` bietet `state`, `day` und `act(action)`. Die Smoke-Tests hängen davon ab, sie darf nur erweitert werden.
+`window.__overnight` bietet `state`, `day`, `act(action)` und `echoes`. Die Smoke-Tests hängen davon ab, sie darf nur erweitert werden.
 
 ## Veröffentlichung
 
