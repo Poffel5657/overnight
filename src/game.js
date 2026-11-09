@@ -84,7 +84,7 @@ function giveItem(s, id) {
   }
 }
 
-// Fenster [ GEAR ]: Waffe oder Rüstung aus dem Beutel anlegen. Kostet keine Runde.
+// Fenster [ BAG ]: Waffe oder Rüstung aus dem Beutel anlegen. Kostet keine Runde.
 // Das bisher Getragene wandert in den Beutel. Rückgabe true, wenn sich etwas geändert hat.
 export function equip(s, id) {
   const index = s.player.bag.indexOf(id);
@@ -104,7 +104,7 @@ export function equip(s, id) {
   return true;
 }
 
-// Fenster [ GEAR ] (seit Tag 6): Dinge mit heal aus dem Beutel benutzen. Kostet keine Runde.
+// Fenster [ BAG ] (seit Tag 6): Dinge mit heal aus dem Beutel benutzen. Kostet keine Runde.
 export function useItem(s, id) {
   const item = ITEMS[id];
   const index = s.player.bag.indexOf(id);
@@ -248,7 +248,7 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     if (!Number.isInteger(s.player.level) || !LEVELS[s.player.level - 1]) s.player.level = 1;
     if (!Number.isInteger(s.stats.xp)) s.stats.xp = 0;
     if (!Number.isInteger(s.stats.together)) s.stats.together = 0;
-    // Stände von vor Tag 6 haben keine Knacks: Die Punkte ihrer Stufen warten dann im Fenster [ GEAR ].
+    // Stände von vor Tag 6 haben keine Knacks: Die Punkte ihrer Stufen warten dann im Fenster [ CHARA ].
     const skills = saved.player?.skills ?? {};
     s.player.skills = Object.fromEntries(SKILLS
       .map((k) => [k.id, Math.min(k.max, Number.isInteger(skills[k.id]) && skills[k.id] > 0 ? skills[k.id] : 0)])

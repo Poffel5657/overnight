@@ -23,13 +23,12 @@ import { QUESTS } from '../content/quests.js';
 import { PRESENCE } from '../content/presence.js';
 import { SHOPS } from '../content/shops.js';
 import { SKILLS } from '../content/skills.js';
+import { LEVELS } from '../content/levels.js';
 
 const KEYS = {
   ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
   w: 'up', s: 'down', a: 'left', d: 'right', ' ': 'wait',
 };
-// Tasten, die ein Fenster öffnen statt einen Zug zu machen.
-const WINDOW_KEYS = { i: 'gear-dialog', g: 'gear-dialog' };
 
 const $ = (id) => document.getElementById(id);
 const pad3 = (n) => String(n).padStart(3, '0');
@@ -52,26 +51,37 @@ const draw = createRenderer($('world'), {
 });
 
 const HP_CELLS = 14;
+const XP_CELLS = 10;
 
-function chip(kind, name) {
-  const span = document.createElement('span');
-  span.className = 'chip';
-  const label = document.createElement('span');
-  label.className = 'chip-kind';
-  label.textContent = `${kind} `;
-  span.append(label, name);
-  return span;
+// Balken aus Zeichen, passend zum Terminal-Look.
+const bar = (part, whole, cells, full = '█', empty = '·') => {
+  const filled = whole > 0 ? Math.max(0, Math.min(cells, Math.round((part / whole) * cells))) : cells;
+  return `[${full.repeat(filled)}${empty.repeat(cells - filled)}]`;
+};
+
+// Gleiche Dinge im Beutel werden gezählt, in der Reihenfolge, in der sie dazukamen.
+function bagCounts() {
+  const counts = new Map();
+  for (const id of state.player.bag) if (ITEMS[id]) counts.set(id, (counts.get(id) ?? 0) + 1);
+  return counts;
 }
 
-function drawHud() {
-  const { hp, maxHp } = state.player;
-  const weapon = ITEMS[state.player.weapon];
-  // Gleiche Dinge im Beutel werden gezählt: "button x3".
-  const counts = new Map();
-  for (const id of state.player.bag) counts.set(id, (counts.get(id) ?? 0) + 1);
-  const bag = [...counts].map(([id, n]) => (n > 1 ? `${ITEMS[id].name} x${n}` : ITEMS[id].name));
-  const { level, xp } = state.player;
+// XP seit der letzten Stufe und bis zur nächsten; null, wenn die höchste Stufe erreicht ist.
+function xpProgress() {
+  const { xp, level } = state.player;
   const next = nextLevelXp(state);
+  // Der Balken füllt sich von der Schwelle der jetzigen Stufe bis zur nächsten.
+  const prev = Math.min(xp, LEVELS[level - 1]?.xp ?? 0);
+  return { xp, next, fill: next === null ? 1 : (xp - prev) / (next - prev) };
+}
+
+// Unter der Karte nur das Nötigste: HP, Stufe und Erfahrung, dazu die Knöpfe CHARA und BAG.
+function drawHud() {
+  const { hp, maxHp, level } = state.player;
+  const weapon = ITEMS[state.player.weapon];
+  const counts = bagCounts();
+  const bag = [...counts].map(([id, n]) => (n > 1 ? `${ITEMS[id].name} x${n}` : ITEMS[id].name));
+  const { xp, next, fill } = xpProgress();
   const xpText = `${level} · XP ${xp}${next === null ? '' : `/${next}`}`;
   // Voller Text für Screenreader und Tests, die sichtbare Anzeige steht daneben.
   const def = defenseOf(state);
@@ -82,115 +92,162 @@ function drawHud() {
   $('hp-label').textContent = parts.join(' · ');
   $('map-name').textContent = MAPS[state.map].name;
 
-  const filled = Math.round((hp / maxHp) * HP_CELLS);
-  $('hp-meter').textContent = `HP [${'█'.repeat(filled)}${'·'.repeat(HP_CELLS - filled)}] ${hp}/${maxHp}`;
+  $('hp-meter').textContent = `HP ${bar(hp, maxHp, HP_CELLS)} ${hp}/${maxHp}`;
   $('hp-meter').classList.toggle('low', hp <= maxHp * 0.3);
-  $('items').replaceChildren(
-    chip('LV', xpText),
-    ...(weapon ? [chip('WPN', weapon.name)] : []),
-    ...(def ? [chip('DEF', String(def))] : []),
-    ...bag.map((name) => chip('BAG', name)),
-  );
+  $('xp-meter').textContent = next === null
+    ? `LV ${level} · MAX`
+    : `LV ${level} ${bar(fill, 1, XP_CELLS)} ${xp}/${next} XP`;
+
+  // Ein offener Knack-Punkt fällt am Knopf auf, sonst merkt ihn niemand.
+  const points = skillPoints(state);
+  $('chara-badge').hidden = points <= 0;
+  $('chara-badge').textContent = points > 0 ? ` +${points}` : '';
+  $('open-chara').setAttribute('aria-label', points > 0 ? `Character, ${points} knack point${points > 1 ? 's' : ''} to spend` : 'Character');
+  const total = state.player.bag.length;
+  $('bag-count').textContent = total ? ` ${total}` : '';
+  $('open-bag').setAttribute('aria-label', `Bag, ${total} thing${total === 1 ? '' : 's'}`);
 }
 
-// Fenster [ GEAR ] (seit Tag 5): Werte, was man trägt, und der Beutel mit Knöpfen zum Anlegen.
-const SLOT_LABELS = { weapon: 'WPN', head: 'HEAD', body: 'BODY', feet: 'FEET' };
+// Fenster [ CHARA ] und [ BAG ] (vorher ein gemeinsames Fenster GEAR seit Tag 5).
+const SLOT_LABELS = { weapon: 'WEAPON', head: 'HEAD', body: 'BODY', feet: 'FEET' };
 
+const el = (tag, className, text) => {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+};
+
+// Eine Zeile mit Name, Wert und Beschreibung. Wird auch vom Laden benutzt.
 function gearRow(label, id, action) {
-  const row = document.createElement('li');
-  row.className = 'gear-row';
-  const kind = document.createElement('span');
-  kind.className = 'gear-kind';
-  kind.textContent = label;
-  const name = document.createElement('span');
-  name.className = 'gear-name';
+  const row = el('li', 'gear-row');
   const item = ITEMS[id];
-  name.textContent = item ? item.name : '—';
-  const stat = item?.atk !== undefined ? ` +${item.atk} ATK` : item?.def ? ` +${item.def} DEF` : '';
-  if (stat) {
-    const bonus = document.createElement('span');
-    bonus.className = 'gear-bonus';
-    bonus.textContent = stat;
-    name.append(bonus);
-  }
-  row.append(kind, name);
+  row.append(el('span', 'gear-kind', label));
+  const name = el('span', item ? 'gear-name' : 'gear-name gear-none', item ? item.name : '— nothing —');
+  const stat = item?.atk !== undefined ? ` +${item.atk} ATK` : item?.def ? ` +${item.def} DEF` : item?.heal ? ` +${item.heal} HP` : '';
+  if (stat) name.append(el('span', 'gear-bonus', stat));
+  row.append(name);
   if (action) row.append(action);
-  if (item?.text) {
-    const text = document.createElement('span');
-    text.className = 'gear-text';
-    text.textContent = item.text;
-    row.append(text);
-  }
+  if (item?.text) row.append(el('span', 'gear-text', item.text));
   return row;
 }
 
-function drawGear() {
-  const p = state.player;
-  const next = nextLevelXp(state);
-  $('gear-stats').textContent = [
-    `LV ${p.level}`, `XP ${p.xp}${next === null ? '' : `/${next}`}`, `HP ${p.hp}/${p.maxHp}`,
-    `ATK ${attackOf(state)}`, `DEF ${defenseOf(state)}`,
-  ].join('   ');
-  $('gear-worn').replaceChildren(
-    gearRow(SLOT_LABELS.weapon, p.weapon),
-    ...ARMOR_SLOTS.map((slot) => gearRow(SLOT_LABELS[slot], p.armor[slot])),
-  );
-  const counts = new Map();
-  for (const id of p.bag) counts.set(id, (counts.get(id) ?? 0) + 1);
-  const rows = [...counts].map(([id, n]) => {
-    const item = ITEMS[id];
-    let button = null;
-    if (item.atk !== undefined || item.slot) {
-      button = gearButton(item.slot ? 'Wear' : 'Wield', () => equip(state, id));
-    } else if (item.heal) {
-      button = gearButton('Use', () => useItem(state, id));
-    }
-    return gearRow(n > 1 ? `x${n}` : 'BAG', id, button);
-  });
-  $('gear-bag').replaceChildren(...rows);
-  $('gear-empty').hidden = rows.length > 0;
-  drawKnacks();
+// Was ein Teil aus dem Beutel gegenüber dem Getragenen bringt: ▲ besser, ▼ schlechter, = gleich.
+function compareTo(id) {
+  const item = ITEMS[id];
+  const isWeapon = item.atk !== undefined;
+  const worn = ITEMS[isWeapon ? state.player.weapon : state.player.armor[item.slot]];
+  const value = isWeapon ? item.atk : item.def ?? 0;
+  const delta = value - (isWeapon ? worn?.atk ?? 0 : worn?.def ?? 0);
+  const unit = isWeapon ? 'ATK' : 'DEF';
+  const node = el('span', 'gear-compare', '');
+  if (delta > 0) { node.classList.add('better'); node.textContent = `▲ ${delta} ${unit}`; }
+  else if (delta < 0) { node.classList.add('worse'); node.textContent = `▼ ${-delta} ${unit}`; }
+  else node.textContent = `= ${unit}`;
+  node.title = worn ? `instead of ${worn.name}` : 'nothing worn there yet';
+  return node;
 }
 
-// Knopf im Fenster [ GEAR ]: führt die Aktion aus, speichert und zeichnet alles neu.
-function gearButton(label, action) {
-  const button = document.createElement('button');
-  button.className = 'gear-equip';
-  button.textContent = label;
+// Knopf in CHARA oder BAG: führt die Aktion aus, speichert, zeichnet neu und zeigt die Antwort
+// der Welt im Fenster, denn das Log liegt hinter dem Dialog.
+function windowButton(label, action, statusId) {
+  const button = el('button', 'gear-equip', label);
   button.addEventListener('click', () => {
+    const before = state.log.length;
     action();
     writeSave(key, state);
     refresh();
-    drawGear();
+    drawWindows();
+    if (state.log.length > before) $(statusId).textContent = state.log.at(-1).text;
   });
   return button;
 }
 
-// Knacks (seit Tag 6): Punkte aus Aufstiegen in Ränge stecken.
-function drawKnacks() {
+function drawChara() {
+  const p = state.player;
+  const { xp, next, fill } = xpProgress();
+  const weapon = ITEMS[p.weapon];
+  const atk = attackOf(state);
+  const atkKnacks = atk - p.atk - (weapon?.atk ?? 0);
+  const armorDef = ARMOR_SLOTS.reduce((sum, slot) => sum + (ITEMS[p.armor[slot]]?.def ?? 0), 0);
+  const def = defenseOf(state);
   const points = skillPoints(state);
-  $('gear-points').textContent = points > 0
-    ? `${points} knack point${points > 1 ? 's' : ''} to spend.`
-    : 'Every level after the first gives one knack point.';
-  $('gear-knacks').replaceChildren(...SKILLS.map((skill) => {
+  const rows = [
+    ['LEVEL', String(p.level), next === null ? 'highest level' : `${next - xp} XP to level ${p.level + 1}`],
+    ['XP', next === null ? String(xp) : `${bar(fill, 1, XP_CELLS)} ${xp}/${next}`, ''],
+    ['HP', `${bar(p.hp, p.maxHp, XP_CELLS)} ${p.hp}/${p.maxHp}`, ''],
+    ['ATK', String(atk), [`${p.atk} base`, weapon && `+${weapon.atk} ${weapon.name}`, atkKnacks && `+${atkKnacks} knacks`].filter(Boolean).join(' · ')],
+    ['DEF', String(def), [`${armorDef} armour`, def - armorDef && `+${def - armorDef} knacks`].filter(Boolean).join(' · ')],
+  ];
+  $('chara-stats').replaceChildren(...rows.flatMap(([label, value, note]) => {
+    const dd = el('dd', '', value);
+    if (note) dd.append(el('span', 'stat-note', `  (${note})`));
+    return [el('dt', '', label), dd];
+  }));
+  $('chara-worn').replaceChildren(
+    gearRow(SLOT_LABELS.weapon, p.weapon),
+    ...ARMOR_SLOTS.map((slot) => gearRow(SLOT_LABELS[slot], p.armor[slot])),
+  );
+
+  // Knacks (seit Tag 6): Punkte aus Aufstiegen in Ränge stecken.
+  $('chara-points').textContent = points > 0
+    ? `${points} point${points > 1 ? 's' : ''} to spend`
+    : 'one point per level';
+  $('chara-points').classList.toggle('ready', points > 0);
+  $('chara-knacks').replaceChildren(...SKILLS.map((skill) => {
     const rank = state.player.skills?.[skill.id] ?? 0;
-    const row = document.createElement('li');
-    row.className = 'gear-row';
+    const row = el('li', 'gear-row');
     row.dataset.skill = skill.id;
-    const kind = document.createElement('span');
-    kind.className = 'gear-kind';
-    kind.textContent = `${rank}/${skill.max}`;
-    const name = document.createElement('span');
-    name.className = 'gear-name';
-    name.textContent = skill.name;
-    row.append(kind, name);
-    if (points > 0 && rank < skill.max) row.append(gearButton('Learn', () => learnSkill(state, skill.id)));
-    const text = document.createElement('span');
-    text.className = 'gear-text';
-    text.textContent = skill.text;
-    row.append(text);
+    row.append(el('span', 'gear-kind pips', '■'.repeat(rank) + '□'.repeat(skill.max - rank)));
+    row.lastChild.setAttribute('aria-label', `rank ${rank} of ${skill.max}`);
+    row.append(el('span', 'gear-name', skill.name));
+    if (points > 0 && rank < skill.max) row.append(windowButton('Learn', () => learnSkill(state, skill.id), 'chara-status'));
+    else if (rank >= skill.max) row.append(el('span', 'gear-done', 'mastered'));
+    row.append(el('span', 'gear-text', skill.text));
     return row;
   }));
+}
+
+function drawBag() {
+  const counts = bagCounts();
+  const use = [];
+  const gear = [];
+  const other = [];
+  for (const [id, n] of counts) {
+    const item = ITEMS[id];
+    const label = n > 1 ? `x${n}` : '';
+    if (item.atk !== undefined || item.slot) {
+      const button = windowButton(item.slot ? 'Wear' : 'Wield', () => equip(state, id), 'bag-status');
+      const row = gearRow(label, id, button);
+      row.dataset.item = id;
+      button.before(compareTo(id));
+      gear.push(row);
+    } else if (item.heal) {
+      const button = windowButton('Use', () => useItem(state, id), 'bag-status');
+      const full = state.player.hp >= state.player.maxHp;
+      button.disabled = full;
+      if (full) button.title = 'You are already fully mended.';
+      const row = gearRow(label, id, button);
+      row.dataset.item = id;
+      use.push(row);
+    } else {
+      const row = gearRow(label, id, null);
+      row.dataset.item = id;
+      other.push(row);
+    }
+  }
+  for (const [list, rows] of [['use', use], ['gear', gear], ['other', other]]) {
+    $(`bag-${list}`).replaceChildren(...rows);
+    $(`bag-section-${list}`).hidden = rows.length === 0;
+  }
+  const total = state.player.bag.length;
+  $('bag-total').textContent = total ? `${total} thing${total === 1 ? '' : 's'}` : '';
+  $('bag-empty').hidden = total > 0;
+}
+
+function drawWindows() {
+  if ($('chara-dialog').open) drawChara();
+  if ($('bag-dialog').open) drawBag();
 }
 
 // Fenster [ SHOP ] (seit Tag 6): öffnet sich, wenn man in einen Stand läuft (state.openShop).
@@ -229,19 +286,42 @@ function openShop() {
   if (!$('shop-dialog').open) $('shop-dialog').showModal();
 }
 
-function setupGear() {
-  const open = () => {
-    drawGear();
-    $('gear-dialog').showModal();
-  };
-  $('open-gear').addEventListener('click', open);
+// Tasten, die ein Fenster öffnen statt einen Zug zu machen.
+const WINDOW_KEYS = { c: 'chara-dialog', b: 'bag-dialog', i: 'bag-dialog', g: 'bag-dialog' };
+
+function openWindow(id) {
+  for (const other of ['chara-dialog', 'bag-dialog']) if (other !== id && $(other).open) $(other).close();
+  $('chara-status').textContent = '';
+  $('bag-status').textContent = '';
+  if (id === 'chara-dialog') drawChara(); else drawBag();
+  if (!$(id).open) $(id).showModal();
+}
+
+function setupWindows() {
+  $('open-chara').addEventListener('click', () => openWindow('chara-dialog'));
+  $('open-bag').addEventListener('click', () => openWindow('bag-dialog'));
+  for (const button of document.querySelectorAll('[data-switch]')) {
+    button.addEventListener('click', () => openWindow(button.dataset.switch));
+  }
+  for (const button of document.querySelectorAll('[data-close]')) {
+    button.addEventListener('click', () => button.closest('dialog').close());
+  }
+  // Ein Klick neben das Fenster schließt es, wie man es von Spielen kennt.
+  for (const id of ['chara-dialog', 'bag-dialog', 'shop-dialog']) {
+    $(id).addEventListener('click', (event) => { if (event.target === $(id)) $(id).close(); });
+  }
   document.addEventListener('keydown', (event) => {
-    if (event.ctrlKey || event.metaKey || event.altKey || document.querySelector('dialog[open]')) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.target.closest?.('input, textarea, select, [contenteditable]')) return;
     if (document.body.classList.contains('chat-open')) return;
-    if (WINDOW_KEYS[event.key] !== 'gear-dialog') return;
+    const id = WINDOW_KEYS[event.key.toLowerCase()];
+    if (!id) return;
+    const open = document.querySelector('dialog[open]');
+    // Dieselbe Taste schließt das Fenster wieder; aus CHARA geht es mit B direkt in den Beutel.
+    if (open && open.id === id) { event.preventDefault(); open.close(); return; }
+    if (open && !['chara-dialog', 'bag-dialog'].includes(open.id)) return;
     event.preventDefault();
-    open();
+    openWindow(id);
   });
 }
 
@@ -569,7 +649,7 @@ setupSuggestions({ archived: Boolean(archivedDay) });
 setupVoting({ archived: Boolean(archivedDay) });
 setupRating({ archived: Boolean(archivedDay) });
 setupQuestLog();
-setupGear();
+setupWindows();
 updateEvent = setupEvent({ archived: Boolean(archivedDay), getStat: (name) => state.stats[name], getFlags: () => state.flags });
 setupInput();
 greet();

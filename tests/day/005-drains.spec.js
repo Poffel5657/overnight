@@ -247,20 +247,34 @@ test('Das Fenster GEAR zeigt Werte und legt Dinge aus dem Beutel an', async ({ p
   });
   await page.goto('/?seed=3');
   await page.waitForFunction(() => window.__overnight);
-  await page.locator('#open-gear').click();
-  await expect(page.locator('#gear-dialog')).toBeVisible();
-  await expect(page.locator('#gear-stats')).toContainText('ATK 2');
-  await expect(page.locator('#gear-stats')).toContainText('DEF 0');
-  await page.locator('#gear-bag .gear-row', { hasText: 'colander' }).getByRole('button').click();
-  await expect(page.locator('#gear-stats')).toContainText('DEF 1');
-  await expect(page.locator('#gear-worn')).toContainText('colander');
-  await page.locator('#gear-bag .gear-row', { hasText: 'stone spear' }).getByRole('button').click();
-  await expect(page.locator('#gear-stats')).toContainText('ATK 4');
-  await expect(page.locator('#gear-bag .gear-row', { hasText: 'grey crumb' }).getByRole('button')).toHaveCount(0);
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#items')).toContainText('DEF');
+  await page.locator('#open-chara').click();
+  await expect(page.locator('#chara-dialog')).toBeVisible();
+  await expect(page.locator('#chara-stats')).toContainText('ATK2');
+  await expect(page.locator('#chara-stats')).toContainText('DEF0');
+  // Reiter wechselt in den Beutel, der vergleicht mit dem Getragenen.
+  await page.locator('#chara-dialog [data-switch="bag-dialog"]').click();
+  await expect(page.locator('#bag-dialog')).toBeVisible();
+  await expect(page.locator('#chara-dialog')).toBeHidden();
+  await expect(page.locator('#bag-gear [data-item="stone-spear"] .gear-compare')).toHaveText('▲ 2 ATK');
+  await page.locator('#bag-gear [data-item="colander"]').getByRole('button', { name: 'Wear' }).click();
+  await expect(page.locator('#bag-status')).toContainText('colander');
+  await page.locator('#bag-gear [data-item="stone-spear"]').getByRole('button', { name: 'Wield' }).click();
+  // Der alte Stock liegt jetzt im Beutel und ist schwächer.
+  await expect(page.locator('#bag-gear [data-item="stick"] .gear-compare')).toHaveText('▼ 2 ATK');
+  await expect(page.locator('#bag-other [data-item="crumb"]').getByRole('button')).toHaveCount(0);
+  await page.keyboard.press('c');
+  await expect(page.locator('#chara-dialog')).toBeVisible();
+  await expect(page.locator('#chara-stats')).toContainText('ATK4');
+  await expect(page.locator('#chara-stats')).toContainText('DEF1');
+  await expect(page.locator('#chara-worn')).toContainText('colander');
+  // Dieselbe Taste schließt wieder; die Leiste unter der Karte zählt nur noch den Beutel.
+  await page.keyboard.press('c');
+  await expect(page.locator('#chara-dialog')).toBeHidden();
+  await expect(page.locator('#bag-count')).toHaveText(' 2');
   await page.keyboard.press('i');
-  await expect(page.locator('#gear-dialog')).toBeVisible();
+  await expect(page.locator('#bag-dialog')).toBeVisible();
+  await page.locator('#bag-dialog [data-close]').click();
+  await expect(page.locator('#bag-dialog')).toBeHidden();
 });
 
 test('Eine angenommene Quest steht im Quest-Log mit Fortschritt', async ({ page }) => {

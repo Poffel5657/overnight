@@ -226,15 +226,42 @@ test('Im Browser: Laden, Knacks und gemeinsame Siege', async ({ page }) => {
   expect(await page.evaluate(() => window.__overnight.state.player.bag.includes('tonic'))).toBe(true);
   await page.keyboard.press('Escape');
 
-  // Fenster [ GEAR ]: Tonikum benutzen, einen Knack lernen.
+  // Fenster [ BAG ]: Tonikum benutzen. Fenster [ CHARA ]: einen Knack lernen.
   await page.evaluate(() => { window.__overnight.state.player.hp = 2; });
-  await page.keyboard.press('i');
-  await page.locator('#gear-bag .gear-row', { hasText: 'fizzy tonic' }).getByRole('button', { name: 'Use' }).click();
+  await expect(page.locator('#chara-badge')).toHaveText(' +1');
+  await page.keyboard.press('b');
+  await page.locator('#bag-use [data-item="tonic"]').getByRole('button', { name: 'Use' }).click();
   expect(await page.evaluate(() => window.__overnight.state.player.hp)).toBeGreaterThan(2);
-  await expect(page.locator('#gear-points')).toContainText('1 knack point');
-  await page.locator('#gear-knacks [data-skill="sharp"] button').click();
+  await page.keyboard.press('c');
+  await expect(page.locator('#chara-points')).toContainText('1 point to spend');
+  await page.locator('#chara-knacks [data-skill="sharp"] button').click();
   expect(await page.evaluate(() => window.__overnight.state.player.skills.sharp)).toBe(1);
-  await expect(page.locator('#gear-knacks [data-skill="sharp"] button')).toHaveCount(0);
+  await expect(page.locator('#chara-knacks [data-skill="sharp"] button')).toHaveCount(0);
+  await expect(page.locator('#chara-status')).toContainText('Sharp 1/3');
+  await expect(page.locator('#chara-badge')).toBeHidden();
+});
+
+test('BAG: Getränke bei vollen HP gesperrt, CHARA zeigt Fortschritt zur nächsten Stufe', async ({ page }) => {
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('overnight.save', JSON.stringify({
+      version: 1, map: 'meadow', turn: 3, lastSeenDay: 6, flags: {}, stats: {},
+      player: { x: 8, y: 5, hp: 10, maxHp: 10, atk: 1, weapon: 'stick', bag: ['tonic', 'tonic', 'button'], xp: 8, level: 2 },
+    }));
+  });
+  await page.goto('/?seed=3');
+  await page.waitForFunction(() => window.__overnight);
+  await expect(page.locator('#xp-meter')).toContainText('LV 2');
+  await expect(page.locator('#xp-meter')).toContainText('8/12 XP');
+  await page.locator('#open-bag').click();
+  const tonic = page.locator('#bag-use [data-item="tonic"]');
+  await expect(tonic.locator('.gear-kind')).toHaveText('x2');
+  await expect(tonic.getByRole('button', { name: 'Use' })).toBeDisabled();
+  await expect(page.locator('#bag-section-gear')).toBeHidden();
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('c');
+  await expect(page.locator('#chara-stats')).toContainText('4 XP to level 3');
 });
 
 test('Gemeinsame Welt: Ein Sieg zusammen mit einem Echo zählt für "Many Hands", allein nicht', async ({ page }) => {

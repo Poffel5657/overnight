@@ -1,5 +1,5 @@
 // Knacks (seit Tag 6): ein kleiner Fähigkeitenbaum. Jeder Aufstieg ab Stufe 2 gibt einen Punkt,
-// den man im Fenster [ GEAR ] in einen Knack steckt. Bei Stufe 10 sind alle 9 Punkte verteilt.
+// den man im Fenster [ CHARA ] in einen Knack steckt. Bei Stufe 10 sind alle 9 Punkte verteilt.
 // Pro Rang: maxHp, atk oder def kommt dazu. max = höchster Rang.
 export const SKILLS = [
   { id: 'sturdy', name: 'Sturdy', max: 3, maxHp: 3, text: '+3 max HP per rank. You get harder to rub out.' },

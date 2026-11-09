@@ -133,8 +133,11 @@
       <div class="hud">
         <p id="hp-label" class="visually-hidden"></p>
         <p id="hp-meter" class="hp-meter" aria-hidden="true"></p>
-        <p id="items" class="chips" aria-hidden="true"></p>
-        <button id="open-gear" class="gear-button" aria-haspopup="dialog">Gear</button>
+        <p id="xp-meter" class="xp-meter" aria-hidden="true"></p>
+        <div class="hud-windows">
+          <button id="open-chara" class="window-button" aria-haspopup="dialog" aria-keyshortcuts="C">Chara<span id="chara-badge" class="badge" hidden></span></button>
+          <button id="open-bag" class="window-button" aria-haspopup="dialog" aria-keyshortcuts="B I">Bag<span id="bag-count" class="badge-count"></span></button>
+        </div>
         <div id="rate-box" class="rate-box" hidden>
           <span id="rate-question"></span>
           <button data-rate="up" aria-label="I liked it">GOOD</button>
@@ -143,7 +146,7 @@
         </div>
       </div>
 
-      <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait.</p>
+      <p class="hint">Arrow keys or WASD to move. Walk into things to use them. Space to wait. C character, B bag.</p>
 
       <section id="log-window" class="window window-log">
         <h2 class="window-title">
@@ -186,19 +189,47 @@
     <form method="dialog"><button>Close</button></form>
   </dialog>
 
-  <dialog id="gear-dialog" class="window">
-    <h2 class="window-title">[ GEAR ]</h2>
-    <p id="gear-stats" class="gear-stats"></p>
-    <h3 class="gear-head">WORN</h3>
-    <ul id="gear-worn" class="gear-list"></ul>
-    <h3 class="gear-head">BAG</h3>
-    <ul id="gear-bag" class="gear-list"></ul>
-    <p id="gear-empty" class="fineprint">Nothing in the bag yet. Walk into things.</p>
-    <h3 class="gear-head">KNACKS</h3>
-    <p id="gear-points" class="fineprint"></p>
-    <ul id="gear-knacks" class="gear-list"></ul>
-    <p class="fineprint">Defence is taken off every hit, but one point always gets through. Press I to open this window.</p>
-    <form method="dialog"><button>Close</button></form>
+  <!-- Fenster CHARA und BAG (seit der Überarbeitung nach Tag 6, vorher ein gemeinsames Fenster GEAR). -->
+  <dialog id="chara-dialog" class="window side-window" aria-labelledby="chara-heading">
+    <h2 class="window-title window-bar">
+      <span id="chara-heading">[ CHARA ]</span>
+      <span class="window-tabs">
+        <button class="tab" data-switch="bag-dialog">Bag</button>
+        <button class="tab" data-close aria-label="Close">X</button>
+      </span>
+    </h2>
+    <dl id="chara-stats" class="stat-grid"></dl>
+    <h3 class="gear-head">EQUIPPED</h3>
+    <ul id="chara-worn" class="gear-list"></ul>
+    <h3 class="gear-head">KNACKS <span id="chara-points" class="head-note"></span></h3>
+    <ul id="chara-knacks" class="gear-list"></ul>
+    <p id="chara-status" class="window-status" role="status"></p>
+    <p class="fineprint">Defence is taken off every hit, but one point always gets through. Gear is changed in the bag. <span class="keys">C opens this window, Esc closes it.</span></p>
+  </dialog>
+
+  <dialog id="bag-dialog" class="window side-window" aria-labelledby="bag-heading">
+    <h2 class="window-title window-bar">
+      <span id="bag-heading">[ BAG ] <span id="bag-total" class="window-sub"></span></span>
+      <span class="window-tabs">
+        <button class="tab" data-switch="chara-dialog">Chara</button>
+        <button class="tab" data-close aria-label="Close">X</button>
+      </span>
+    </h2>
+    <section id="bag-section-use" class="bag-section">
+      <h3 class="gear-head">TO USE</h3>
+      <ul id="bag-use" class="gear-list"></ul>
+    </section>
+    <section id="bag-section-gear" class="bag-section">
+      <h3 class="gear-head">GEAR <span class="head-note">compared with what you wear</span></h3>
+      <ul id="bag-gear" class="gear-list"></ul>
+    </section>
+    <section id="bag-section-other" class="bag-section">
+      <h3 class="gear-head">ODDS AND ENDS</h3>
+      <ul id="bag-other" class="gear-list"></ul>
+    </section>
+    <p id="bag-empty" class="fineprint">Nothing in the bag yet. Walk into things.</p>
+    <p id="bag-status" class="window-status" role="status"></p>
+    <p class="fineprint">Using and changing things takes no time. <span class="keys">B or I opens this window, Esc closes it.</span></p>
   </dialog>
 
   <dialog id="shop-dialog" class="window">
@@ -206,7 +237,7 @@
     <p id="shop-greeting"></p>
     <p id="shop-purse" class="gear-stats"></p>
     <ul id="shop-stock" class="gear-list"></ul>
-    <p class="fineprint">Buying takes no time. Tonics and tea are drunk from the GEAR window.</p>
+    <p class="fineprint">Buying takes no time. Tonics and tea are drunk from the BAG window.</p>
     <form method="dialog"><button>Close</button></form>
   </dialog>
 
