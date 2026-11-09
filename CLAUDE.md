@@ -34,6 +34,7 @@ Das gilt auch in der Aufräumnacht (jede 7. Nacht, siehe unten), dort kommt dana
 - Die Spielwelt nimmt die Neuerung wahr: Der Keeper oder ein anderes Wesen sagt etwas dazu, wenn es passt. Spieltexte sind Englisch und folgen dem Ton aus `DESIGN.md`.
 - Bestehende Spielstände dürfen nie kaputtgehen. Ändert sich das Speicherformat: `SAVE_VERSION` erhöhen, Migration in `src/save.js` ergänzen und eine Fixture in `tests/fixtures/` ablegen. Alte Fixtures bleiben liegen.
 - Alte Spielstände ohne neue Felder müssen funktionieren. Prüfe das beim Einführen neuer Felder.
+- Alles, was kämpft oder beim Kämpfen hilft, geht durch den Probespieler (siehe „Balance“). Eine Neuerung, die sich nicht richtig spielt, ist nicht fertig.
 
 ## Aufräumnacht: jede 7. Nacht
 
@@ -42,7 +43,7 @@ An Tagen, deren Nummer durch 7 teilbar ist (7, 14, 21 …), wächst das Spiel **
 1. **Erst bauen.** Die Neuerungen der Nacht fertig bauen und testen wie in jeder Nacht.
 2. **Dann Code-Review.** Lies den Code der letzten sieben Nächte (`git log` seit dem letzten `day-*`-Tag, der durch 7 teilbar ist) und die neuen Teile von heute kritisch durch wie ein Reviewer: Fehler, Grenzfälle, alte Spielstände, gemeinsame Welt (siehe „Gemeinsame Welt“), Performance, unklare Stellen. Was du findest, behebst du.
 3. **Dann aufräumen und optimieren:** Doppeltes zusammenführen, große Funktionen und Dateien teilen (zum Beispiel `src/game.js` in Module), Daten nach `content/` verlagern, tote Pfade entfernen, Namen klären, unnötige Arbeit pro Zug oder pro Bild vermeiden. Verhalten, das Spieler kennen, bleibt gleich, außer es war ein Fehler.
-4. **Dann testen:** Lücken in den Tests schließen, besonders für Systeme ohne eigenen Tagestest, und Balance prüfen (sind Gegner, Waffen und Belohnungen noch stimmig?). Alle Tests müssen am Ende grün sein.
+4. **Dann testen:** Lücken in den Tests schließen, besonders für Systeme ohne eigenen Tagestest, und Balance prüfen: den vollen Bericht des Probespielers lesen, `STAGES` mit dem tatsächlichen Stand der Welt vergleichen (Ausrüstung, Belohnungen, Stufen) und nachziehen. Alle Tests müssen am Ende grün sein.
 5. **Doku entrümpeln:** `LORE.md`, `PLAN.md` und `ARCHITECTURE.md`: Veraltetes raus, Widersprüche auflösen.
 
 - Die Grenze liegt in dieser Nacht bei **2000 Zeilen** (1000 für die Neuerungen, 1000 fürs Aufräumen); der Workflow erkennt die Aufräumnacht an der Tagesnummer. Reicht es nicht für beides, haben die Neuerungen Vorrang, und der Rest des Aufräumens kommt als Punkt in `PLAN.md`.
@@ -100,12 +101,24 @@ Du darfst ein Community-Event starten, wenn du es für eine gute Idee hältst. E
 
 - Führe vor dem PR `npm ci`, `npx playwright install chromium` und `npm test` aus. Wenn der Browser in deiner Umgebung nicht installierbar ist, schreibe das in die PR-Beschreibung, der Workflow testet trotzdem.
 - Lege für die Neuerung einen Test `tests/day/NNN-*.spec.js` an. Die Spiellogik lässt sich dort direkt aus `src/game.js` importieren.
+- `tests/balance/` prüft, ob sich Kämpfe richtig spielen (siehe „Balance“). Tagestests sollen Zahlen aus `content/` lesen statt sie abzuschreiben, damit ein späterer Rebalance sie nicht bricht.
 - `tests/smoke/` ist geschützt und gilt immer. Wenn ein Smoke-Test scheitert, ist dein Code falsch, nicht der Test.
+
+## Balance: der Probespieler
+
+Wachsen allein reicht nicht, es muss sich auch richtig spielen. Ein Boss für Gruppen, den man allein ohne Mühe legt, ist ein Fehler, genau wie ein normaler Gegner, an dem man stirbt. Du spielst dein Spiel nicht selbst, deshalb tut es der **Probespieler** (`tests/balance/probe.js`): Er kämpft gegen jede Kreatur mit der Ausrüstung, die man an ihrem Ort realistisch hat, allein rundenweise und in der gemeinsamen Welt im Takt, allein und zu dritt. Er probiert mehrere Taktiken, nutzt Getränke und Zauber und nimmt die beste, so wie Spieler sie finden.
+
+- **Jede Kreatur hat `balance: { stage, role }`** in `content/creatures.js`. Entscheide Rolle und Ort, *bevor* du Zahlen wählst. Rollen stehen in `content/balance.js` unter `ROLES`: `fodder` (nebenbei), `normal` (kostet spürbar HP), `boss` (allein schaffbar, nur mit Einsatz), `group` (allein kaum, zu dritt gut). „Mit Freunden“ heißt immer `group`.
+- **`STAGES` ehrlich pflegen.** Ein neuer Ort bekommt eine neue Stufe: Stufe, Waffe, Rüstung, Beutel, wie ein Spieler dort wirklich ankommt. Neue Waffen, Rüstung, Getränke oder Zauber trägst du in jede Stufe ein, ab der man sie leicht haben kann. Sonst misst der Probespieler einen zu schwachen Spieler, und alte Gegner werden unbemerkt zu leicht.
+- **Neue Vorteile beibringen.** Gibt eine Neuerung dem Spieler einen neuen Trick (ein Zauber, eine Fernwaffe, eine Falle, ein Ort zum Verstecken), bring dem Probespieler bei, ihn zu nutzen. Er soll so gut spielen wie ein Spieler, der das Spiel kennt.
+- **Vor dem PR:** `node tests/balance/report.mjs` ausführen. Jede Kreatur muss passen; `tests/balance/balance.spec.js` läuft mit `npm test`. Passt etwas nicht, ändere Zahlen oder Verhalten der Kreatur (oder der neuen Ausrüstung), nie die Rolle, nur damit der Test grün wird.
+- **`ROLES`, `SKILL_ORDER` und die Grundregeln des Kampfs ändert nur Chris:** Rüstung fängt höchstens die Hälfte eines Schlags ab (`mitigate()`), Trinken kostet einen Zug, `PRESENCE.attackMs` ist gleich `PRESENCE.tickMs`, Bosse in der gemeinsamen Welt heilen, wenn niemand sie trifft. Hältst du eine davon für falsch, schreib es in `PLAN.md` unter `Bekannte Probleme`.
+- **Bericht in die Chronik:** In `CHRONICLE.md` steht bei jeder Nacht unter „Balance“ die Zeile des Probespielers für jede neue oder geänderte Kreatur (Siege allein rundenweise, allein live, zu dritt, HP-Verlust) und was du nachgebessert hast.
 
 ## Tagesende: Pflicht
 
 1. Eintrag in `content/chronicle.js` mit Tagesnummer, Datum, Titel und einem Satz für Spieler. Erwähne darin, welche Idee die Abstimmung gewonnen hat.
-2. Eintrag in `CHRONICLE.md`: was neu ist, gegliedert nach den drei Teilen, warum genau das, welche Vorschläge es beeinflusst haben (in eigenen Worten), und das Abstimmungsergebnis.
+2. Eintrag in `CHRONICLE.md`: was neu ist, gegliedert nach den drei Teilen, warum genau das, welche Vorschläge es beeinflusst haben (in eigenen Worten), das Abstimmungsergebnis und der Bericht des Probespielers (siehe „Balance“).
 3. `content/ballot.js` neu füllen (siehe „Abstimmung“). `content/event.js` pflegen, falls ein Event läuft oder endet.
 4. `LORE.md` ergänzen (siehe „Weltlexikon“).
 5. `PLAN.md` aktualisieren: Erledigtes entfernen, nächste Tage planen, offene Fäden und Probleme festhalten, gelesenen Inbox-Stand eintragen. Ideen aus Vorschlägen, die dir gefallen, die du aber nicht gebaut hast, kommen in eigenen Worten unter `Ideen für später`. Nur von dort holst du später Ideen für den Stimmzettel, alte Vorschlagsdateien liest du nicht noch einmal.

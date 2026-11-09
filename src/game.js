@@ -9,9 +9,9 @@ import { WHEEL } from '../content/wheel.js';
 import { QUESTS } from '../content/quests.js';
 import { SHOPS } from '../content/shops.js';
 import { SKILLS } from '../content/skills.js';
-import { DIRS, activeEvent, currentDay, distance, entityAt, log, random, tileAt } from './core.js';
+import { DIRS, activeEvent, currentDay, distance, entityAt, log, mitigate, random, tileAt } from './core.js';
 import {
-  ARMOR_SLOTS, countItem, describeGain, gainXp, giveItem, hasItem, isWeapon, skillPoints, takeItem, attackOf,
+  ARMOR_SLOTS, countItem, describeGain, gainXp, giveItem, hasItem, isWeapon, skillPoints, takeItem, attackOf, useItem,
 } from './inventory.js';
 import {
   AI_BEHAVIOURS, creatureAt, enterMap, isFree, newCreature, spawnCreatures,
@@ -299,8 +299,8 @@ function spinWheel(s) {
   WHEEL_EFFECTS[wedge.effect](s, wedge);
 }
 
-// Schaden eines Schlags: Angriff minus Panzer der Kreatur (def, seit Tag 7), mindestens 1.
-export const damageTo = (s, type) => Math.max(1, attackOf(s) - (CREATURES[type]?.def ?? 0));
+// Schaden eines Schlags: Angriff minus Panzer der Kreatur (def, seit Tag 7), höchstens die Hälfte abgefangen.
+export const damageTo = (s, type) => mitigate(attackOf(s), CREATURES[type]?.def ?? 0);
 
 function attackCreature(s, c) {
   const def = CREATURES[c.type];
@@ -365,6 +365,12 @@ function endTurn(s) {
 // Einziger Einstiegspunkt für Spielzüge. Rückgabe: true, wenn eine Runde vergangen ist.
 export function act(s, action) {
   if (action === 'wait') {
+    endTurn(s);
+    return true;
+  }
+  // Trinken (seit dem Rebalance): 'use:<id>' kostet eine Runde, wie ein Schlag. Sonst heilt man sich mitten im Kampf umsonst.
+  if (typeof action === 'string' && action.startsWith('use:')) {
+    if (!useItem(s, action.slice('use:'.length))) return false;
     endTurn(s);
     return true;
   }

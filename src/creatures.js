@@ -3,7 +3,7 @@
 import { MAPS, START } from '../content/world.js';
 import { CREATURES } from '../content/creatures.js';
 import { SPELL_TEXT } from '../content/spells.js';
-import { DIRS, distance, entityAt, log, random, tileAt } from './core.js';
+import { DIRS, distance, entityAt, log, mitigate, random, tileAt } from './core.js';
 import { defenseOf } from './inventory.js';
 
 export const creatureAt = (s, x, y) =>
@@ -40,8 +40,8 @@ export function enterMap(s, mapId, x, y) {
   s.worldMap = null;
 }
 
-// Rüstung zieht ihre Abwehr vom Schaden ab, ein Punkt geht immer durch.
-export const damageFrom = (s, def) => Math.max(1, def.atk - defenseOf(s));
+// Rüstung zieht ihre Abwehr vom Schaden ab, aber höchstens die Hälfte des Schlags (siehe mitigate).
+export const damageFrom = (s, def) => mitigate(def.atk, defenseOf(s));
 
 // Auf dem Server (s.onHurt) trifft der Biss einen echten Spieler; sein Browser rechnet den Schaden.
 export function hurtPlayer(s, def) {
@@ -50,6 +50,12 @@ export function hurtPlayer(s, def) {
     return false;
   }
   // Zauber WARD (seit Tag 7): Solange der Tintenring hält, prallen Bisse ab.
+  // Bosse sind zu groß für den Ring (seit dem Rebalance): Er hält einen ihrer Bisse ab und zerbricht.
+  if (s.player.ward > 0 && def.boss) {
+    s.player.ward = 0;
+    log(s, `The ${def.name} ${def.biteVerb ?? 'bites'} you. ${SPELL_TEXT.wardBreaks}`, 'spell');
+    return false;
+  }
   if (s.player.ward > 0) {
     s.player.ward -= 1;
     log(s, `The ${def.name} ${def.biteVerb ?? 'bites'} you. ${SPELL_TEXT.wardHolds}`, 'spell');
@@ -177,10 +183,15 @@ export const AI_BEHAVIOURS = {
     return false;
   },
   // Kuckucke (Tag 7): spucken aus der Ferne, wenn sie in gerader Linie freie Sicht haben.
-  // Wer nah herankommt, vor dem weichen sie aus; nur in der Ecke picken sie zurück.
+  // Wer nah herankommt, den picken sie und flattern dann weg, aber nur jede zweite Runde (seit dem Rebalance:
+  // vorher wichen sie jedes Mal aus, und allein holte man sie nie ein).
   aim(s, c, def) {
     const d = distance(c, s.player);
-    if (d === 1) return retreat(s, c) ? false : strike(s, def);
+    if (d === 1) {
+      const fainted = strike(s, def);
+      if (!fainted && s.turn % 2 === 0) retreat(s, c);
+      return fainted;
+    }
     if (d > def.senseRange + 2) {
       wander(s, c);
       return false;

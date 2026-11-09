@@ -1,7 +1,7 @@
 // Fenster [ CHARA ], [ BAG ] und [ SHOP ] und die Balken der Leiste unter der Karte.
 // In der Aufräumnacht 7 aus src/main.js gelöst; main.js ruft setupWindows() einmal auf.
 import {
-  attackOf, buy, countItem, defenseOf, equip, learnSkill, nextLevelXp, skillPoints, useItem, ARMOR_SLOTS,
+  attackOf, buy, countItem, defenseOf, equip, learnSkill, nextLevelXp, skillPoints, ARMOR_SLOTS,
 } from './game.js';
 import { ITEMS } from '../content/items.js';
 import { SHOPS } from '../content/shops.js';
@@ -149,7 +149,7 @@ function drawBag() {
       button.before(compareTo(id));
       gear.push(row);
     } else if (item.heal) {
-      const button = windowButton('Use', () => useItem(state, id), 'bag-status');
+      const button = windowButton('Use', () => perform(`use:${id}`), 'bag-status');
       const full = state.player.hp >= state.player.maxHp;
       button.disabled = full;
       if (full) button.title = 'You are already fully mended.';
@@ -227,9 +227,11 @@ function openWindow(id) {
 let state = null;
 let save = () => {};
 let refresh = () => {};
+// perform(action): ein Spielzug über main.js, mit Abklingzeit in der gemeinsamen Welt (Trinken kostet eine Runde).
+let perform = () => {};
 
 export function setupWindows(options) {
-  ({ state, save, refresh } = options);
+  ({ state, save, refresh, perform } = options);
   $('open-chara').addEventListener('click', () => openWindow('chara-dialog'));
   $('open-bag').addEventListener('click', () => openWindow('bag-dialog'));
   for (const button of document.querySelectorAll('[data-switch]')) {
