@@ -6,6 +6,13 @@
 // reach (seit Tag 7): mit ai 'grind' trifft sie auch auf diese Entfernung in gerader Linie (nur in geraden Runden).
 // stat (seit Tag 7): jeder Sieg erhöht state.stats[stat] um 1 (für Quests).
 // balance (seit dem Rebalance): { stage, role } aus content/balance.js. Der Probespieler prüft damit jeden Kampf.
+// aoe (seit dem Rebalance): Flächenangriff eines Bosses. Alle every Runden markiert er Felder mit der Kreatur mark,
+//   warn Runden später schlägt er dort zu. patterns = [{ shape, size }] wechseln sich ab, size ist die Reichweite:
+//   'cross' = gerade Linien von ihm weg (trifft auch, wer direkt daneben steht), 'ring' = Felder mit Abstand 2 bis size
+//   (direkt daneben ist sicher), 'area' = alles bis size um ihn herum. warnText steht im Log, wenn er markiert.
+//   Fair bleiben: Wer direkt daneben steht, muss in warn Runden herauskommen können (allein rundenweise ein Feld pro Runde).
+// mark: true (seit dem Rebalance): eine Markierung, keine echte Kreatur. Blockiert nichts, lässt sich nicht schlagen,
+//   und trifft mit atk (immer, ohne hitChance), wer zum Zeitpunkt darauf steht. Zerbricht WARD wie ein Boss.
 // boss: true = einmalig. Nach dem Sieg merkt sich der Spielstand das (flags.slain), der Spawn entfällt dann.
 export const CREATURES = {
   rat: {
@@ -59,7 +66,7 @@ export const CREATURES = {
     balance: { stage: 'sump', role: 'boss' },
     glyph: '&',
     color: '#d6c3cf',
-    hp: 75,
+    hp: 88,
     atk: 8,
     hitChance: 0.6,
     ai: 'trudge',
@@ -68,6 +75,7 @@ export const CREATURES = {
     xp: 30,
     biteVerb: 'smothers',
     boss: true,
+    aoe: { mark: 'crumb-fall', every: 5, warn: 2, patterns: [{ shape: 'cross', size: 2 }], warnText: 'The Crumb Heap rears up. Crumbs start to trickle down around it.' },
     defeatText: 'The Crumb Heap comes apart into ordinary crumbs and washes away.',
     drops: [{ item: 'drain-hook', chance: 1 }],
   },
@@ -93,7 +101,7 @@ export const CREATURES = {
     balance: { stage: 'mainspring', role: 'group' },
     glyph: 'Ø',
     color: '#f2c56b',
-    hp: 200,
+    hp: 380,
     atk: 10,
     hitChance: 0.6,
     ai: 'trudge',
@@ -102,6 +110,7 @@ export const CREATURES = {
     xp: 45,
     biteVerb: 'chimes at',
     boss: true,
+    aoe: { mark: 'thirteenth-chime', every: 4, warn: 2, patterns: [{ shape: 'area', size: 2 }, { shape: 'ring', size: 3 }], warnText: 'The Overwound Clock winds itself tighter. The air around it starts to hum.' },
     defeatText: 'The Overwound Clock strikes thirteen, sighs, and finally runs down.',
     drops: [{ item: 'brass-helm', chance: 1 }, { item: 'spring', chance: 1 }],
   },
@@ -160,7 +169,7 @@ export const CREATURES = {
     balance: { stage: 'clocktower', role: 'group' },
     glyph: '☼',
     color: '#f2c56b',
-    hp: 280,
+    hp: 420,
     atk: 12,
     def: 2,
     reach: 2,
@@ -171,7 +180,51 @@ export const CREATURES = {
     xp: 60,
     biteVerb: 'grinds',
     boss: true,
+    aoe: { mark: 'cog-teeth', every: 4, warn: 2, patterns: [{ shape: 'cross', size: 3 }, { shape: 'area', size: 2 }], warnText: 'The Great Cog shudders. Somewhere in the floor, teeth line up.' },
     defeatText: 'The Great Cog slips a tooth, shudders, and stops. Somewhere above, every clock in Mainspring skips a beat, then agrees on the time.',
     drops: [{ item: 'cog-tooth', chance: 1 }, { item: 'spring', chance: 1 }],
+  },
+  // Markierungen der Flächenangriffe (seit dem Rebalance). Keine echten Kreaturen: siehe mark oben.
+  'crumb-fall': {
+    name: 'falling crumbs',
+    glyph: '×',
+    color: '#ff6b5a',
+    mark: true,
+    hp: 1,
+    atk: 9,
+    hitChance: 1,
+    ai: 'mark',
+    senseRange: 0,
+    respawnTurns: 100000,
+    xp: 0,
+    biteVerb: 'come down on',
+  },
+  'thirteenth-chime': {
+    name: 'thirteenth chime',
+    glyph: '×',
+    color: '#ff6b5a',
+    mark: true,
+    hp: 1,
+    atk: 26,
+    hitChance: 1,
+    ai: 'mark',
+    senseRange: 0,
+    respawnTurns: 100000,
+    xp: 0,
+    biteVerb: 'rings straight through',
+  },
+  'cog-teeth': {
+    name: "Great Cog's teeth",
+    glyph: '×',
+    color: '#ff6b5a',
+    mark: true,
+    hp: 1,
+    atk: 22,
+    hitChance: 1,
+    ai: 'mark',
+    senseRange: 0,
+    respawnTurns: 100000,
+    xp: 0,
+    biteVerb: 'come up under',
   },
 };

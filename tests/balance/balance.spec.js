@@ -10,6 +10,7 @@ import { judge, playerFor } from './probe.js';
 
 test('Jede Kreatur hat eine Rolle und eine Stufe, die es gibt', () => {
   for (const [type, def] of Object.entries(CREATURES)) {
+    if (def.mark) continue;
     expect(ROLES[def.balance?.role], `${type}: balance.role`).toBeTruthy();
     expect(STAGES[def.balance?.stage], `${type}: balance.stage`).toBeTruthy();
   }
@@ -51,7 +52,7 @@ test('Trinken kostet eine Runde', () => {
   expect(act(s, 'use:tonic')).toBe(false);
 });
 
-for (const type of Object.keys(CREATURES)) {
+for (const type of Object.keys(CREATURES).filter((t) => !CREATURES[t].mark)) {
   test(`Probespieler gegen ${type}`, () => {
     const result = judge(type, { runs: 40 });
     expect(result.problems, result.problems.join('\n')).toEqual([]);

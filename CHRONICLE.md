@@ -164,23 +164,24 @@ Geändert, mit Grund:
 - **Bosse heilen in der gemeinsamen Welt**, wenn sie `WORLD_BOSS_REST` (30) Takte lang niemand trifft. Sonst legt man sie allein durch Ohnmacht, Zurücklaufen und Weiterhauen.
 - **Ein Boss zerbricht WARD mit einem Biss.** Vorher hielten vier Tropfen Tinte einen ganzen Gruppenkampf ab.
 - **Kuckucke** picken, wenn man daneben steht, und flattern nur jede zweite Runde weg.
-- Zahlen: Frosch 14 HP / 3 Angriff / 3 XP, Aal 14 / 5 / 4, Krähe 10 / 4 / 4, Kuckuck 28 / 6 / 4, Krümelhaufen 75 / 8 / 30, Overwound Clock 200 / 10 / 45, Great Cog 280 / 12 / 60. Ratten, Mäuse und Seiten bleiben Kleinvieh.
+- **Flächenangriffe der Bosse:** Alle paar Runden markiert ein Boss Felder rot (`×`, roter Schleier), zwei Runden später schlägt er dort zu, mit viel mehr Wucht als sein Biss. Wer daneben stehen bleibt, verliert. Krümelhaufen: Kreuz um sich (Länge 2). Overwound Clock: abwechselnd alles bis 2 Felder um sich und ein Ring 2 bis 3 Felder entfernt (wer zu weit wegläuft, wird auch erwischt). Great Cog: abwechselnd Kreuz (Länge 3) und alles bis 2 Felder. Die Markierungen sind in `content/creatures.js` eigene Einträge mit `mark: true`, laufen allein und in der gemeinsamen Welt gleich und brauchen keine Änderung am Worker.
+- Zahlen: Frosch 14 HP / 3 Angriff / 3 XP, Aal 14 / 5 / 4, Krähe 10 / 4 / 4, Kuckuck 28 / 6 / 4, Krümelhaufen 88 / 8 / 30 (Krümel 9), Overwound Clock 380 / 10 / 45 (Glocke 26), Great Cog 420 / 12 / 60 (Zähne 22). Ratten, Mäuse und Seiten bleiben Kleinvieh.
 
 Nachher (`node tests/balance/report.mjs 80`):
 
-| Kreatur | Rolle | allein rundenweise | allein live | zu dritt live |
-|---|---|---|---|---|
-| Ratte | fodder | 100 % (6 % HP) | 100 % (6 % HP) | |
-| Frosch | normal | 100 % (18 % HP) | 100 % (18 % HP) | |
-| Aal | normal | 100 % (24 % HP) | 100 % (16 % HP) | |
-| Krähe | normal | 100 % (15 % HP) | 100 % (15 % HP) | |
-| Krümelhaufen | boss | 70 % (86 % HP) | 70 % (89 % HP) | |
-| Maus | fodder | 100 % (0 % HP) | 100 % (0 % HP) | |
-| Overwound Clock | group | 0 % | 0 % | 100 % (25 % HP) |
-| lose Seite | fodder | 100 % (2 % HP) | 100 % (0 % HP) | |
-| Kuckuck | normal | 100 % (37 % HP) | 100 % (17 % HP) | |
-| Great Cog | group | 0 % | 0 % | 100 % (28 % HP) |
+| Kreatur | Rolle | allein rundenweise | allein live | zu dritt live | ohne Ausweichen |
+|---|---|---|---|---|---|
+| Ratte | fodder | 100 % (6 % HP) | 100 % (6 % HP) | | |
+| Frosch | normal | 100 % (18 % HP) | 100 % (18 % HP) | | |
+| Aal | normal | 100 % (24 % HP) | 100 % (16 % HP) | | |
+| Krähe | normal | 100 % (15 % HP) | 100 % (15 % HP) | | |
+| Krümelhaufen | boss | 60 % (93 % HP) | 69 % (93 % HP) | | 14 % allein |
+| Maus | fodder | 100 % (0 % HP) | 100 % (0 % HP) | | |
+| Overwound Clock | group | 0 % | 0 % | 100 % (42 % HP) | 57 % zu dritt |
+| lose Seite | fodder | 100 % (2 % HP) | 100 % (0 % HP) | | |
+| Kuckuck | normal | 100 % (37 % HP) | 100 % (17 % HP) | | |
+| Great Cog | group | 0 % | 0 % | 100 % (33 % HP) | 10 % zu dritt |
 
-Zu zweit schaffen Clock und Cog es auch, mit etwa der Hälfte der HP. Wer weit über seinen Ort hinaus gelevelt ist, kann die Clock knapp allein legen; das ist gewollt.
+Der Probespieler weicht den Markierungen aus; die letzte Spalte zeigt, wie es ohne Ausweichen ausgeht. Wer weit über seinen Ort hinaus gelevelt ist, kann die Clock allein schaffen; das ist gewollt.
 
 Für die Nächte: `CLAUDE.md` hat einen neuen Abschnitt „Balance: der Probespieler“. Jede neue Kreatur braucht `balance: { stage, role }`, neue Ausrüstung gehört in die Stufen, und der Bericht steht in jedem Chronik-Eintrag.

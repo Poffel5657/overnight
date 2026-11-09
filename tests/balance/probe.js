@@ -37,13 +37,14 @@ export function playerFor(stageId, seed = 1) {
 }
 
 // Freies Feld für den Probespieler: begehbar, kein Ding, keine Kreatur, kein anderer Spieler.
-const passable = (s, creatures, others, x, y) =>
+// Markierungen von Flächenangriffen meidet er wie Hindernisse, außer marks: true (dann darf er darüber, um herauszukommen).
+const passable = (s, creatures, others, x, y, marks = false) =>
   tileAt(s.map, x, y).walkable && !entityAt(s, x, y) &&
-  !creatures.some((c) => c.respawnAt === null && c.x === x && c.y === y) &&
+  !creatures.some((c) => c.respawnAt === null && c.x === x && c.y === y && !(marks && CREATURES[c.type]?.mark)) &&
   !others.some((p) => p.x === x && p.y === y);
 
 // Erster Schritt eines kürzesten Weges zu einem Feld, das goal() erfüllt. null, wenn keiner da ist.
-function firstStep(s, from, creatures, others, goal) {
+function firstStep(s, from, creatures, others, goal, marks = false) {
   const seen = new Set([`${from.x},${from.y}`]);
   const queue = [{ x: from.x, y: from.y, first: null }];
   while (queue.length) {
@@ -53,12 +54,24 @@ function firstStep(s, from, creatures, others, goal) {
       const x = cur.x + dx;
       const y = cur.y + dy;
       const key = `${x},${y}`;
-      if (seen.has(key) || !passable(s, creatures, others, x, y)) continue;
+      if (seen.has(key) || !passable(s, creatures, others, x, y, marks)) continue;
       seen.add(key);
       queue.push({ x, y, first: cur.first ?? name });
     }
   }
   return null;
+}
+
+// Flächenangriffe (seit dem Rebalance): Steht der Probespieler auf einer Markierung, tritt er herunter,
+// am liebsten auf ein freies Feld direkt neben dem Gegner, damit er gleich weiterhauen kann.
+const onMark = (creatures, p) => creatures.some((m) => m.respawnAt === null && CREATURES[m.type]?.mark && m.x === p.x && m.y === p.y);
+function escapeMark(s, from, target, creatures, others) {
+  if (!onMark(creatures, from)) return null;
+  const free = Object.entries(DIRS)
+    .map(([name, [dx, dy]]) => ({ name, x: from.x + dx, y: from.y + dy }))
+    .filter((p) => passable(s, creatures, others, p.x, p.y));
+  const best = free.find((p) => dist(p, target) === 1) ?? free[0];
+  return best?.name ?? firstStep(s, from, creatures, others, (p) => !onMark(creatures, p), true);
 }
 
 // Startfeld: ein erreichbares Feld etwa vier Schritte von der Kreatur entfernt.
@@ -116,7 +129,8 @@ function supplies(s, def, adjacent) {
 }
 
 // Allein und rundenweise. Rückgabe { win, hpLost, turns }.
-export function solo(type, { stage, tactic = 'stand', seed = 1, maxTurns = 800 } = {}) {
+// dodge: false spielt einen Spieler, der Markierungen von Flächenangriffen nicht beachtet (nur für den Bericht).
+export function solo(type, { stage, tactic = 'stand', seed = 1, maxTurns = 800, dodge: dodges = true } = {}) {
   const def = CREATURES[type];
   const s = playerFor(stage ?? def.balance.stage, seed);
   const mapId = Object.keys(MAPS).find((id) => MAPS[id].spawns.some((sp) => sp.type === type));
@@ -136,9 +150,12 @@ export function solo(type, { stage, tactic = 'stand', seed = 1, maxTurns = 800 }
       return { win: true, hpLost: lost / s.player.maxHp, turns: turn };
     }
     const adjacent = dist(c, s.player) === 1;
-    const plan = supplies(s, def, adjacent);
+    const dodge = dodges && escapeMark(s, s.player, c, s.creatures, []);
+    const plan = dodge ? null : supplies(s, def, adjacent);
     let action = null;
-    if (plan?.drink) {
+    if (dodge) {
+      action = dodge;
+    } else if (plan?.drink) {
       drink(s, plan.drink);
     } else if (plan?.act) {
       action = plan.act;
@@ -151,7 +168,7 @@ export function solo(type, { stage, tactic = 'stand', seed = 1, maxTurns = 800 }
     } else {
       action = firstStep(s, s.player, s.creatures, [], (p) => dist(p, c) === 1) ?? 'wait';
     }
-    justHit = Boolean(action && adjacent && DIRS[action] && dist(c, s.player) === 1 && !plan);
+    justHit = Boolean(action && !dodge && adjacent && DIRS[action] && dist(c, s.player) === 1 && !plan);
     if (action) act(s, action);
     if (s.player.hp < lastHp) lost += lastHp - s.player.hp;
     lastHp = s.player.hp;
@@ -160,7 +177,7 @@ export function solo(type, { stage, tactic = 'stand', seed = 1, maxTurns = 800 }
 }
 
 // Gemeinsame Welt: n Spieler gegen eine Kreatur, im Takt des Servers. Rückgabe { win, hpLost, ticks, down }.
-export function shared(type, { stage, players = 1, tactic = 'stand', seed = 1, maxTicks = 800 } = {}) {
+export function shared(type, { stage, players = 1, tactic = 'stand', seed = 1, maxTicks = 800, dodge: dodges = true } = {}) {
   const def = CREATURES[type];
   const mapId = Object.keys(MAPS).find((id) => MAPS[id].spawns.some((sp) => sp.type === type));
   const world = createWorld(mapId, seed);
@@ -187,6 +204,12 @@ export function shared(type, { stage, players = 1, tactic = 'stand', seed = 1, m
       Object.assign(s.player, bot.pos);
       const adjacent = dist(c, bot.pos) === 1;
       const nextTick = (tick + 1) * tickMs;
+      const dodge = dodges && escapeMark(s, bot.pos, c, world.creatures, others);
+      if (dodge) {
+        bot.pos = { x: bot.pos.x + DIRS[dodge][0], y: bot.pos.y + DIRS[dodge][1] };
+        bot.readyAt = t + moveMs;
+        continue;
+      }
       const plan = supplies(s, def, adjacent);
       if (plan?.drink) {
         drink(s, plan.drink);
@@ -281,6 +304,7 @@ function summary(runs) {
 // Bewertet eine Kreatur gegen ihre Rolle. Rückgabe: Messwerte und eine Liste von Problemen (leer = passt).
 export function judge(type, { runs = 60 } = {}) {
   const def = CREATURES[type];
+  if (def.mark) return { type, problems: [] };
   const role = ROLES[def.balance?.role];
   if (!role) return { type, problems: [`${type}: keine balance.role in content/creatures.js`] };
   const seeds = Array.from({ length: runs }, (_, i) => i + 1);
@@ -306,6 +330,16 @@ export function judge(type, { runs = 60 } = {}) {
     const [gMin, gMax] = role.group.hpLost ?? [0, 1];
     if (g.win > 0 && g.hpLost < gMin) out.problems.push(`${type} zu ${role.group.size}.: kostet nur ${pct(g.hpLost)} HP, Rolle ${out.role} will mindestens ${pct(gMin)}`);
     if (g.win > 0 && g.hpLost > gMax) out.problems.push(`${type} zu ${role.group.size}.: kostet ${pct(g.hpLost)} HP, Rolle ${out.role} erlaubt höchstens ${pct(gMax)}`);
+  }
+  if (def.aoe && role.lazyWin !== undefined) {
+    const size = role.group?.size ?? 1;
+    const lazy = summary(seeds.map((seed) => (size > 1
+      ? shared(type, { seed, players: size, dodge: false })
+      : solo(type, { seed, dodge: false }))));
+    out.lazy = lazy;
+    if (lazy.win > role.lazyWin) {
+      out.problems.push(`${type}: wer den Flächenangriffen nicht ausweicht, gewinnt noch ${pct(lazy.win)}, Rolle ${out.role} erlaubt höchstens ${pct(role.lazyWin)}`);
+    }
   }
   return out;
 }

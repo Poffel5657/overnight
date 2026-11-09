@@ -3,7 +3,7 @@ import { MAPS } from '../content/world.js';
 import { CREATURES } from '../content/creatures.js';
 import { WHEEL } from '../content/wheel.js';
 import { DIRS, distance } from './core.js';
-import { AI_BEHAVIOURS, creatureAt, hurtPlayer, isFree, newCreature, spawnCreatures } from './creatures.js';
+import { AI_BEHAVIOURS, creatureAt, creatureTurn, hurtPlayer, isFree, newCreature, spawnCreatures, sweepMarks } from './creatures.js';
 
 // Seit Tag 6. Der Server (worker/presence.js) importiert das über src/game.js, führt pro Karte eine Welt mit
 // createWorld() und rechnet sie im Takt mit stepWorld(). Dafür nutzt er dieselben AI_BEHAVIOURS:
@@ -29,6 +29,7 @@ const nearest = (c, players) => players.reduce((best, p) => (!best || distance(c
 export function stepWorld(world, players) {
   const bites = [];
   world.turn += 1;
+  sweepMarks(world.creatures);
   const base = { map: world.map, turn: world.turn, seed: world.seed, flags: {}, creatures: world.creatures, others: players };
   for (const c of world.creatures) {
     if (c.respawnAt === null || world.turn < c.respawnAt) continue;
@@ -58,9 +59,11 @@ export function stepWorld(world, players) {
       others: players.filter((p) => p !== target),
       onHurt: () => bites.push({ id: target.id, type: c.type }),
     };
-    AI_BEHAVIOURS[def.ai](view, c, def);
+    creatureTurn(view, c, def);
     world.seed = view.seed;
   }
+  // Neue Markierungen von Flächenangriffen bekommen hier ihre id (das Verhalten kennt den Zähler nicht).
+  for (const c of world.creatures) if (!c.id) c.id = `c${world.next++}`;
   return bites;
 }
 

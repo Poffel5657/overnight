@@ -14,7 +14,7 @@ import {
   ARMOR_SLOTS, countItem, describeGain, gainXp, giveItem, hasItem, isWeapon, skillPoints, takeItem, attackOf, useItem,
 } from './inventory.js';
 import {
-  AI_BEHAVIOURS, creatureAt, enterMap, isFree, newCreature, spawnCreatures,
+  AI_BEHAVIOURS, creatureAt, creatureTurn, enterMap, isFree, newCreature, spawnCreatures, sweepMarks,
 } from './creatures.js';
 import { castSpell, spellById } from './spells.js';
 
@@ -346,6 +346,7 @@ function endTurn(s) {
   s.turn += 1;
   // In der gemeinsamen Welt bewegt der Server die Kreaturen im Takt, nicht der eigene Zug.
   if (s.shared) return;
+  sweepMarks(s.creatures);
   for (const c of s.creatures) {
     if (c.respawnAt === null) continue;
     if (s.turn >= c.respawnAt && distance(c.spawn, s.player) > 5 && isFree(s, c.spawn.x, c.spawn.y)) {
@@ -358,7 +359,7 @@ function endTurn(s) {
   for (const c of s.creatures) {
     if (c.respawnAt !== null) continue;
     const def = CREATURES[c.type];
-    if (AI_BEHAVIOURS[def.ai](s, c, def)) return;
+    if (creatureTurn(s, c, def)) return;
   }
 }
 

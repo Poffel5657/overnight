@@ -75,6 +75,19 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
     }
   };
 
+  // Markiertes Feld eines Flächenangriffs: halbdurchsichtig rot mit Rahmen.
+  function drawMark(col, row) {
+    if (col < 0 || row < 0 || col >= VIEW_COLS || row >= VIEW_ROWS) return;
+    ctx.save();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255, 90, 70, 0.28)';
+    ctx.fillRect(col * CELL, row * CELL, CELL, CELL);
+    ctx.strokeStyle = 'rgba(255, 107, 90, 0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(col * CELL + 1.5, row * CELL + 1.5, CELL - 3, CELL - 3);
+    ctx.restore();
+  }
+
   // Dünner Balken an der Unterkante des Feldes, dunkler Grund, Füllung nach Rest-HP.
   function drawHpBar(col, row, bar) {
     if (!bar) return;
@@ -140,8 +153,11 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
       ctx.fillText('!', gx + CELL - 5, gy + 5);
       ctx.restore();
     }
+    // Markierungen von Flächenangriffen (seit dem Rebalance) zuerst, damit Figuren darüber stehen.
+    const marks = s.creatures.filter((c) => c.respawnAt === null && CREATURES[c.type]?.mark);
+    for (const c of marks) figure(c.x, c.y, CREATURES[c.type].glyph, CREATURES[c.type].color);
     for (const c of s.creatures) {
-      if (c.respawnAt === null) {
+      if (c.respawnAt === null && !CREATURES[c.type]?.mark) {
         const def = CREATURES[c.type];
         figure(c.x, c.y, def.glyph, def.color);
         drawHpBar(c.x - camX, c.y - camY, hpBar(c.hp, def.hp, def.boss));
@@ -150,6 +166,8 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
     drawEchoes(s, camX, camY, figure);
     // Mit Tintenring (Zauber WARD, seit Tag 7) erscheint der Spieler in Tintenblau.
     figure(s.player.x, s.player.y, '@', s.player.ward > 0 ? '#7f9cf5' : '#ffffff');
+    // Danach ein roter Schleier mit Rahmen über jedes markierte Feld, auch wenn jemand darauf steht.
+    for (const c of marks) drawMark(c.x - camX, c.y - camY);
     drawChats(s, camX, camY);
   }
 

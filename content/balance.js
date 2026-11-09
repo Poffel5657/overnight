@@ -40,12 +40,14 @@ export const SKILL_ORDER = ['sharp', 'sturdy', 'thick'];
 //   hpLost:   [min, max] Anteil der max HP, den ein gewonnener Kampf im Schnitt kostet
 //   group:    { size, minWin, hpLost }: so viele Spieler zusammen (gemeinsame Welt) gewinnen mindestens so oft
 //             und verlieren dabei im Schnitt so viel ihrer HP (sonst ist es zu dritt geschenkt)
+//   lazyWin:  höchstens so oft gewinnt, wer die Markierungen eines Flächenangriffs (aoe) nicht beachtet
+//             (bei boss allein, bei group mit der Gruppe). Sonst ist der Flächenangriff nur Deko.
 export const ROLES = {
   fodder: { text: 'harmlos: nebenbei wegzuhauen', soloWin: [0.97, 1], hpLost: [0, 0.4] },
   normal: { text: 'ein echter Gegner, kostet spürbar HP', soloWin: [0.85, 1], hpLost: [0.1, 0.7] },
-  boss: { text: 'allein schaffbar, aber nur mit Einsatz', soloWin: [0.35, 0.9], hpLost: [0.4, 1] },
+  boss: { text: 'allein schaffbar, aber nur mit Einsatz', soloWin: [0.35, 0.9], hpLost: [0.4, 1], lazyWin: 0.4 },
   group: {
-    text: 'allein kaum zu schaffen, zu dritt gut', soloWin: [0, 0.1], hpLost: [0, 1],
+    text: 'allein kaum zu schaffen, zu dritt gut', soloWin: [0, 0.1], hpLost: [0, 1], lazyWin: 0.7,
     group: { size: 3, minWin: 0.75, hpLost: [0.1, 0.8] },
   },
 };

@@ -4,7 +4,7 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 
 ## Stand
 
-- Letzter Tag: 7 (Aufräumnacht). Danach, vor Nacht 8: **großer Rebalance von Chris** mit dem Probespieler (siehe `CHRONICLE.md`, Abschnitt nach Tag 7). Nacht 8 erwähnt im Chronik-Satz für Spieler in einem Halbsatz, dass die Welt über Nacht neu gewichtet wurde (Gegner zäher, Rüstung fängt höchstens die Hälfte ab, Trinken kostet einen Zug).
+- Letzter Tag: 7 (Aufräumnacht). Danach, vor Nacht 8: **großer Rebalance von Chris** mit dem Probespieler (siehe `CHRONICLE.md`, Abschnitt nach Tag 7). Nacht 8 erwähnt im Chronik-Satz für Spieler in einem Halbsatz, dass die Welt über Nacht neu gewichtet wurde (Gegner zäher, Rüstung fängt höchstens die Hälfte ab, Trinken kostet einen Zug, Bosse markieren den Boden, bevor sie zuschlagen). In `LORE.md` die Flächenangriffe der drei Bosse nachtragen, mit ihren Log-Sätzen (`aoe.warnText`).
 - Inbox gelesen bis: `2026-11-09T17-29-34-531Z-c5554587.json` (Vorschläge), Stimmen bis `2026-11-09T17-36-48-306Z-a6f12242.json`, Bewertungen bis `2026-11-08T23-37-47-802Z-22809058.json`. Keine Event-Beiträge (kein Event lief).
 - **Event läuft:** „Bottled Ink“ (`bottled-ink`, Tag 7 bis 9, bei der Magierin, `stats.ink` +3 pro Tag, Ziel 10). Auswerten in Nacht 10. Angekündigte Belohnung: „something to write with, bigger than a book“. Vorschlag: eine **Schreibfeder/Federkiel-Station** im Turm, mit der man Bleistiftlinien (`:`) im Rough Draft mit Tinte nachzieht, sodass sie begehbar werden (der alte Faden „Linien werden fester“), oder ein Tintenfass für jeden Spieler. Nicht erreicht: Die Magierin bleibt freundlich, die Tinte reicht „for a footnote“.
 
