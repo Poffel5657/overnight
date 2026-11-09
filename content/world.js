@@ -37,12 +37,15 @@ export const MAPS = {
           "If you drink from the well when you're already fine, mind the edge. It's deeper than it was.",
           "Have you seen them? Pale shapes, walking about like you. Echoes, I call them. The Nightwright drew more than one of you.",
           'There is a gate in the western trees now. It ticks. I went through. There is a whole town in there, and a Mayor, who wound me up.',
+          'A tower grew in the northern trees overnight. Crooked. There is a Mage in it who says ink is the only thing that lasts. She looked worried saying it.',
+          'Mainspring opened its clock tower. Something big in there turns and turns. Take friends. Take several.',
         ],
         // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
         itemLines: {
           stick: "Is that a stick? It wasn't there yesterday. Rats respect a good stick. Mostly.",
           'stone-spear': "A spear! Now we're a settlement with a weapons industry. Don't tell the rats.",
           'drain-hook': "That came out of the sump? Then the sump is a little emptier. Good. I never liked the sump.",
+          'tome-ward': 'A spellbook? In my meadow? Well. Ward the hut while you are at it.',
           wrench: 'A wrench from Mainspring. They make tools over there that actually fit your hand. Show-offs.',
         },
       },
@@ -72,6 +75,12 @@ export const MAPS = {
         id: 'west-gate', kind: 'door', name: 'Brass gate', glyph: '+', color: '#c9a04f', x: 2, y: 7,
         to: { map: 'town', x: 2, y: 6 },
         text: 'The brass gate ticks twice and lets you through. On the other side, everything is winding.',
+      },
+      // Tag 7: eine krumme Tür in den nördlichen Bäumen führt in den Turm der Magierin (Gewinner von Zettel 6).
+      {
+        id: 'crooked-door', kind: 'door', name: 'Crooked door', glyph: '+', color: '#b49be0', x: 7, y: 1,
+        to: { map: 'tower', x: 7, y: 7 },
+        text: 'The crooked door opens the wrong way, politely. Inside, a tower that leans on purpose.',
       },
       // Tag 5: Wer gesund ist und trotzdem trinkt, rutscht hinein (down) und landet in den Kanälen.
       {
@@ -126,6 +135,7 @@ export const MAPS = {
           'There is a grate in the grass now. Things gurgle under it. I preferred not knowing that.',
           'You kept watch, all of you. Somebody inked a line round the rubbed bit overnight. It has not crept an inch since.',
           'Those pale walkers are Echoes. More of you! I tried to scare one. It waved. I did not know what to do with my arms.',
+          'Crows, at last! Made of ink, which nobody warned me about. They swoop, peck and flap off. Hit them when they land.',
         ],
         // Tag 6: Dank für die Wache (Event "The Smudge Watch" erreicht). Einmal pro Spieler.
         gift: {
@@ -136,6 +146,7 @@ export const MAPS = {
         itemLines: {
           stick: "A stick! I'm mostly sticks myself. Be gentle with it.",
           'stone-spear': "Is that a stick with a rock on it? Please don't introduce me to the workbench.",
+          'crow-coat': 'The coat suits you. The crows keep staring at it. Good.',
         },
       },
       // Tag 4: Der Dealer und sein Glücksrad (Daten in content/wheel.js).
@@ -176,6 +187,9 @@ export const MAPS = {
       { type: 'rat', x: 15, y: 2 },
       { type: 'frog', x: 13, y: 8 },
       { type: 'frog', x: 15, y: 9 },
+      // Tag 7: endlich Krähen für die Vogelscheuche. Aus Tinte.
+      { type: 'crow', x: 6, y: 2 },
+      { type: 'crow', x: 14, y: 4 },
     ],
   },
   // Tag 5 (Gewinner von Zettel 4): die Kanäle unter dem Brunnen. Leiter zurück zum Brunnen,
@@ -281,6 +295,7 @@ export const MAPS = {
           'We were drawn in all at once, the whole town, already ticking. Nobody remembers being wound. Somebody must have.',
           'The mice in the Winding Yard were meant to carry springs to me. Now they just carry them.',
           'There is something big in the yard. Wound far too tight. I would not go alone. Go with an Echo or two.',
+          'The Great Cog in the tower is bolted down, armoured, and its teeth reach two squares. Stand off the straight lines.',
         ],
         itemLines: {
           wrench: 'Treat that wrench well. It has opinions about bolts.',
@@ -294,7 +309,17 @@ export const MAPS = {
           'The clock tower keeps the town going. If the clock stops, we all stop. No pressure.',
           'I have a key in my back. Please do not mention it. Everyone has one. It is rude to point.',
           'The meadow folk seem nice. Your Keeper did not have a key at all. I wound him anyway, out of politeness.',
+          'The clock tower is open. Please do not ask what keeps the time. It is a cog. A very great one. It does not like visitors.',
         ],
+        itemLines: {
+          'cog-tooth': 'Is that a tooth of the Great Cog? The clocks all skipped last night. Civic thanks, citizen. Quietly.',
+        },
+      },
+      // Tag 7: Der Uhrturm hat eine Tür. Drinnen dreht sich der Great Cog (Vorschlag: ein Boss für eine Gruppe).
+      {
+        id: 'tower-door', kind: 'door', name: 'Clock tower door', glyph: '+', color: '#f2c56b', x: 14, y: 3,
+        to: { map: 'clocktower', x: 2, y: 5 },
+        text: 'The clock tower door swings open on the stroke of something. Inside, everything turns.',
       },
       {
         id: 'yard-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 22, y: 6,
@@ -309,5 +334,109 @@ export const MAPS = {
       { type: 'overwound-clock', x: 27, y: 10 },
     ],
   },
+  // Tag 7 (Gewinner von Zettel 6): der krumme Turm der Magierin, hinter einer Tür in den nördlichen Bäumen der Wiese.
+  // Hinter den Löchern im Boden (h) liegt eine Nische, die man nur mit HOP erreicht.
+  tower: {
+    name: 'The Crooked Tower',
+    tiles: [
+      '   kkkkkkkkkkkk  ',
+      '  kbbbbllllbbbbk ',
+      '  kllllllllllhlk ',
+      ' klllllllllllhlk ',
+      ' klllllllllllhlk ',
+      ' kllllllllllkkkk ',
+      '  kllllllllllk   ',
+      '  kllllllllllk   ',
+      '  kkkkklkkkkkk   ',
+    ],
+    entities: [
+      {
+        id: 'tower-exit', kind: 'door', name: 'Crooked door', glyph: '+', color: '#b49be0', x: 7, y: 8,
+        to: { map: 'meadow', x: 7, y: 2 },
+        text: 'You step out of the tower. The meadow stands up very straight, as if to make a point.',
+      },
+      {
+        id: 'mage', kind: 'npc', name: 'The Mage', glyph: 'W', color: '#c6a8ff', x: 8, y: 2,
+        lines: [
+          'Mind the holes. The tower was drawn crooked on purpose. Straight towers fall over the moment nobody looks.',
+          'Pencil is a promise. Ink is a fact. Spells are written in ink, which is why they work.',
+          'I woke up here with a hat and a great many opinions. The books were already muttering.',
+          'Something is rubbing at the edges of things. I can feel it in the margins. Ink is the only thing it cannot lift.',
+          'The inkwell fills a little every night. Do not ask me from where. I asked. It went quiet for a week. Well, a night.',
+        ],
+        itemLines: {
+          'pencil-stub': 'A pencil stub. Keep it. Pencil is how everything starts, even if ink is how it stays.',
+          'tome-hop': 'You found the hopping book! Press 2, then a direction. Mind the landing.',
+        },
+      },
+      {
+        id: 'inkwell', kind: 'inkwell', name: 'Inkwell', glyph: 'u', color: '#7f9cf5', x: 5, y: 2, amount: 2,
+        text: 'You dip into the inkwell. Two drops of ink cling to your fingers and refuse to drip.',
+        dryText: 'The inkwell is dry. It will fill again by tomorrow. It always does.',
+      },
+      {
+        id: 'tower-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 10, y: 7,
+        text: 'THE CROOKED TOWER. Apprentices wanted. Bring your own ink. Mind the holes.',
+      },
+      {
+        id: 'tower-chest', kind: 'chest', item: 'tome-hop', name: 'Chest', glyph: '■', openGlyph: '□', color: '#c49a6c', x: 3, y: 6,
+        text: 'Under a heap of drafts lies the Tome of Hopping. Press 2 and a direction to jump two squares. It costs a drop of ink.',
+        emptyText: 'Just old drafts. Every one of them says the same thing, crossed out.',
+      },
+      // Nur mit HOP zu erreichen: eine Randnotiz in derselben Handschrift wie die Schilder, und ein Tropfen Tinte.
+      {
+        id: 'margin-note', kind: 'sign', name: 'Margin note', glyph: '"', color: '#8a8fa8', x: 14, y: 2,
+        text: 'A note in the margin, in the same hand as every sign: "Keep the ink dry. Something tidy is coming."',
+      },
+      {
+        id: 'alcove-ink', kind: 'pickup', item: 'ink', name: 'Drop of ink', glyph: '•', color: '#7f9cf5', x: 14, y: 4,
+        text: 'A drop of ink, hiding behind the holes. You pocket it. It feels like a secret.',
+      },
+    ],
+    spawns: [
+      { type: 'page', x: 5, y: 4 },
+      { type: 'page', x: 10, y: 5 },
+      { type: 'page', x: 4, y: 7 },
+    ],
+  },
+  // Tag 7 (Vorschlag: ein Boss, den man zusammen besiegt, im Uhrturm): drinnen dreht sich der Great Cog.
+  // Kuckucke spucken aus der Ferne. Auf der Insel aus Zahnrädern steht eine Truhe, die man nur mit HOP erreicht.
+  clocktower: {
+    name: 'The Clock Tower',
+    tiles: [
+      'MMMMMMMMMMMMMMMMMMMM',
+      'MooooooMMMMMMooooooM',
+      'Moo%oooooooooooooooM',
+      'MooooooooooooooooooM',
+      'MoooogggggoooooooooM',
+      'ooooogooogoooooooooM',
+      'MoooogggggoooooooooM',
+      'MooooooooooooooooooM',
+      'Moo%oooooooooooo%ooM',
+      'MooooooooooooooooooM',
+      'MMMMMMMMMMMMMMMMMMMM',
+    ],
+    entities: [
+      {
+        id: 'clock-exit', kind: 'door', name: 'Clock tower door', glyph: '+', color: '#f2c56b', x: 0, y: 5,
+        to: { map: 'town', x: 13, y: 3 },
+        text: 'You slip back out into Mainspring. The ticking sounds smaller out here.',
+      },
+      {
+        id: 'clock-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 2, y: 2,
+        text: 'THE CLOCK TOWER. The Great Cog keeps the time. Do not stand in line with its teeth. Visit with friends.',
+      },
+      {
+        id: 'gear-chest', kind: 'chest', item: 'brass-greaves', name: 'Chest', glyph: '■', openGlyph: '□', color: '#c49a6c', x: 8, y: 5,
+        text: 'You open the chest on the island of gears. Brass greaves, still warm from the machinery.',
+        emptyText: 'The chest is empty. The gears go on turning round it, unimpressed.',
+      },
+    ],
+    spawns: [
+      { type: 'cuckoo', x: 12, y: 2 },
+      { type: 'cuckoo', x: 17, y: 8 },
+      { type: 'cuckoo', x: 11, y: 9 },
+      { type: 'great-cog', x: 15, y: 5 },
+    ],
+  },
 };
-

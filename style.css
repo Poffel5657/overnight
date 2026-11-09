@@ -176,6 +176,12 @@ canvas {
 .badge-count { color: var(--muted); }
 .window-button:hover .badge-count, .window-button:focus-visible .badge-count { color: inherit; }
 .echo-count { opacity: 0.75; }
+/* Zauberleiste (seit Tag 7): Tinte, Tintenring und ein Knopf pro Zauber. HOP leuchtet, solange er auf eine Richtung wartet. */
+.spell-bar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 20px; }
+.spell-ink { color: var(--bright); white-space: pre; }
+.spell-buttons { display: flex; gap: 8px; }
+.spell-button { font-size: 20px; padding: 0 4px; }
+.spell-button.armed { color: var(--bg); background: var(--accent); }
 
 /* Fenster [ GEAR ] (seit Tag 5) */
 .gear-stats { color: var(--bright); white-space: pre-wrap; }
@@ -229,6 +235,7 @@ dialog.side-window .window-bar { position: sticky; top: -8px; z-index: 1; displa
 .log li:last-child::after { content: '_'; animation: blink 1.1s steps(1) infinite; }
 .log li.new-tonight { color: var(--accent); }
 .log li.danger { color: var(--danger); }
+.log li.spell { color: var(--bright); }
 
 .hint { margin: 0; color: var(--muted); font-size: 18px; }
 

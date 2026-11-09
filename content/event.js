@@ -13,5 +13,19 @@
 //   goal: 20,                         // so viele Tagesbeiträge braucht es insgesamt
 //   startDay: 4, endDay: 6,           // läuft vom Tag startDay bis einschließlich endDay
 // }
-// Tag 6: "The Smudge Watch" (Tag 4 bis 5) ist ausgewertet: 13 Beiträge bei Ziel 6, erreicht. Frühestens Tag 7 ein neues.
-export const EVENT = null;
+// Tag 6: "The Smudge Watch" (Tag 4 bis 5) ist ausgewertet: 13 Beiträge bei Ziel 6, erreicht.
+// Tag 7: zweites Event, die Vorbereitung beginnt. Die Magierin im krummen Turm will Tinte abfüllen.
+export const EVENT = {
+  id: 'bottled-ink',
+  title: 'Bottled Ink',
+  text: 'The Mage wants ink, as much as the world can spare, bottled before something tidy arrives.',
+  giver: 'mage',
+  intro: 'Pencil smudges. Ink holds. Something is rubbing at the margins, and I want ink bottled before it gets here. Gather some every day, all of you, and I will see to the bottling.',
+  task: 'Gather 3 drops of ink.',
+  reward: 'If enough of you gather, the tower will have something to write with. Something bigger than a book.',
+  stat: 'ink',
+  need: 3,
+  goal: 10,
+  startDay: 7,
+  endDay: 9,
+};

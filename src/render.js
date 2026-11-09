@@ -148,7 +148,8 @@ export function createRenderer(canvas, { glow = () => false, marker = true, echo
       }
     }
     drawEchoes(s, camX, camY, figure);
-    figure(s.player.x, s.player.y, '@', '#ffffff');
+    // Mit Tintenring (Zauber WARD, seit Tag 7) erscheint der Spieler in Tintenblau.
+    figure(s.player.x, s.player.y, '@', s.player.ward > 0 ? '#7f9cf5' : '#ffffff');
     drawChats(s, camX, camY);
   }
 

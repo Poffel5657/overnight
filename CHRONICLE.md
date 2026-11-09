@@ -98,3 +98,50 @@ Nicht neu, aber gefunden: Das Quest-Log blieb ohne laufendes Event unsichtbar, w
 
 Problem: Der geschützte Smoke-Test `tests/smoke/presence.spec.js` („Echos: nur mit ?echoes=1 …“) ist zeitabhängig. Seine vier Züge vom Start in der Hütte enden wieder auf dem Startfeld; kommen sie innerhalb von 150 ms nach der ersten Positionsmeldung, schickt die Drosselung keine neue Position, und der Test wartet vergeblich. Auf unverändertem `main` scheitert er hier etwa einmal in drei Läufen, mit Tag 6 öfter. Chris ist informiert.
 
+Bewertung (nachgetragen in Nacht 7): 1 hoch, 0 runter. Wenige Stimmen, aber wieder keine Gegenstimme.
+
+## Tag 7 (2026-11-10): Tinte, und ein sehr großes Zahnrad
+
+Die erste Aufräumnacht. Erst die drei Teile wie in jeder Nacht, dann ein Durchgang über den Code der ersten sieben Nächte. Die drei Teile greifen ineinander: Tinte ist der neue Rohstoff, der Turm macht daraus Zauber, und die Zauber (Hüpfen über Lücken, Bisse abwehren, heilen) sind das Werkzeug gegen die neuen Gegner, bei denen man nachdenken muss.
+
+**Teil 1, aus den Vorschlägen: der Great Cog im Uhrturm und Kämpfe, die Denken verlangen.**
+- Der Uhrturm in Mainspring hat eine Tür. Drinnen (20 x 11) dreht sich der **Great Cog** (`☼`, 120 HP, schlägt mit 6): festgeschraubt, gepanzert (zieht 2 von jedem Schlag ab) und seine Zähne reichen in jeder zweiten Runde zwei Felder weit in gerader Linie. Schräg daneben ist man sicher. Er ist als Boss für eine Gruppe gedacht; allein geht es nur mit Zaubern und Tee. Beute: ein **Zahn** des Cog (Waffe, Angriff +6, die stärkste bisher).
+- **Kuckucke** (`y`) spucken Zahnräder aus bis zu vier Feldern, aber nur bei freier gerader Linie. Wer nah kommt, vor dem weichen sie aus, also treibt man sie in eine Ecke oder stellt sich so, dass etwas dazwischen steht.
+- Auf einer Insel aus Zahnrädern steht eine Truhe mit **Messingbeinschienen** (Abwehr 2), nur mit dem Zauber HOP erreichbar.
+- Kreaturen können jetzt Panzer (`def`) und Reichweite (`reach`) haben. Neue Verhalten `aim` (Fernkampf in gerader Linie) und `grind` (festgeschraubt, Reichweite in geraden Runden).
+- Einfluss: Ein Spieler wünschte sich mit dem Mehrspieler einen Grund, mit Freunden zu spielen: einen starken Boss im Uhrturm, ein böses Zahnrad. Ein anderer fand die Kämpfe zu leicht, alles stirbt zu schnell, man muss nicht nachdenken. Beides gebaut. Die alten Gegner sind unverändert (Spieler kennen sie), die Herausforderung steckt in den neuen. Notiert, aber nicht gebaut: Berufe (Bergbau, Kräuter, Schmieden …), die Hütte mit Dach und Tür, ein Ort im Haus, um Ideen aufzuschreiben (das Formular SHAPE TOMORROW gibt es schon).
+
+**Teil 2, aus der Abstimmung: der krumme Turm.** Zettel 6: Magierturm 3 Stimmen, Heckenlabyrinth 1, Hütte 0, Zwergenkapelle 0, Teich 0. Hinter einer krummen Tür in den nördlichen Bäumen der Wiese lehnt **The Crooked Tower**. Die **Mage** (`W`) nimmt Lehrlinge: „Apprentice“ (zwei Tropfen Tinte bringen) gibt das **Tome of Warding**, „Second Lesson“ (drei Zauber wirken) das **Tome of Mending**. Das **Tome of Hopping** liegt in einer Truhe im Turm. Ein **Tintenfass** gibt jede Nacht zwei Tropfen, **lose Seiten** (`¶`) flattern herum und tragen auch Tinte. Hinter Löchern im Boden liegt eine Nische mit einer Randnotiz und einem Tropfen, nur mit HOP zu erreichen.
+- **Zauber** (neues System, Daten in `content/spells.js`): Man kann einen Zauber, solange man sein Buch dabeihat. Jeder kostet einen Tropfen Tinte und eine Runde. **WARD** (Taste 1): die nächsten drei Bisse prallen ab, die Figur leuchtet tintenblau. **HOP** (Taste 2, dann eine Richtung): zwei Felder weit über ein Loch, Wasser, eine Grube oder eine Kreatur, nie über Dinge oder Wände. **MEND** (Taste 3): +6 HP. Unter der Karte erscheint dafür eine Zauberleiste mit Tinte und Knöpfen (am Handy: Knopf HOP, dann das Steuerkreuz).
+- Zauber laufen nur im Browser und betreffen nur den eigenen Spieler, deshalb funktionieren sie in der gemeinsamen Welt ohne Änderung am Worker.
+
+**Teil 3, vom Nightwright: Krähen aus Tinte und das Event „Bottled Ink“.**
+- Die Vogelscheuche wartet seit Tag 2 auf Krähen. Jetzt sind sie da, aus Tinte: **Tintenkrähen** (`v`) im Rough Draft stoßen herab, picken einmal und flattern wieder weg. Man trifft sie, wenn sie landen. Sie lassen Tinte und Knöpfe fallen. Wer mit Tinte zur Vogelscheuche kommt, bekommt „Crow Season“: vier Krähen verjagen, dafür einen **Federmantel** (Abwehr 2).
+- **Community-Event „Bottled Ink“** (Tag 7 bis 9, bei der Magierin): Jeder sammelt pro Tag drei Tropfen Tinte, Ziel 10 Tagesbeiträge. Das ist der Beginn der Vorbereitung im langen Bogen. Die Belohnung ist angekündigt („something to write with, bigger than a book“).
+- Figuren bemerken jetzt alles, was man dabeihat, nicht nur die Waffe in der Hand (vorher blieben Bemerkungen zu Rüstung stumm).
+
+Warum: Der Turm hat klar gewonnen, und Zauber sind genau die Art Tiefe, die die Bewertungen bisher belohnt haben. Tinte war seit Tag 6 als Faden offen; jetzt hat sie eine Quelle, einen Zweck und ist der Rohstoff für das erste Event der Vorbereitung. Die Vorschläge nach einem Gruppenboss und schwereren Kämpfen passen dazu: Die neuen Gegner verlangen Stellung (gerade Linien meiden), Geduld (Krähen) und Zauber.
+
+Community-Event: „Bottled Ink“ gestartet (Tag 7 bis 9, Ziel 10).
+
+Bewertung von Tag 6: 1 hoch, 0 runter.
+
+### Review der Aufräumnacht
+
+Gelesen: der Code von Tag 1 bis 6 (`git log` seit dem Anfang, ein `day-*`-Tag mit durch 7 teilbarer Nummer gab es noch nicht) und die neuen Teile von heute.
+
+Gefunden und behoben:
+- `takeItem()` hätte bei einem Ding, das man gar nicht hat, ein fremdes Rüstungsteil aus demselben Platz genommen. Jetzt nur, wenn genau dieses Teil getragen wird.
+- Ein Spielstand mit kaputten HP (keine Zahl) hätte `NaN` HP ergeben; ebenso kaputtes `maxHp`. Beides fällt jetzt auf sinnvolle Werte zurück.
+- `itemLines` reagierten nur auf die Waffe in der Hand. Jetzt auf alles, was man dabeihat (Waffe zuerst), sonst wären die neuen Bemerkungen zu Mantel, Büchern und Zahn nie zu hören gewesen.
+- Der Smoke-Test-Kandidat aus Nacht 6 (wackliger Echo-Test) lief diese Nacht in allen Läufen grün.
+
+Aufgeräumt:
+- `src/game.js` (über 750 Zeilen) ist in Module geteilt: `src/core.js` (Tag, Event, Zufall, Log, Gelände), `src/inventory.js` (Gegenstände, Ausrüstung, Läden, Knacks, Erfahrung), `src/creatures.js` (Setzen, Bewegen, Verhalten, Bisse), `src/shared.js` (gemeinsame Welt), neu `src/spells.js`. `src/game.js` behält Spielstart, Objekte, Quests, Rad und `act()` und gibt alles weiter, damit Worker, Tests und Browser unverändert importieren.
+- Die Fenster CHARA, BAG und SHOP sind aus `src/main.js` nach `src/windows.js` gezogen (main.js von 670 auf unter 500 Zeilen).
+- Wiederholtes `random(s) < def.hitChance ? hurtPlayer(…) : false` in allen Verhalten ist jetzt eine Hilfe `strike()`.
+
+Balance: Alte Gegner unverändert. Der Great Cog ist absichtlich nur zu mehreren oder mit Zaubern und Tee zu schaffen. Tinte reicht für das Event: zwei Tropfen aus dem Fass pro Nacht, dazu etwa jede dritte Seite oder Krähe.
+
+Problem: Im Container scheitert `npx playwright install chromium` weiterhin; Tests liefen mit dem vorinstallierten Chromium, alle grün (213, einer übersprungen).
+

@@ -6,22 +6,22 @@
 //   { ballot: 3, options: [{ text: 'A town of steam and gears…', votes: 4, won: true }, …] }
 //   text wie auf dem alten Zettel, votes aus den gezählten Dateien, won genau einmal true.
 export const BALLOT = {
-  day: 6,
+  day: 7,
   options: [
-    { id: 'hut-grows', since: 4, text: 'Your hut grows a roof and an upstairs overnight. The workbench moves in.' },
-    { id: 'dwarf-band', since: 4, text: 'A band of very small miners plays very loud music. Listening makes you brave.' },
     { id: 'deep-pond', since: 5, text: 'The pond gets deeper. Someone finally invents swimming.' },
-    { id: 'wizard-tower', since: 6, text: 'A crooked tower where a mage takes apprentices and teaches spells from dusty tomes.' },
     { id: 'hedge-maze', since: 6, text: 'A hedge maze grows off the meadow. Something with hooves guards the middle.' },
+    { id: 'deeper-drains', since: 7, text: 'The drains go down another floor, and something worse than crumbs lives there.' },
+    { id: 'first-trade', since: 7, text: 'Learn a trade: dig ore from the gear pits of Mainspring and work it at the bench.' },
+    { id: 'standing-stones', since: 7, text: 'A ring of odd stones turns up in the Rough Draft. Nobody knows what it does.' },
   ],
   lastResult: {
-    ballot: 5,
+    ballot: 6,
     options: [
-      { text: 'A town of steam and gears, whose people have favours to ask.', votes: 4, won: true },
-      { text: 'More weapons from the workbench: a knife, an axe, a sword.', votes: 0, won: false },
-      { text: 'Your hut grows a roof and an upstairs overnight. The workbench moves in.', votes: 1, won: false },
+      { text: 'Your hut grows a roof and an upstairs overnight. The workbench moves in.', votes: 0, won: false },
       { text: 'A band of very small miners plays very loud music. Listening makes you brave.', votes: 0, won: false },
       { text: 'The pond gets deeper. Someone finally invents swimming.', votes: 0, won: false },
+      { text: 'A crooked tower where a mage takes apprentices and teaches spells from dusty tomes.', votes: 3, won: true },
+      { text: 'A hedge maze grows off the meadow. Something with hooves guards the middle.', votes: 1, won: false },
     ],
   },
 };

@@ -43,5 +43,10 @@ export const CHRONICLE = [
     title: 'Not alone, and wound up',
     text: 'You are not alone out here any more: the pale shapes are Echoes, and you can fight beside them. You won the vote: Mainspring, a clockwork town, ticks behind a brass gate in the west. The Dealer finally sells things, favours come back every night, and levels give knack points.',
   },
+  {
+    day: 7,
+    date: '2026-11-10',
+    title: 'Ink, and a very great cog',
+    text: 'You won the vote: a crooked tower leans in the northern trees, and its Mage teaches spells written in ink. The clock tower opens on the Great Cog, best faced with friends. Crows have come for the Scarecrow at last, the Mage wants ink bottled, and then the Nightwright swept up.',
+  },
 ];
-
