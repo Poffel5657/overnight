@@ -1,5 +1,6 @@
 // Geländetypen: Schlüssel ist das Zeichen in den Kartenzeilen aus world.js.
 // bump = Meldung beim Dagegenlaufen, wenn das Feld nicht begehbar ist.
+// low (seit Tag 7): tief genug, dass man mit dem Zauber HOP darüber springen kann.
 export const TILES = {
   ' ': {
     name: 'nothing', glyph: ' ', fg: '#000000', bg: '#07070f', walkable: false,
@@ -16,7 +17,7 @@ export const TILES = {
     bump: 'Your hut. Sturdy, considering it is one day old.',
   },
   '~': {
-    name: 'water', glyph: '~', fg: '#6fb1e0', bg: '#14304a', walkable: false,
+    name: 'water', low: true, glyph: '~', fg: '#6fb1e0', bg: '#14304a', walkable: false,
     bump: 'The pond is cold, and nobody has invented swimming yet.',
   },
   // Seit Tag 3: flache Stelle am Teich, durch die man den spitzen Stein sieht.
@@ -37,7 +38,7 @@ export const TILES = {
   },
   '_': { name: 'drain floor', glyph: '.', fg: '#47605a', bg: '#0e1514', walkable: true },
   'c': {
-    name: 'channel', glyph: '≈', fg: '#5fa596', bg: '#0c2826', walkable: false,
+    name: 'channel', low: true, glyph: '≈', fg: '#5fa596', bg: '#0c2826', walkable: false,
     bump: 'The channel is going somewhere in a hurry. You are not invited.',
   },
   'p': { name: 'plank', glyph: '=', fg: '#a8703a', bg: '#0c2826', walkable: true },
@@ -58,8 +59,26 @@ export const TILES = {
     bump: 'The clock tower. It is either very early or very late. It refuses to say which.',
   },
   '%': {
-    name: 'gear pit', glyph: '%', fg: '#b58b45', bg: '#120d07', walkable: false,
+    name: 'gear pit', low: true, glyph: '%', fg: '#b58b45', bg: '#120d07', walkable: false,
     bump: 'Gears the size of wagon wheels turn down there. Best keep your fingers.',
   },
+  // Seit Tag 7: der krumme Turm der Magierin.
+  'k': {
+    name: 'tower wall', glyph: '#', fg: '#8f86a8', bg: '#16131f', walkable: false,
+    bump: 'The tower wall leans. It has been leaning for years, apparently, since last night.',
+  },
+  'l': { name: 'floorboards', glyph: '.', fg: '#6d5a7a', bg: '#130f1a', walkable: true },
+  'b': {
+    name: 'bookshelf', glyph: '≡', fg: '#b08a5a', bg: '#1c1420', walkable: false,
+    bump: 'Books, floor to ceiling. Several of them are muttering.',
+  },
+  'h': {
+    name: 'hole in the floor', glyph: ' ', fg: '#000000', bg: '#050308', walkable: false, low: true,
+    bump: 'A hole in the floorboards. Below: more tower, somehow. You could hop it, with the right word.',
+  },
+  // Seit Tag 7: im Uhrturm von Mainspring.
+  'g': {
+    name: 'turning gears', glyph: '*', fg: '#b58b45', bg: '#120d07', walkable: false, low: true,
+    bump: 'Gears, turning just below the floor. Too wide to step over. A hop, maybe.',
+  },
 };
-

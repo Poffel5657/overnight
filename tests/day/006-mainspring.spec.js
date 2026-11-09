@@ -193,7 +193,8 @@ test('Overwound Clock: Boss mit eigener Abschiedszeile und Messinghelm', () => {
 });
 
 test('Die Wache hat gehalten: Tinte um die Ecke, die Vogelscheuche schenkt einmal ihren Hut', () => {
-  expect(EVENT).toBe(null);
+  // Das Event ist ausgewertet und nicht mehr eingetragen (seit Tag 7 läuft ein neues).
+  expect(EVENT?.id).not.toBe('smudge-watch');
   expect(tileAt('draft', 12, 8).name).toBe('ink line');
   expect(tileAt('draft', 12, 8).walkable).toBe(false);
   const s = quiet('draft', 12, 6);

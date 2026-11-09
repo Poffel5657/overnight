@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "tower",
+  "player": { "x": 6, "y": 4, "hp": 12, "maxHp": 24, "atk": 3, "weapon": "cog-tooth", "bag": ["ink", "ink", "tome-ward", "tome-hop", "drain-hook", "tonic"], "xp": 40, "level": 5, "armor": { "head": "brass-helm", "body": "crow-coat", "feet": "brass-greaves" }, "skills": { "sharp": 2, "thick": 1, "sturdy": 1 }, "ward": 2 },
+  "turn": 1400,
+  "flags": { "talk": { "mage": 3 }, "quests": { "apprentice": "done", "second-lesson": "active", "crow-season": "done" }, "questBase": { "second-lesson": 4, "crow-season": 1 }, "inkDay": { "inkwell": 7 }, "eventsHeard": { "bottled-ink": true }, "slain": { "great-cog": true }, "opened": { "tower-chest": true, "gear-chest": true } },
+  "stats": { "kills": 80, "faints": 3, "xp": 40, "together": 4, "ink": 9, "spells": 6, "crows": 5 },
+  "lastSeenDay": 7
+}

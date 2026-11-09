@@ -3,6 +3,8 @@
 // sonst kommt es in den Beutel (player.bag). Gleiche Dinge dürfen mehrfach im Beutel liegen.
 // Mit heal (seit Tag 6) lässt es sich im Fenster [ BAG ] benutzen: heilt so viele HP und ist dann weg.
 // text = Beschreibung im Fenster [ BAG ].
+// stat (seit Tag 7): jedes Stück, das man bekommt, erhöht state.stats[stat] um 1 (zum Beispiel für Events).
+// spell (seit Tag 7): ein Buch, das einen Zauber aus content/spells.js lehrt, solange man es dabeihat.
 export const ITEMS = {
   stick: {
     name: 'stick',
@@ -102,5 +104,48 @@ export const ITEMS = {
     name: 'strong tea',
     heal: 12,
     text: 'A flask of tea so strong the spoon stands up. Mends almost anything.',
+  },
+  // Tag 7: Tinte. Hält, wo Bleistift nicht hält. Zauber aus dem Turm kosten einen Tropfen.
+  ink: {
+    name: 'drop of ink',
+    stat: 'ink',
+    text: 'A bead of ink that refuses to spill. Spells drink it. So, apparently, does the future.',
+  },
+  // Tag 7: Zauberbücher aus dem krummen Turm (Gewinner von Zettel 6). Wer eins dabeihat, kann den Zauber.
+  'tome-ward': {
+    name: 'Tome of Warding',
+    spell: 'ward',
+    text: 'Thin, stern, and bound in something that used to be a fence. Teaches WARD.',
+  },
+  'tome-hop': {
+    name: 'Tome of Hopping',
+    spell: 'hop',
+    text: 'Most of the pages are blank where the words jumped off. Teaches HOP.',
+  },
+  'tome-mend': {
+    name: 'Tome of Mending',
+    spell: 'mend',
+    text: 'Smells of tea and sticking plaster. Teaches MEND.',
+  },
+  // Tag 7: Beute des Great Cog im Uhrturm. Der stärkste Schlag bisher.
+  'cog-tooth': {
+    name: 'cog tooth',
+    atk: 6,
+    hitVerb: 'saw at',
+    text: 'One tooth of the Great Cog, as long as your arm. It still wants to turn something.',
+  },
+  // Tag 7: Truhe auf der Insel im Uhrturm, nur mit HOP zu erreichen.
+  'brass-greaves': {
+    name: 'brass greaves',
+    slot: 'feet',
+    def: 2,
+    text: 'Clockwork shin guards. They tick when you run, and they make you run on time.',
+  },
+  // Tag 7: Dank der Vogelscheuche, wenn die Krähen endlich erschreckt sind.
+  'crow-coat': {
+    name: 'crow-feather coat',
+    slot: 'body',
+    def: 2,
+    text: 'Stitched from what the crows left behind. Still slightly inky. They would like it back.',
   },
 };

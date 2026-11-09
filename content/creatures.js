@@ -2,6 +2,9 @@
 // xp = Erfahrung für den Sieg, biteVerb = was sie dem Spieler antun (Standard: bites),
 // drops = [{ item, chance }]: lässt beim Sieg manchmal etwas fallen (jeder Eintrag wird einzeln gewürfelt).
 // defeatText (seit Tag 6): letzte Zeile beim Sieg über einen Boss.
+// def (seit Tag 7): Panzer, wird vom Schaden jedes Schlags abgezogen (mindestens 1 geht durch).
+// reach (seit Tag 7): mit ai 'grind' trifft sie auch auf diese Entfernung in gerader Linie (nur in geraden Runden).
+// stat (seit Tag 7): jeder Sieg erhöht state.stats[stat] um 1 (für Quests).
 // boss: true = einmalig. Nach dem Sieg merkt sich der Spielstand das (flags.slain), der Spawn entfällt dann.
 export const CREATURES = {
   rat: {
@@ -95,5 +98,69 @@ export const CREATURES = {
     defeatText: 'The Overwound Clock strikes thirteen, sighs, and finally runs down.',
     drops: [{ item: 'brass-helm', chance: 1 }, { item: 'spring', chance: 1 }],
   },
+  // Tag 7: Die Vogelscheuche hat endlich Krähen. Sie sind aus Tinte, stoßen herab, picken und flattern wieder weg.
+  crow: {
+    name: 'ink crow',
+    glyph: 'v',
+    color: '#7f9cf5',
+    hp: 4,
+    atk: 2,
+    hitChance: 0.6,
+    ai: 'swoop',
+    senseRange: 6,
+    respawnTurns: 40,
+    xp: 3,
+    biteVerb: 'pecks',
+    stat: 'crows',
+    drops: [{ item: 'ink', chance: 0.35 }, { item: 'button', chance: 0.15 }],
+  },
+  // Tag 7: im krummen Turm. Lose Seiten, die herumflattern und mit den Kanten schneiden.
+  page: {
+    name: 'loose page',
+    glyph: '¶',
+    color: '#e6e3d3',
+    hp: 3,
+    atk: 1,
+    hitChance: 0.5,
+    ai: 'flutter',
+    senseRange: 3,
+    respawnTurns: 35,
+    xp: 2,
+    biteVerb: 'gives a paper cut to',
+    drops: [{ item: 'ink', chance: 0.3 }],
+  },
+  // Tag 7: im Uhrturm. Kuckucke spucken Zahnräder aus der Ferne, in gerader Linie. Wer nah kommt, vor dem weichen sie aus.
+  cuckoo: {
+    name: 'cuckoo',
+    glyph: 'y',
+    color: '#e0a35f',
+    hp: 4,
+    atk: 2,
+    hitChance: 0.5,
+    ai: 'aim',
+    senseRange: 4,
+    respawnTurns: 40,
+    xp: 3,
+    biteVerb: 'spits a cog at',
+    drops: [{ item: 'spring', chance: 0.4 }, { item: 'button', chance: 0.2 }],
+  },
+  // Tag 7: der Boss im Uhrturm, für eine Gruppe gedacht. Festgeschraubt, gepanzert, und seine Zähne reichen zwei Felder weit.
+  'great-cog': {
+    name: 'Great Cog',
+    glyph: '☼',
+    color: '#f2c56b',
+    hp: 120,
+    atk: 6,
+    def: 2,
+    reach: 2,
+    hitChance: 0.7,
+    ai: 'grind',
+    senseRange: 2,
+    respawnTurns: 100000,
+    xp: 40,
+    biteVerb: 'grinds',
+    boss: true,
+    defeatText: 'The Great Cog slips a tooth, shudders, and stops. Somewhere above, every clock in Mainspring skips a beat, then agrees on the time.',
+    drops: [{ item: 'cog-tooth', chance: 1 }, { item: 'spring', chance: 1 }],
+  },
 };
-

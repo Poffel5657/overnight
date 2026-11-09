@@ -1,216 +1,28 @@
 // Reine Spiellogik ohne DOM. Alles Spielbare läuft über act(), damit die Tests es direkt prüfen können.
+// Seit der Aufräumnacht 7 in Module geteilt; dieses Modul gibt alles weiter, Importe von außen bleiben gleich.
 import { MAPS, PLAYER, START } from '../content/world.js';
-import { TILES } from '../content/tiles.js';
 import { CREATURES } from '../content/creatures.js';
-import { CHRONICLE } from '../content/chronicle.js';
 import { ITEMS } from '../content/items.js';
 import { RECIPES } from '../content/recipes.js';
-import { LEVELS, LEVEL_UP_TEXT } from '../content/levels.js';
+import { LEVELS } from '../content/levels.js';
 import { WHEEL } from '../content/wheel.js';
-import { EVENT } from '../content/event.js';
 import { QUESTS } from '../content/quests.js';
 import { SHOPS } from '../content/shops.js';
-import { SKILLS, SKILL_TEXT } from '../content/skills.js';
+import { SKILLS } from '../content/skills.js';
+import { DIRS, activeEvent, currentDay, distance, entityAt, log, random, tileAt } from './core.js';
+import {
+  ARMOR_SLOTS, countItem, describeGain, gainXp, giveItem, hasItem, isWeapon, skillPoints, takeItem, attackOf,
+} from './inventory.js';
+import {
+  AI_BEHAVIOURS, creatureAt, enterMap, isFree, newCreature, spawnCreatures,
+} from './creatures.js';
+import { castSpell, spellById } from './spells.js';
 
-const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
-const LOG_LIMIT = 50;
-
-export const currentDay = () => CHRONICLE[CHRONICLE.length - 1].day;
-
-// Das laufende Community-Event oder null.
-export const activeEvent = (day = currentDay()) =>
-  (EVENT && day >= EVENT.startDay && day <= EVENT.endDay ? EVENT : null);
-
-// Eigener Zufall mit Seed (mulberry32), damit Abläufe in Tests wiederholbar sind.
-function random(s) {
-  s.seed = (s.seed + 0x6d2b79f5) | 0;
-  let t = s.seed;
-  t = Math.imul(t ^ (t >>> 15), t | 1);
-  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-}
-
-export function log(s, text, kind = '') {
-  s.log.push({ text, kind });
-  if (s.log.length > LOG_LIMIT) s.log.shift();
-}
-
-export function tileAt(mapId, x, y) {
-  const row = MAPS[mapId].tiles[y];
-  return TILES[row?.[x] ?? ' '] ?? TILES[' '];
-}
-
-// Aufgehobene Gegenstände verschwinden dauerhaft von der Karte.
-export const visibleEntities = (s) =>
-  MAPS[s.map].entities.filter((e) => !s.flags.taken?.[e.id]);
-
-export const entityAt = (s, x, y) =>
-  visibleEntities(s).find((e) => e.x === x && e.y === y);
-
-// Knacks (seit Tag 6): Ränge aus content/skills.js geben atk und def dazu (maxHp sofort beim Lernen).
-const skillBonus = (s, stat) =>
-  SKILLS.reduce((sum, k) => sum + (s.player.skills?.[k.id] ?? 0) * (k[stat] ?? 0), 0);
-export const attackOf = (s) => s.player.atk + (ITEMS[s.player.weapon]?.atk ?? 0) + skillBonus(s, 'atk');
-// Rüstung (seit Tag 5): player.armor = { head, body, feet }, def wird vom Schaden abgezogen.
-export const ARMOR_SLOTS = ['head', 'body', 'feet'];
-export const defenseOf = (s) =>
-  Object.values(s.player.armor).reduce((sum, id) => sum + (ITEMS[id]?.def ?? 0), 0) + skillBonus(s, 'def');
-const isWeapon = (id) => ITEMS[id]?.atk !== undefined;
-const isArmor = (id) => Boolean(ITEMS[id]?.slot);
-
-// Gegenstände: Waffen (mit atk) liegen in player.weapon, Rüstung in player.armor, alles andere in player.bag.
-const worn = (s) => [s.player.weapon, ...Object.values(s.player.armor)].filter(Boolean);
-export const countItem = (s, id) =>
-  worn(s).filter((w) => w === id).length + s.player.bag.filter((b) => b === id).length;
-export const hasItem = (s, id) => countItem(s, id) > 0;
-// Aus dem Beutel zuerst, damit niemand ungefragt seine Waffe oder Rüstung verliert.
-function takeItem(s, id) {
-  const index = s.player.bag.indexOf(id);
-  if (index >= 0) s.player.bag.splice(index, 1);
-  else if (s.player.weapon === id) s.player.weapon = null;
-  else s.player.armor[ITEMS[id].slot] = null;
-}
-// Eine neue Waffe ersetzt die alte, die alte wandert in den Beutel und geht nie verloren.
-// Rüstung zieht man an, wenn der Platz frei ist, sonst kommt sie in den Beutel.
-function giveItem(s, id) {
-  const item = ITEMS[id];
-  if (isWeapon(id)) {
-    if (s.player.weapon) s.player.bag.push(s.player.weapon);
-    s.player.weapon = id;
-  } else if (isArmor(id) && !s.player.armor[item.slot]) {
-    s.player.armor[item.slot] = id;
-  } else {
-    s.player.bag.push(id);
-  }
-}
-
-// Fenster [ BAG ]: Waffe oder Rüstung aus dem Beutel anlegen. Kostet keine Runde.
-// Das bisher Getragene wandert in den Beutel. Rückgabe true, wenn sich etwas geändert hat.
-export function equip(s, id) {
-  const index = s.player.bag.indexOf(id);
-  if (index < 0 || !(isWeapon(id) || isArmor(id))) return false;
-  s.player.bag.splice(index, 1);
-  const item = ITEMS[id];
-  if (isWeapon(id)) {
-    if (s.player.weapon) s.player.bag.push(s.player.weapon);
-    s.player.weapon = id;
-    log(s, `You take up the ${item.name}. You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
-  } else {
-    const old = s.player.armor[item.slot];
-    if (old) s.player.bag.push(old);
-    s.player.armor[item.slot] = id;
-    log(s, `You put on the ${item.name}. Defence ${defenseOf(s)}.`);
-  }
-  return true;
-}
-
-// Fenster [ BAG ] (seit Tag 6): Dinge mit heal aus dem Beutel benutzen. Kostet keine Runde.
-export function useItem(s, id) {
-  const item = ITEMS[id];
-  const index = s.player.bag.indexOf(id);
-  if (index < 0 || !item?.heal) return false;
-  if (s.player.hp >= s.player.maxHp) {
-    log(s, `You are already fully mended. The ${item.name} can wait.`);
-    return false;
-  }
-  s.player.bag.splice(index, 1);
-  s.player.hp = Math.min(s.player.maxHp, s.player.hp + item.heal);
-  log(s, `You drink the ${item.name}. HP ${s.player.hp}/${s.player.maxHp}.`);
-  return true;
-}
-
-// Läden (seit Tag 6, content/shops.js): kaufen kostet keine Runde. Rückgabe true, wenn gekauft.
-export function buy(s, shopId, itemId) {
-  const shop = SHOPS[shopId];
-  const offer = shop?.stock.find((o) => o.item === itemId);
-  if (!offer) return false;
-  if (countItem(s, shop.currency) < offer.price) {
-    log(s, `Not enough ${ITEMS[shop.currency].name}s. The ${ITEMS[itemId].name} costs ${offer.price}.`);
-    return false;
-  }
-  for (let i = 0; i < offer.price; i += 1) takeItem(s, shop.currency);
-  giveItem(s, itemId);
-  log(s, `You buy a ${ITEMS[itemId].name} for ${offer.price} ${ITEMS[shop.currency].name}s.`);
-  describeGain(s, itemId);
-  return true;
-}
-
-// Knacks (seit Tag 6): ein Punkt pro Aufstieg über Stufe 1, minus die schon vergebenen.
-export const skillPoints = (s) =>
-  s.player.level - 1 - SKILLS.reduce((sum, k) => sum + (s.player.skills?.[k.id] ?? 0), 0);
-
-export function learnSkill(s, id) {
-  const skill = SKILLS.find((k) => k.id === id);
-  const skills = (s.player.skills ??= {});
-  if (!skill || skillPoints(s) <= 0 || (skills[id] ?? 0) >= skill.max) return false;
-  skills[id] = (skills[id] ?? 0) + 1;
-  if (skill.maxHp) {
-    s.player.maxHp += skill.maxHp;
-    s.player.hp += skill.maxHp;
-  }
-  log(s, `${SKILL_TEXT} ${skill.name} ${skills[id]}/${skill.max}.`, 'new-tonight');
-  return true;
-}
-
-// Ergebnis einer neuen Sache für das Log: Waffen nennen den Schaden, Rüstung die Abwehr.
-function describeGain(s, id) {
-  const item = ITEMS[id];
-  if (isWeapon(id) && s.player.weapon === id) log(s, `You now ${item.hitVerb} things for ${attackOf(s)} damage.`);
-  else if (isArmor(id) && s.player.armor[item.slot] === id) log(s, `You wear the ${item.name}. Defence ${defenseOf(s)}.`);
-}
-
-// Stufen (seit Tag 4): Erfahrung aus Siegen und vom Glücksrad. Nächste Schwelle oder null am Ende der Leiter.
-export const nextLevelXp = (s) => LEVELS[s.player.level]?.xp ?? null;
-
-function gainXp(s, amount) {
-  s.player.xp += amount;
-  s.stats.xp += amount;
-  while (nextLevelXp(s) !== null && s.player.xp >= nextLevelXp(s)) {
-    const step = LEVELS[s.player.level];
-    s.player.level += 1;
-    s.player.maxHp += step.maxHp ?? 0;
-    s.player.atk += step.atk ?? 0;
-    s.player.hp = s.player.maxHp;
-    log(s, LEVEL_UP_TEXT.replace('{level}', s.player.level), 'new-tonight');
-    const gains = [step.maxHp && `+${step.maxHp} max HP`, step.atk && `+${step.atk} attack`, '1 knack point'].filter(Boolean);
-    if (gains.length) log(s, `${gains.join(', ')}. You are fully mended.`);
-  }
-}
-
-export const creatureAt = (s, x, y) =>
-  s.creatures.find((c) => c.respawnAt === null && c.x === x && c.y === y);
-
-// s.others: andere Spieler in der gemeinsamen Welt (nur auf dem Server gesetzt), auf deren Feld nichts tritt.
-const isFree = (s, x, y) =>
-  tileAt(s.map, x, y).walkable &&
-  !entityAt(s, x, y) &&
-  !creatureAt(s, x, y) &&
-  !(s.player.x === x && s.player.y === y) &&
-  !s.others?.some((p) => p.x === x && p.y === y);
-
-const distance = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-
-// once: Kreatur kommt nach dem Sieg nicht wieder (Besucher vom Glücksrad).
-const newCreature = (type, x, y, once = false) => ({
-  type, x, y, hp: CREATURES[type].hp, spawn: { x, y }, respawnAt: null, once,
-});
-
-// Besiegte Bosse (flags.slain) kommen nie wieder.
-function spawnCreatures(s, mapId) {
-  return MAPS[mapId].spawns
-    .filter((spawn) => !(CREATURES[spawn.type].boss && s.flags.slain?.[spawn.type]))
-    .map((spawn) => newCreature(spawn.type, spawn.x, spawn.y));
-}
-
-// Wechselt die Karte. Kreaturen der neuen Karte erscheinen frisch, nie auf dem Ankunftsfeld.
-// In der gemeinsamen Welt schickt der Server die Kreaturen der neuen Karte; bis dahin ist sie leer.
-function enterMap(s, mapId, x, y) {
-  s.map = mapId;
-  s.player.x = x;
-  s.player.y = y;
-  s.creatures = s.shared ? [] : spawnCreatures(s, mapId).filter((c) => !(c.x === x && c.y === y));
-  s.worldMap = null;
-}
+export * from './core.js';
+export * from './inventory.js';
+export * from './creatures.js';
+export * from './shared.js';
+export * from './spells.js';
 
 // saved: migrierter Spielstand aus save.js oder null für ein neues Spiel.
 // Kreaturen werden nie gespeichert, sonst könnten sie nach einem Update in neuem Gelände stecken.
@@ -220,11 +32,11 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     map: START.map,
     player: {
       x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null, bag: [], xp: 0, level: 1,
-      armor: { head: null, body: null, feet: null }, skills: {},
+      armor: { head: null, body: null, feet: null }, skills: {}, ward: 0,
     },
     turn: 0,
     flags: {},
-    stats: { kills: 0, faints: 0, xp: 0, together: 0 },
+    stats: { kills: 0, faints: 0, xp: 0, together: 0, ink: 0, spells: 0, crows: 0 },
     lastSeenDay: null,
     log: [],
     creatures: [],
@@ -247,14 +59,19 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     if (!Number.isInteger(s.player.xp) || s.player.xp < 0) s.player.xp = 0;
     if (!Number.isInteger(s.player.level) || !LEVELS[s.player.level - 1]) s.player.level = 1;
     if (!Number.isInteger(s.stats.xp)) s.stats.xp = 0;
-    if (!Number.isInteger(s.stats.together)) s.stats.together = 0;
+    // Zähler, die erst später dazukamen (together seit Tag 6, ink/spells/crows seit Tag 7), beginnen bei 0.
+    for (const stat of ['together', 'ink', 'spells', 'crows']) if (!Number.isInteger(s.stats[stat])) s.stats[stat] = 0;
+    // Tintenring (WARD, seit Tag 7): höchstens so viele Ladungen, wie der Zauber gibt.
+    if (!Number.isInteger(s.player.ward) || s.player.ward < 0) s.player.ward = 0;
+    s.player.ward = Math.min(s.player.ward, spellById('ward').charges);
     // Stände von vor Tag 6 haben keine Knacks: Die Punkte ihrer Stufen warten dann im Fenster [ CHARA ].
     const skills = saved.player?.skills ?? {};
     s.player.skills = Object.fromEntries(SKILLS
       .map((k) => [k.id, Math.min(k.max, Number.isInteger(skills[k.id]) && skills[k.id] > 0 ? skills[k.id] : 0)])
       .filter(([, rank]) => rank > 0));
     if (skillPoints(s) < 0) s.player.skills = {};
-    s.player.hp = Math.min(Math.max(s.player.hp, 1), s.player.maxHp);
+    if (!Number.isInteger(s.player.maxHp) || s.player.maxHp < 1) s.player.maxHp = PLAYER.maxHp;
+    s.player.hp = Number.isInteger(s.player.hp) ? Math.min(Math.max(s.player.hp, 1), s.player.maxHp) : s.player.maxHp;
   }
   s.creatures = spawnCreatures(s, s.map);
   // Die Welt kann sich über Nacht geändert haben: Spieler notfalls zurück an den Start setzen.
@@ -289,11 +106,15 @@ export const INTERACTIONS = {
     }
     const quest = QUESTS.find((q) => q.giver === e.id && questOpen(s, q));
     if (quest && talkQuest(s, e, quest)) return;
-    const remark = e.itemLines?.[s.player.weapon];
+    // Einmalige Bemerkung zu etwas, das man dabeihat: zuerst zur Waffe in der Hand, dann zu allem anderen
+    // (vor Tag 7 nur zur Waffe, deshalb blieben Bemerkungen zu Rüstung oder Büchern stumm).
     const heard = (s.flags.heard ??= {});
-    if (remark && !heard[`${e.id}:${s.player.weapon}`]) {
-      heard[`${e.id}:${s.player.weapon}`] = true;
-      log(s, `${e.name}: "${remark}"`);
+    const lines = e.itemLines ?? {};
+    const noticed = [s.player.weapon, ...Object.keys(lines)]
+      .find((id) => lines[id] && hasItem(s, id) && !heard[`${e.id}:${id}`]);
+    if (noticed) {
+      heard[`${e.id}:${noticed}`] = true;
+      log(s, `${e.name}: "${lines[noticed]}"`);
       return;
     }
     const talk = (s.flags.talk ??= {});
@@ -349,6 +170,17 @@ export const INTERACTIONS = {
     giveItem(s, recipe.makes);
     log(s, recipe.text, 'new-tonight');
     describeGain(s, recipe.makes);
+  },
+  // Tintenfass (Tag 7): gibt jede Nacht amount Tropfen Tinte (flags.inkDay[id]).
+  inkwell(s, e) {
+    const days = (s.flags.inkDay ??= {});
+    if (days[e.id] === currentDay()) {
+      log(s, e.dryText);
+      return;
+    }
+    days[e.id] = currentDay();
+    for (let i = 0; i < e.amount; i += 1) giveItem(s, 'ink');
+    log(s, e.text, 'new-tonight');
   },
   // Türen führen auf eine andere Karte: to = { map, x, y } ist das Ankunftsfeld.
   door(s, e) {
@@ -467,17 +299,21 @@ function spinWheel(s) {
   WHEEL_EFFECTS[wedge.effect](s, wedge);
 }
 
+// Schaden eines Schlags: Angriff minus Panzer der Kreatur (def, seit Tag 7), mindestens 1.
+export const damageTo = (s, type) => Math.max(1, attackOf(s) - (CREATURES[type]?.def ?? 0));
+
 function attackCreature(s, c) {
   const def = CREATURES[c.type];
   const weapon = ITEMS[s.player.weapon];
+  const dmg = damageTo(s, c.type);
   // Gemeinsame Welt: Der Server zieht die HP ab und meldet den Sieg allen, die mitgekämpft haben.
   if (s.shared) {
-    s.outbox.push({ t: 'hit', id: c.id, dmg: attackOf(s) });
-    c.hp -= attackOf(s);
+    s.outbox.push({ t: 'hit', id: c.id, dmg });
+    c.hp -= dmg;
     log(s, weapon ? `You ${weapon.hitVerb} the ${def.name}.` : `You hit the ${def.name}.`);
     return;
   }
-  c.hp -= attackOf(s);
+  c.hp -= dmg;
   if (c.hp <= 0) {
     c.respawnAt = s.turn + def.respawnTurns;
     if (c.once || def.boss) s.creatures.splice(s.creatures.indexOf(c), 1);
@@ -493,6 +329,7 @@ export function rewardKill(s, type, text) {
   if (!def) return;
   if (def.boss) (s.flags.slain ??= {})[type] = true;
   s.stats.kills += 1;
+  if (def.stat) s.stats[def.stat] = (s.stats[def.stat] ?? 0) + 1;
   log(s, text);
   if (def.boss) log(s, def.defeatText ?? `The ${def.name} is gone for good.`, 'new-tonight');
   for (const drop of def.drops ?? []) {
@@ -504,94 +341,6 @@ export function rewardKill(s, type, text) {
   gainXp(s, def.xp ?? 0);
 }
 
-// Rüstung zieht ihre Abwehr vom Schaden ab, ein Punkt geht immer durch.
-export const damageFrom = (s, def) => Math.max(1, def.atk - defenseOf(s));
-
-// Auf dem Server (s.onHurt) trifft der Biss einen echten Spieler; sein Browser rechnet den Schaden.
-function hurtPlayer(s, def) {
-  if (s.onHurt) {
-    s.onHurt(def);
-    return false;
-  }
-  s.player.hp -= damageFrom(s, def);
-  log(s, `The ${def.name} ${def.biteVerb ?? 'bites'} you.`, 'danger');
-  if (s.player.hp <= 0) {
-    s.stats.faints += 1;
-    s.player.hp = s.player.maxHp;
-    enterMap(s, START.map, START.x, START.y);
-    log(s, 'Everything goes dark. You wake up in your bed, as if it were a new day.', 'danger');
-    return true;
-  }
-  return false;
-}
-
-function stepCreature(s, c, dx, dy) {
-  if (isFree(s, c.x + dx, c.y + dy)) {
-    c.x += dx;
-    c.y += dy;
-    return true;
-  }
-  return false;
-}
-
-function wander(s, c) {
-  if (random(s) < 0.5) return;
-  const [dx, dy] = Object.values(DIRS)[Math.floor(random(s) * 4)];
-  stepCreature(s, c, dx, dy);
-}
-
-// Verhalten pro Runde. Rückgabe true heißt: Der Spieler wurde besiegt, die Runde endet sofort.
-// Ein Schritt auf den Spieler zu. Rückgabe true, wenn die Kreatur sich bewegt hat.
-function approach(s, c) {
-  const dx = Math.sign(s.player.x - c.x);
-  const dy = Math.sign(s.player.y - c.y);
-  const horizontalFirst = Math.abs(s.player.x - c.x) >= Math.abs(s.player.y - c.y);
-  return Boolean(horizontalFirst
-    ? (dx && stepCreature(s, c, dx, 0)) || (dy && stepCreature(s, c, 0, dy))
-    : (dy && stepCreature(s, c, 0, dy)) || (dx && stepCreature(s, c, dx, 0)));
-}
-
-export const AI_BEHAVIOURS = {
-  skulk(s, c, def) {
-    const d = distance(c, s.player);
-    if (d === 1) {
-      return random(s) < def.hitChance ? hurtPlayer(s, def) : false;
-    }
-    if (d > def.senseRange) {
-      wander(s, c);
-      return false;
-    }
-    if (!approach(s, c)) wander(s, c);
-    return false;
-  },
-  // Frösche (Tag 4): beißen wie Ratten, sitzen aber jede zweite Runde still und springen dann zwei Felder.
-  hop(s, c, def) {
-    if (distance(c, s.player) === 1) {
-      return random(s) < def.hitChance ? hurtPlayer(s, def) : false;
-    }
-    if (s.turn % 2 === 1) return false;
-    if (distance(c, s.player) > def.senseRange) {
-      wander(s, c);
-      return false;
-    }
-    if (approach(s, c) && distance(c, s.player) > 1) approach(s, c);
-    return false;
-  },
-  // Aale (Tag 5): rühren sich nie, beißen aber, wer daneben steht.
-  lurk(s, c, def) {
-    if (distance(c, s.player) !== 1) return false;
-    return random(s) < def.hitChance ? hurtPlayer(s, def) : false;
-  },
-  // Der Krümelhaufen (Tag 5): langsam, ein Schritt jede zweite Runde, aber schwer.
-  trudge(s, c, def) {
-    if (distance(c, s.player) === 1) {
-      return random(s) < def.hitChance ? hurtPlayer(s, def) : false;
-    }
-    if (s.turn % 2 === 1 || distance(c, s.player) > def.senseRange) return false;
-    approach(s, c);
-    return false;
-  },
-};
 
 function endTurn(s) {
   s.turn += 1;
@@ -616,6 +365,13 @@ function endTurn(s) {
 // Einziger Einstiegspunkt für Spielzüge. Rückgabe: true, wenn eine Runde vergangen ist.
 export function act(s, action) {
   if (action === 'wait') {
+    endTurn(s);
+    return true;
+  }
+  // Zauber (seit Tag 7): 'cast:ward', 'cast:mend', 'cast:hop:<Richtung>'.
+  if (typeof action === 'string' && action.startsWith('cast:')) {
+    const [, id, dirName] = action.split(':');
+    if (!castSpell(s, id, dirName)) return false;
     endTurn(s);
     return true;
   }
@@ -645,109 +401,4 @@ export function act(s, action) {
   s.player.y = y;
   endTurn(s);
   return true;
-}
-
-// ---------------------------------------------------------------------------------------------
-// Gemeinsame Welt (seit Tag 6). Der Server (worker/presence.js) führt pro Karte eine Welt mit
-// createWorld() und rechnet sie im Takt mit stepWorld(). Dafür nutzt er dieselben AI_BEHAVIOURS:
-// Jede Kreatur sieht als s.player den nächsten Spieler, Bisse gehen über s.onHurt an dessen Browser.
-// Im Browser setzt applyWorld() die Kreaturen vom Server, takeBite() rechnet einen Biss,
-// rewardKill() einen gemeinsamen Sieg. s.shared und s.outbox werden nie gespeichert.
-
-// Nach einem Sieg kommen Bosse in der gemeinsamen Welt nach dieser Zahl Takte wieder, damit Spätere sie auch treffen.
-export const WORLD_BOSS_RESPAWN = 900;
-
-export function createWorld(mapId, seed = 1) {
-  let next = 0;
-  const creatures = MAPS[mapId].spawns.map((spawn) => ({ ...newCreature(spawn.type, spawn.x, spawn.y), id: `c${next++}` }));
-  return { map: mapId, turn: 0, seed: seed | 0, creatures, next, hitters: {} };
-}
-
-const nearest = (c, players) => players.reduce((best, p) => (!best || distance(c, p) < distance(c, best) ? p : best), null);
-
-// Ein Takt. players: [{ id, x, y }] auf dieser Karte. Rückgabe: Bisse [{ id, type }].
-export function stepWorld(world, players) {
-  const bites = [];
-  world.turn += 1;
-  const base = { map: world.map, turn: world.turn, seed: world.seed, flags: {}, creatures: world.creatures, others: players };
-  for (const c of world.creatures) {
-    if (c.respawnAt === null || world.turn < c.respawnAt) continue;
-    const view = { ...base, player: { x: -99, y: -99 } };
-    if (players.every((p) => distance(c.spawn, p) > 5) && isFree(view, c.spawn.x, c.spawn.y)) {
-      Object.assign(c, { x: c.spawn.x, y: c.spawn.y, hp: CREATURES[c.type].hp, respawnAt: null });
-      delete world.hitters[c.id];
-    }
-  }
-  if (!players.length) return bites;
-  for (const c of world.creatures) {
-    const def = CREATURES[c.type];
-    if (c.respawnAt !== null || !def || !AI_BEHAVIOURS[def.ai]) continue;
-    const target = nearest(c, players);
-    const view = {
-      ...base,
-      seed: world.seed,
-      player: { x: target.x, y: target.y },
-      others: players.filter((p) => p !== target),
-      onHurt: () => bites.push({ id: target.id, type: c.type }),
-    };
-    AI_BEHAVIOURS[def.ai](view, c, def);
-    world.seed = view.seed;
-  }
-  return bites;
-}
-
-// Browser: Wäre dieser Zug ein Angriff? Für die Abklingzeiten in der gemeinsamen Welt.
-export function isAttack(s, action) {
-  const dir = DIRS[action];
-  return Boolean(dir && creatureAt(s, s.player.x + dir[0], s.player.y + dir[1]));
-}
-
-// Ein Spieler trifft eine Kreatur. Rückgabe: null (ungültig), { killed: false } oder { killed: true, type, hitters }.
-export function hitWorld(world, id, dmg, player) {
-  const c = world.creatures.find((x) => x.id === id && x.respawnAt === null);
-  if (!c || distance(c, player) !== 1) return null;
-  const def = CREATURES[c.type];
-  c.hp -= dmg;
-  const hitters = (world.hitters[c.id] ??= []);
-  if (!hitters.includes(player.id)) hitters.push(player.id);
-  if (c.hp > 0) return { killed: false };
-  delete world.hitters[c.id];
-  if (c.once) world.creatures.splice(world.creatures.indexOf(c), 1);
-  else c.respawnAt = world.turn + (def.boss ? WORLD_BOSS_RESPAWN : def.respawnTurns);
-  return { killed: true, type: c.type, hitters };
-}
-
-// Besucher vom Glücksrad in der gemeinsamen Welt. Nur Kreaturen, die das Rad wirklich bringt.
-export function summonWorld(world, type, x, y) {
-  if (!WHEEL.wedges.some((w) => w.effect === 'visitor' && w.creature === type)) return false;
-  const view = { map: world.map, flags: {}, creatures: world.creatures, player: { x: -99, y: -99 }, others: [] };
-  if (!isFree(view, x, y)) return false;
-  world.creatures.push({ ...newCreature(type, x, y, true), id: `c${world.next++}` });
-  return true;
-}
-
-// Browser: Kreaturen vom Server übernehmen. Unbekannte Arten (ältere Spielversion) bleiben weg.
-export function applyWorld(s, creatures) {
-  s.shared = true;
-  s.worldMap = s.map;
-  s.outbox ??= [];
-  s.creatures = creatures
-    .filter((c) => CREATURES[c.type])
-    .map((c) => ({ id: c.id, type: c.type, x: c.x, y: c.y, hp: c.hp, spawn: { x: c.x, y: c.y }, respawnAt: null, once: false }));
-}
-
-// Browser: zurück zur eigenen Welt (keine Verbindung, oder der Server kennt diese Karte nicht).
-export function leaveWorld(s) {
-  if (!s.shared) return;
-  s.shared = false;
-  s.worldMap = null;
-  s.outbox = [];
-  s.creatures = spawnCreatures(s, s.map).filter((c) => !(c.x === s.player.x && c.y === s.player.y));
-}
-
-// Browser: Biss vom Server. Rückgabe true, wenn der Spieler ohnmächtig wurde (und auf der Wiese aufwacht).
-export function takeBite(s, type) {
-  const def = CREATURES[type];
-  if (!def) return false;
-  return hurtPlayer(s, def);
 }
