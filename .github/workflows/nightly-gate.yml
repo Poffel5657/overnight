@@ -64,22 +64,18 @@ jobs:
           grep -qx 'content/chronicle.js' paths.txt || fail "content/chronicle.js wurde nicht aktualisiert."
 
           lines=$(jq -s '[.[] | select(.filename | test("^(content/|tests/)|\\.md$") | not) | .additions + .deletions] | add // 0' files.jsonl)
-          big_issue=""
-          # Aufräumnacht (Tag durch 7 teilbar): normale Neuerungen plus Aufräumen, daher doppelte Grenze.
-          limit=1000
-          if (( 10#$day % 7 == 0 )); then limit=2000; fi
-          if [ "$lines" -gt "$limit" ]; then
-            # Großer Umbau: nur mit Freigabe von Chris auf einem big-change-Issue, und höchstens 3000 Zeilen.
-            [ "$lines" -le 3000 ] || fail "$lines geänderte Zeilen außerhalb von content/, tests/ und Doku (absolute Grenze 3000)."
-            gh api "repos/$REPO/pulls/$PR" --jq '.body // ""' > body.txt
-            big_issue=$(grep -oE '^Big-Change: #[0-9]+' body.txt | grep -oE '[0-9]+' | head -1 || true)
-            [ -n "$big_issue" ] || fail "$lines Zeilen (Grenze $limit) und keine Zeile Big-Change: #N in der PR-Beschreibung."
+          echo "$lines geänderte Zeilen außerhalb von content/, tests/ und Doku (keine Grenze mehr)."
+          # Großer Umbau (seit 2026-11-10 ohne Zeilengrenze): Nennt die PR-Beschreibung ein big-change-Issue,
+          # muss Chris es freigegeben haben; der Workflow schließt es nach dem Merge.
+          gh api "repos/$REPO/pulls/$PR" --jq '.body // ""' > body.txt
+          big_issue=$(grep -oE '^Big-Change: #[0-9]+' body.txt | grep -oE '[0-9]+' | head -1 || true)
+          if [ -n "$big_issue" ]; then
             gh api "repos/$REPO/issues/$big_issue" --jq 'select(.state == "open" and .pull_request == null and ([.labels[].name] | index("big-change"))) | .number' > issue.txt
             [ -s issue.txt ] || fail "Issue #$big_issue ist kein offenes big-change-Issue."
             # Nur ein eigener Kommentar von Chris zählt, nicht einer, den der Nachtlauf über eine GitHub-App schreibt.
             gh api --paginate "repos/$REPO/issues/$big_issue/comments?per_page=100" --jq '.[] | select(.user.login == "Poffel5657" and .author_association == "OWNER" and .performed_via_github_app == null and (.body | test("^\\s*ja\\b"; "i"))) | .id' > approved.txt
             [ -s approved.txt ] || fail "Issue #$big_issue hat keine Freigabe von Chris."
-            echo "Freigabe gefunden: Issue #$big_issue, $lines Zeilen."
+            echo "Freigabe gefunden: Issue #$big_issue."
           fi
           echo "big_issue=$big_issue" >> "$GITHUB_OUTPUT"
 

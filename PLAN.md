@@ -8,6 +8,16 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 - Inbox gelesen bis: `2026-11-09T17-29-34-531Z-c5554587.json` (Vorschläge), Stimmen bis `2026-11-09T17-36-48-306Z-a6f12242.json`, Bewertungen bis `2026-11-08T23-37-47-802Z-22809058.json`. Keine Event-Beiträge (kein Event lief).
 - **Event läuft:** „Bottled Ink“ (`bottled-ink`, Tag 7 bis 9, bei der Magierin, `stats.ink` +3 pro Tag, Ziel 10). Auswerten in Nacht 10. Angekündigte Belohnung: „something to write with, bigger than a book“. Vorschlag: eine **Schreibfeder/Federkiel-Station** im Turm, mit der man Bleistiftlinien (`:`) im Rough Draft mit Tinte nachzieht, sodass sie begehbar werden (der alte Faden „Linien werden fester“), oder ein Tintenfass für jeden Spieler. Nicht erreicht: Die Magierin bleibt freundlich, die Tinte reicht „for a footnote“.
 
+## Ausbau läuft
+
+Wünsche, die in einer Nacht nur als erstes Stück kamen. Geht neuen Wünschen vor, bis es fertig ist. Format: Wunsch, was schon da ist, was in welcher Nacht dazukommt.
+
+- (noch nichts; ab Nacht 8 nach „Wünsche richtig umsetzen“ in `CLAUDE.md`)
+
+## Heute in Arbeit
+
+Der Plan der laufenden Nacht nach „Wünsche richtig umsetzen“: pro Teil was der Spieler will, woran er es merkt, woran es anschließt, der Weg dorthin. Am Tagesende leeren.
+
 ## Stimmzettel
 
 Zettel 7:
