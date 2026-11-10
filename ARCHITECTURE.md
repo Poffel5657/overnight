@@ -118,4 +118,4 @@ Der Deploy schreibt außerdem `timelapse/days.js`: pro archivierter Nacht Chroni
 
 Ein PR von `claude/day-NNN` wird von `.github/workflows/nightly-gate.yml` geprüft und gemergt, danach taggt der Workflow `day-NNN` und startet den Deploy. `.github/workflows/deploy.yml` baut die Seite aus `main` und legt für jeden Tag eine spielbare Kopie unter `day/NNN/` an. Fehlschläge lassen die Live-Seite unverändert.
 
-Grenzen pro PR: 1000 geänderte Zeilen außerhalb von `content/`, `tests/` und Doku. Bis 3000 nur mit `Big-Change: #N` in der PR-Beschreibung und einem `ja`-Kommentar von Chris auf dem `big-change`-Issue. Der Workflow schließt das Issue nach dem Merge.
+Keine Zeilengrenze pro PR (seit 2026-11-10; der Workflow meldet die Zahl nur). Ein großer Umbau, der das Grundwesen des Spiels ändert, braucht `Big-Change: #N` in der PR-Beschreibung und einen `ja`-Kommentar von Chris auf dem `big-change`-Issue. Der Workflow schließt das Issue nach dem Merge.
