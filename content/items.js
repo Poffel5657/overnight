@@ -151,4 +151,47 @@ export const ITEMS = {
     def: 2,
     text: 'Stitched from what the crows left behind. Still slightly inky. They would like it back.',
   },
+  // Tag 8: der erste Beruf (Gewinner von Zettel 7). Bergbau in den Zahnradgruben von Mainspring.
+  pick: {
+    name: "miner's pick",
+    text: 'Old, chipped, and very keen on rocks. Walk into an ore vein with it to dig. See TRADES in CHARA.',
+  },
+  'brass-ore': {
+    name: 'lump of brass ore',
+    stat: 'ore',
+    text: 'Warm, heavy and faintly ticking. Any workbench can make something of it.',
+  },
+  springsteel: {
+    name: 'sliver of springsteel',
+    text: 'From the deep veins under the clock tower. It bends, and then it very firmly unbends.',
+  },
+  'brass-axe': {
+    name: 'brass axe',
+    atk: 5,
+    hitVerb: 'chop',
+    text: 'Brass head, spring in the handle. It bounces back for the next swing.',
+  },
+  'brass-plate': {
+    name: 'brass plate',
+    slot: 'body',
+    def: 2,
+    text: 'Hammered from ore at a workbench. Heavy, shiny, and it rings when things bite it.',
+  },
+  'brass-peg': {
+    name: 'brass peg',
+    text: 'For pegging down things that want to wander off. The Surveyor has a use for these.',
+  },
+  'springsteel-sword': {
+    name: 'springsteel sword',
+    atk: 7,
+    hitVerb: 'slash',
+    text: 'Thin, bright and very sure of itself. The best thing a workbench has made so far.',
+  },
+  // Tag 8: Dank der Vermesserin, wenn der Rand der Wiese festgepflockt ist.
+  'surveyor-boots': {
+    name: "surveyor's boots",
+    slot: 'feet',
+    def: 2,
+    text: 'Every step exactly one pace long. You could measure a meadow in these.',
+  },
 };

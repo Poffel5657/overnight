@@ -27,7 +27,7 @@ export const STAGES = {
     bag: ['tonic', 'strong-tea'],
   },
   clocktower: {
-    level: 7, weapon: 'drain-hook', armor: ['straw-hat', 'crow-coat', 'rubber-boots'],
+    level: 7, weapon: 'drain-hook', armor: ['straw-hat', 'crow-coat', 'surveyor-boots'],
     bag: ['strong-tea', 'strong-tea', 'tonic', 'tome-ward', 'tome-mend', 'ink', 'ink', 'ink', 'ink'],
   },
 };

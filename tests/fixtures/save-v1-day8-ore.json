@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "map": "town",
+  "player": { "x": 5, "y": 2, "hp": 20, "maxHp": 24, "atk": 3, "weapon": "brass-axe", "bag": ["pick", "brass-ore", "brass-ore", "brass-peg", "button-mail"], "xp": 52, "level": 6, "armor": { "head": "colander", "body": "brass-plate", "feet": "surveyor-boots" }, "skills": { "sharp": 2, "thick": 2, "sturdy": 1 }, "ward": 0, "mining": 9 },
+  "turn": 2100,
+  "flags": { "taken": { "old-pick": true }, "veins": { "vein-pit": { "day": 8, "used": 2 }, "vein-south": { "day": 8, "used": 1 } }, "quests": { "loose-springs": "done", "pit-quota": "active", "pegging-the-edge": "done", "night-survey": "active" }, "questBase": { "night-survey": 1 }, "eventsHeard": { "bottled-ink": true } },
+  "stats": { "kills": 96, "faints": 3, "xp": 52, "together": 4, "ink": 9, "spells": 6, "crows": 5, "ore": 13, "mites": 2 },
+  "lastSeenDay": 8
+}

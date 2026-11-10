@@ -184,6 +184,23 @@ export const CREATURES = {
     defeatText: 'The Great Cog slips a tooth, shudders, and stops. Somewhere above, every clock in Mainspring skips a beat, then agrees on the time.',
     drops: [{ item: 'cog-tooth', chance: 1 }, { item: 'spring', chance: 1 }],
   },
+  // Tag 8: Der Südrand der Wiese ist ausradiert. Aus den Krümeln kriechen Radiermilben.
+  mite: {
+    name: 'rubber mite',
+    balance: { stage: 'meadow', role: 'fodder' },
+    glyph: 'u',
+    color: '#c9b3bf',
+    hp: 3,
+    atk: 1,
+    hitChance: 0.5,
+    ai: 'skulk',
+    senseRange: 3,
+    respawnTurns: 30,
+    xp: 1,
+    biteVerb: 'rubs at',
+    stat: 'mites',
+    drops: [{ item: 'crumb', chance: 0.25 }],
+  },
   // Markierungen der Flächenangriffe (seit dem Rebalance). Keine echten Kreaturen: siehe mark oben.
   'crumb-fall': {
     name: 'falling crumbs',

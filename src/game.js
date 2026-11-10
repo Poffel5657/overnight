@@ -3,7 +3,6 @@
 import { MAPS, PLAYER, START } from '../content/world.js';
 import { CREATURES } from '../content/creatures.js';
 import { ITEMS } from '../content/items.js';
-import { RECIPES } from '../content/recipes.js';
 import { LEVELS } from '../content/levels.js';
 import { WHEEL } from '../content/wheel.js';
 import { QUESTS } from '../content/quests.js';
@@ -17,12 +16,14 @@ import {
   AI_BEHAVIOURS, creatureAt, creatureTurn, enterMap, isFree, newCreature, spawnCreatures, sweepMarks,
 } from './creatures.js';
 import { castSpell, spellById } from './spells.js';
+import { mineVein, useBench } from './trades.js';
 
 export * from './core.js';
 export * from './inventory.js';
 export * from './creatures.js';
 export * from './shared.js';
 export * from './spells.js';
+export * from './trades.js';
 
 // saved: migrierter Spielstand aus save.js oder null für ein neues Spiel.
 // Kreaturen werden nie gespeichert, sonst könnten sie nach einem Update in neuem Gelände stecken.
@@ -32,11 +33,11 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     map: START.map,
     player: {
       x: START.x, y: START.y, hp: PLAYER.maxHp, maxHp: PLAYER.maxHp, atk: PLAYER.atk, weapon: null, bag: [], xp: 0, level: 1,
-      armor: { head: null, body: null, feet: null }, skills: {}, ward: 0,
+      armor: { head: null, body: null, feet: null }, skills: {}, ward: 0, mining: 0,
     },
     turn: 0,
     flags: {},
-    stats: { kills: 0, faints: 0, xp: 0, together: 0, ink: 0, spells: 0, crows: 0 },
+    stats: { kills: 0, faints: 0, xp: 0, together: 0, ink: 0, spells: 0, crows: 0, ore: 0, mites: 0 },
     lastSeenDay: null,
     log: [],
     creatures: [],
@@ -60,7 +61,10 @@ export function createGame({ saved = null, seed = Date.now() } = {}) {
     if (!Number.isInteger(s.player.level) || !LEVELS[s.player.level - 1]) s.player.level = 1;
     if (!Number.isInteger(s.stats.xp)) s.stats.xp = 0;
     // Zähler, die erst später dazukamen (together seit Tag 6, ink/spells/crows seit Tag 7), beginnen bei 0.
-    for (const stat of ['together', 'ink', 'spells', 'crows']) if (!Number.isInteger(s.stats[stat])) s.stats[stat] = 0;
+    // ore und mites seit Tag 8.
+    for (const stat of ['together', 'ink', 'spells', 'crows', 'ore', 'mites']) if (!Number.isInteger(s.stats[stat])) s.stats[stat] = 0;
+    // Bergbau (seit Tag 8): Zahl der Schläge, fehlt sie oder ist ungültig, gilt 0.
+    if (!Number.isInteger(s.player.mining) || s.player.mining < 0) s.player.mining = 0;
     // Tintenring (WARD, seit Tag 7): höchstens so viele Ladungen, wie der Zauber gibt.
     if (!Number.isInteger(s.player.ward) || s.player.ward < 0) s.player.ward = 0;
     s.player.ward = Math.min(s.player.ward, spellById('ward').charges);
@@ -158,18 +162,13 @@ export const INTERACTIONS = {
     (s.flags.taken ??= {})[e.id] = true;
     log(s, e.openText, 'new-tonight');
   },
-  // Werkbank: baut das erste Rezept aus content/recipes.js, für das der Spieler alles dabeihat.
+  // Werkbank: öffnet im Browser das Fenster [ WORKBENCH ] (seit Tag 8, vorher baute sie das erste passende Rezept).
   bench(s, e) {
-    const recipe = RECIPES.find((r) => r.needs.every((id) => countItem(s, id) >= r.needs.filter((n) => n === id).length));
-    if (!recipe) {
-      const partial = RECIPES.find((r) => r.needs.some((id) => hasItem(s, id)));
-      log(s, partial ? partial.hint : e.text);
-      return;
-    }
-    for (const id of recipe.needs) takeItem(s, id);
-    giveItem(s, recipe.makes);
-    log(s, recipe.text, 'new-tonight');
-    describeGain(s, recipe.makes);
+    useBench(s, e);
+  },
+  // Erzadern (seit Tag 8): mit der Spitzhacke Erz schlagen, zwei Schläge pro Ader und Nacht (src/trades.js).
+  vein(s, e) {
+    mineVein(s, e);
   },
   // Tintenfass (Tag 7): gibt jede Nacht amount Tropfen Tinte (flags.inkDay[id]).
   inkwell(s, e) {

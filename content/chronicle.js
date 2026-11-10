@@ -49,4 +49,10 @@ export const CHRONICLE = [
     title: 'Ink, and a very great cog',
     text: 'You won the vote: a crooked tower leans in the northern trees, and its Mage teaches spells written in ink. The clock tower opens on the Great Cog, best faced with friends. Crows have come for the Scarecrow at last, the Mage wants ink bottled, and then the Nightwright swept up.',
   },
+  {
+    day: 8,
+    date: '2026-11-11',
+    title: 'Brass in the pits, and a shorter meadow',
+    text: 'You won the vote with a trade: an old pick waits by the gear pits of Mainspring, the ore veins grow back every night, and every workbench now shows what it can make. The south edge of the meadow was rubbed out overnight, and a Surveyor wants it pegged. The world was also weighed again: foes hit harder, and bosses mark the floor before they strike.',
+  },
 ];

@@ -207,8 +207,10 @@
     <ul id="chara-worn" class="gear-list"></ul>
     <h3 class="gear-head">KNACKS <span id="chara-points" class="head-note"></span></h3>
     <ul id="chara-knacks" class="gear-list"></ul>
+    <h3 class="gear-head">TRADES</h3>
+    <ul id="chara-trades" class="gear-list"></ul>
     <p id="chara-status" class="window-status" role="status"></p>
-    <p class="fineprint">Defence is taken off every hit, but one point always gets through. Gear is changed in the bag. <span class="keys">C opens this window, Esc closes it.</span></p>
+    <p class="fineprint">Defence is taken off every hit, but never more than half of it. Gear is changed in the bag. Trades grow with use. <span class="keys">C opens this window, Esc closes it.</span></p>
   </dialog>
 
   <dialog id="bag-dialog" class="window side-window" aria-labelledby="bag-heading">
@@ -243,6 +245,28 @@
     <ul id="shop-stock" class="gear-list"></ul>
     <p class="fineprint">Buying takes no time. Tonics and tea are drunk from the BAG window.</p>
     <form method="dialog"><button>Close</button></form>
+  </dialog>
+
+  <!-- Fenster WORKBENCH (seit Tag 8): öffnet sich, wenn man in eine Werkbank läuft. -->
+  <dialog id="bench-dialog" class="window side-window" aria-labelledby="bench-heading">
+    <h2 class="window-title window-bar">
+      <span id="bench-heading">[ WORKBENCH ]</span>
+      <span class="window-tabs">
+        <button class="tab" data-close aria-label="Close">X</button>
+      </span>
+    </h2>
+    <p id="bench-greeting">Everything a workbench knows how to make. Bring what it needs, then press Make.</p>
+    <section class="bag-section">
+      <h3 class="gear-head">READY</h3>
+      <ul id="bench-ready" class="gear-list"></ul>
+      <p id="bench-none" class="fineprint">Nothing can be made from what you carry yet.</p>
+    </section>
+    <section class="bag-section">
+      <h3 class="gear-head">NOT YET <span class="head-note">what is missing</span></h3>
+      <ul id="bench-later" class="gear-list"></ul>
+    </section>
+    <p id="bench-status" class="window-status" role="status"></p>
+    <p class="fineprint">Making takes no time. New gear goes into the BAG if you already wear something there. Brass ore comes from the gear pits of Mainspring.</p>
   </dialog>
 
   <dialog id="suggest-dialog" class="window">

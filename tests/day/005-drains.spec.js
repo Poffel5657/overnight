@@ -2,7 +2,7 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import {
-  act, activeEvent, attackOf, countItem, createGame, damageFrom, defenseOf, entityAt, equip, questState, tileAt,
+  act, activeEvent, attackOf, countItem, craft, createGame, damageFrom, defenseOf, entityAt, equip, questState, tileAt,
   AI_BEHAVIOURS,
 } from '../../src/game.js';
 import { CREATURES } from '../../content/creatures.js';
@@ -116,6 +116,7 @@ test('Drei Knöpfe werden an der Werkbank zu Knopfpanzer, zwei reichen nicht', (
   expect(s.log.at(-1).text).toContain('three');
   s.player.bag.push('button', 'pencil-stub');
   act(s, 'right');
+  craft(s, 'button-mail'); // seit Tag 8 im Fenster [ WORKBENCH ]
   expect(s.player.armor.body).toBe('button-mail');
   expect(s.player.bag).toEqual(['pencil-stub']);
 });

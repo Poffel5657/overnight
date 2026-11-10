@@ -10,6 +10,7 @@ import { WHEEL } from '../../content/wheel.js';
 import { SPELL_COST } from '../../content/spells.js';
 import { CREATURES } from '../../content/creatures.js';
 import { MAPS } from '../../content/world.js';
+import { MINING } from '../../content/trades.js';
 
 const entities = Object.values(MAPS).flatMap((m) => m.entities);
 
@@ -27,6 +28,7 @@ function usesOf(id) {
   if (WHEEL.cost === id) uses.push('Rad');
   if (SPELL_COST === id) uses.push('Tinte für Zauber');
   if (entities.some((e) => e.key === id)) uses.push('Schlüssel');
+  if (id === MINING.tool && entities.some((e) => e.kind === 'vein')) uses.push('Werkzeug');
   return uses;
 }
 
@@ -34,6 +36,7 @@ function usesOf(id) {
 function sourcesOf(id) {
   const sources = [];
   if (entities.some((e) => e.item === id)) sources.push('liegt in der Welt');
+  if (entities.some((e) => e.kind === 'vein' && e.ore === id)) sources.push('Ader');
   if (entities.some((e) => e.gift?.item === id)) sources.push('Geschenk');
   if (entities.some((e) => e.kind === 'inkwell') && id === SPELL_COST) sources.push('Tintenfass');
   if (Object.values(CREATURES).some((c) => c.drops?.some((d) => d.item === id))) sources.push('Beute');

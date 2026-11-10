@@ -1,7 +1,7 @@
 // Tag 3: Ein spitzer Stein im Teich, eine Werkbank an der Hütte und daraus ein Steinspeer.
 import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { act, attackOf, createGame, entityAt, hasItem, tileAt, activeEvent } from '../../src/game.js';
+import { act, attackOf, craft, createGame, entityAt, hasItem, tileAt, activeEvent } from '../../src/game.js';
 
 const quietGame = (x, y, saved = null) => {
   const s = createGame({ seed: 1, saved });
@@ -52,6 +52,10 @@ test('Stock und Stein werden an der Werkbank zum Steinspeer', () => {
   s.player.x = 11;
   s.player.y = 6;
   act(s, 'left');
+  // Seit Tag 8 öffnet die Werkbank ein Fenster, dort wählt man das Rezept.
+  expect(s.openBench).toBe('bench');
+  expect(s.log.at(-1).text).toContain('stone spear');
+  expect(craft(s, 'stone-spear')).toBe(true);
   expect(s.player.weapon).toBe('stone-spear');
   expect(s.player.bag).toEqual([]);
   expect(attackOf(s)).toBe(4);
@@ -97,5 +101,6 @@ test('Ein Spielstand mit Stein im Beutel kann direkt den Speer bauen', () => {
   expect(s.player.bag).toEqual(['pointy-rock']);
   expect(entityAt(s, 18, 5)).toBeUndefined();
   act(s, 'left');
+  craft(s, 'stone-spear');
   expect(s.player.weapon).toBe('stone-spear');
 });
