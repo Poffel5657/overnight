@@ -5,6 +5,8 @@
 // text = Beschreibung im Fenster [ BAG ].
 // stat (seit Tag 7): jedes Stück, das man bekommt, erhöht state.stats[stat] um 1 (zum Beispiel für Events).
 // spell (seit Tag 7): ein Buch, das einen Zauber aus content/spells.js lehrt, solange man es dabeihat.
+// Jeder Gegenstand braucht einen Zweck und einen Weg in die Welt (tests/play/purpose.spec.js). Einzige Ausnahme:
+// keepsake: '<Begründung>', ein Andenken, das ein offener Faden später braucht (höchstens zwei gleichzeitig).
 export const ITEMS = {
   stick: {
     name: 'stick',
@@ -31,6 +33,7 @@ export const ITEMS = {
   'pencil-stub': {
     name: 'pencil stub',
     text: 'Short, chewed, still sharp. The Dealer said to keep it.',
+    keepsake: 'Offener Faden: wird im langen Bogen gebraucht (PLAN.md, Federkiel aus Stummel und Tinte).',
   },
   // Tag 5: graue Krümel aus der ausradierten Ecke. Der Keeper will sie sehen (Quest "Grey Crumbs").
   crumb: {

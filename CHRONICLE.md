@@ -185,3 +185,9 @@ Nachher (`node tests/balance/report.mjs 80`):
 Der Probespieler weicht den Markierungen aus; die letzte Spalte zeigt, wie es ohne Ausweichen ausgeht. Wer weit über seinen Ort hinaus gelevelt ist, kann die Clock allein schaffen; das ist gewollt.
 
 Für die Nächte: `CLAUDE.md` hat einen neuen Abschnitt „Balance: der Probespieler“. Jede neue Kreatur braucht `balance: { stage, role }`, neue Ausrüstung gehört in die Stufen, und der Bericht steht in jedem Chronik-Eintrag.
+
+## Nach Tag 7 (2026-11-10): Wünsche richtig umsetzen (von Chris, keine Nacht)
+
+Wünsche kamen oft als dünnste Version ins Spiel (ein Ding, das nichts tut; ein Fenster, das am Handy kaum geht), und Chris musste nachbessern. Neu in `CLAUDE.md`: der Abschnitt „Wünsche richtig umsetzen“. Pro Nacht ein Vorschlag, aber gründlich; vorher ein Plan unter `Heute in Arbeit` in `PLAN.md` (was der Spieler will, woran er es merkt, woran es anschließt, der Weg dorthin); ein Spielweg-Test; Bilder vom Spiel mit `tests/play/look.mjs`; große Wünsche unter `Ausbau läuft`; in der Chronik „Gewünscht / Geliefert / Fehlt noch“.
+
+`tests/play/purpose.spec.js` prüft, dass jeder Gegenstand einen Zweck und einen Fundort hat. Gefunden: der Bleistiftstummel (Tag 4) tut bis heute nichts; er ist jetzt als Andenken für den langen Bogen markiert (`keepsake`). `look.mjs` fand gleich einen veralteten Hilfetext im Fenster BAG („Using … takes no time“), obwohl Trinken seit dem Rebalance einen Zug kostet; korrigiert.

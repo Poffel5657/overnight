@@ -34,6 +34,7 @@ Statische Seite ohne Build-Schritt und ohne Laufzeit-Abhängigkeiten, Vanilla JS
 | `content/ballot.js` | Stimmzettel `BALLOT = { day, options: [{ id, since, text }] }`, jede Nacht neu datiert (Format prüft `tests/smoke/vote.spec.js`) |
 | `content/tiles.js` | Geländetypen; `low: true` (seit Tag 7) heißt, HOP darf darüber springen |
 | `content/creatures.js` | Kreaturentypen; seit Tag 7 optional `def` (Panzer gegen Schläge), `reach` (mit `grind`), `stat` (Siege zählen in `state.stats`); seit dem Rebalance Pflicht: `balance: { stage, role }` |
+| `tests/play/` | `purpose.spec.js`: jeder Gegenstand hat einen Zweck und einen Fundort (Ausnahme `keepsake`); `look.mjs`: Bildschirmfotos am Handy und am Rechner aus einem gewählten Spielstand |
 | `content/balance.js` | `STAGES` (Ausrüstung eines Spielers je Ort), `SKILL_ORDER`, `ROLES` (Ziele je Rolle, `lazyWin`: höchstens so oft gewinnt, wer Flächenangriffen nicht ausweicht) für den Probespieler |
 | `content/items.js` | Gegenstände: mit `atk` (und `hitVerb`) eine Waffe, mit `slot` (`head`, `body`, `feet`) und `def` ein Rüstungsteil, mit `heal` ein Getränk (im Fenster BAG benutzbar, seit Tag 6), mit `spell` ein Zauberbuch (seit Tag 7), sonst ein Ding für den Beutel; `stat` zählt jedes erhaltene Stück in `state.stats` (seit Tag 7, Tinte); `text` ist die Beschreibung im Fenster BAG |
 | `content/spells.js` | Zauber (seit Tag 7): `SPELLS = [{ id, name, cost, text, castText, … }]` in Tastenreihenfolge, `SPELL_COST` (Gegenstand, `'ink'`), `SPELL_TEXT` |
