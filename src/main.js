@@ -465,7 +465,7 @@ setupSuggestions({ archived: Boolean(archivedDay) });
 setupVoting({ archived: Boolean(archivedDay) });
 setupRating({ archived: Boolean(archivedDay) });
 setupQuestLog();
-setupWindows({ state, save: () => writeSave(key, state), refresh });
+setupWindows({ state, save: () => writeSave(key, state), refresh, perform });
 updateEvent = setupEvent({ archived: Boolean(archivedDay), getStat: (name) => state.stats[name], getFlags: () => state.flags });
 setupInput();
 greet();

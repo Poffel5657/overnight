@@ -145,3 +145,43 @@ Balance: Alte Gegner unverändert. Der Great Cog ist absichtlich nur zu mehreren
 
 Problem: Im Container scheitert `npx playwright install chromium` weiterhin; Tests liefen mit dem vorinstallierten Chromium, alle grün (213, einer übersprungen).
 
+
+## Nach Tag 7 (2026-11-10): Der große Rebalance (von Chris, keine Nacht)
+
+Die Welt wuchs schnell, aber Kämpfe waren kaum mehr als Laufen. Chris hat den Great Cog, einen Boss für Gruppen, allein und ohne Mühe gelegt. Der Grund: Der Nightwright hat bisher nur getestet, ob etwas funktioniert, nie, ob es sich richtig spielt.
+
+**Der Probespieler** (`tests/balance/`) spielt jetzt jeden Kampf nach, mit der Ausrüstung, die man an diesem Ort realistisch hat (`content/balance.js`, `STAGES`): allein rundenweise und in der gemeinsamen Welt im Takt, allein und zu dritt. Er probiert mehrere Taktiken (hinlaufen und hauen, zuschlagen und ausweichen, warten, zwischen zwei Takten zuschlagen) und nutzt Getränke, MEND und WARD. Jede Kreatur hat eine Rolle (`fodder`, `normal`, `boss`, `group`), und der Test verlangt, dass der Kampf dazu passt.
+
+Vorher (bester Spieler am jeweiligen Ort):
+- Alle Kreaturen in der gemeinsamen Welt: 100 % Siege, 0 % HP verloren. Man schlug öfter zu, als die Kreatur zurückbiss (Schlag alle 500 ms, Takt 700 ms), und konnte zwischen zwei Takten zuschlagen und wegtreten.
+- Krümelhaufen, Overwound Clock, Great Cog allein rundenweise: 100 % Siege bei 8 bis 14 % HP.
+- Kuckucke rundenweise: 0 % (wichen jedes Mal aus, man holte sie nie ein), Krähen 3 %.
+
+Geändert, mit Grund:
+- **Rüstung fängt höchstens die Hälfte eines Schlags ab** (`mitigate()` in `src/core.js`, auch für den Panzer des Cog). Vorher kam man auf Abwehr 9 und nahm von allem nur noch 1 Schaden.
+- **Trinken kostet einen Zug** (`act(s, 'use:<id>')`, in der gemeinsamen Welt die Abklingzeit eines Schlags). Vorher heilte Tee mitten im Kampf umsonst.
+- **Ein Schlag pro Takt:** `PRESENCE.tickMs` und `attackMs` beide 600. Kreaturen ziehen etwas schneller, und Zuschlagen und Wegtreten vor dem nächsten Biss geht nicht mehr.
+- **Bosse heilen in der gemeinsamen Welt**, wenn sie `WORLD_BOSS_REST` (30) Takte lang niemand trifft. Sonst legt man sie allein durch Ohnmacht, Zurücklaufen und Weiterhauen.
+- **Ein Boss zerbricht WARD mit einem Biss.** Vorher hielten vier Tropfen Tinte einen ganzen Gruppenkampf ab.
+- **Kuckucke** picken, wenn man daneben steht, und flattern nur jede zweite Runde weg.
+- **Flächenangriffe der Bosse:** Alle paar Runden markiert ein Boss Felder rot (`×`, roter Schleier), zwei Runden später schlägt er dort zu, mit viel mehr Wucht als sein Biss. Wer daneben stehen bleibt, verliert. Krümelhaufen: Kreuz um sich (Länge 2). Overwound Clock: abwechselnd alles bis 2 Felder um sich und ein Ring 2 bis 3 Felder entfernt (wer zu weit wegläuft, wird auch erwischt). Great Cog: abwechselnd Kreuz (Länge 3) und alles bis 2 Felder. Die Markierungen sind in `content/creatures.js` eigene Einträge mit `mark: true`, laufen allein und in der gemeinsamen Welt gleich und brauchen keine Änderung am Worker.
+- Zahlen: Frosch 14 HP / 3 Angriff / 3 XP, Aal 14 / 5 / 4, Krähe 10 / 4 / 4, Kuckuck 28 / 6 / 4, Krümelhaufen 88 / 8 / 30 (Krümel 9), Overwound Clock 380 / 10 / 45 (Glocke 26), Great Cog 420 / 12 / 60 (Zähne 22). Ratten, Mäuse und Seiten bleiben Kleinvieh.
+
+Nachher (`node tests/balance/report.mjs 80`):
+
+| Kreatur | Rolle | allein rundenweise | allein live | zu dritt live | ohne Ausweichen |
+|---|---|---|---|---|---|
+| Ratte | fodder | 100 % (6 % HP) | 100 % (6 % HP) | | |
+| Frosch | normal | 100 % (18 % HP) | 100 % (18 % HP) | | |
+| Aal | normal | 100 % (24 % HP) | 100 % (16 % HP) | | |
+| Krähe | normal | 100 % (15 % HP) | 100 % (15 % HP) | | |
+| Krümelhaufen | boss | 60 % (93 % HP) | 69 % (93 % HP) | | 14 % allein |
+| Maus | fodder | 100 % (0 % HP) | 100 % (0 % HP) | | |
+| Overwound Clock | group | 0 % | 0 % | 100 % (42 % HP) | 57 % zu dritt |
+| lose Seite | fodder | 100 % (2 % HP) | 100 % (0 % HP) | | |
+| Kuckuck | normal | 100 % (37 % HP) | 100 % (17 % HP) | | |
+| Great Cog | group | 0 % | 0 % | 100 % (33 % HP) | 10 % zu dritt |
+
+Der Probespieler weicht den Markierungen aus; die letzte Spalte zeigt, wie es ohne Ausweichen ausgeht. Wer weit über seinen Ort hinaus gelevelt ist, kann die Clock allein schaffen; das ist gewollt.
+
+Für die Nächte: `CLAUDE.md` hat einen neuen Abschnitt „Balance: der Probespieler“. Jede neue Kreatur braucht `balance: { stage, role }`, neue Ausrüstung gehört in die Stufen, und der Bericht steht in jedem Chronik-Eintrag.

@@ -41,3 +41,7 @@ export const entityAt = (s, x, y) =>
   visibleEntities(s).find((e) => e.x === x && e.y === y);
 
 export const distance = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+
+// Schaden eines Schlags nach Abzug der Abwehr (seit dem Rebalance nach Tag 7): Rüstung und Panzer fangen
+// höchstens die Hälfte eines Schlags ab. Sonst wird man ab einer bestimmten Rüstung von nichts mehr verletzt.
+export const mitigate = (atk, def = 0) => Math.max(Math.ceil(atk / 2), atk - def, 1);

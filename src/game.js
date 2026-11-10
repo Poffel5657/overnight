@@ -9,12 +9,12 @@ import { WHEEL } from '../content/wheel.js';
 import { QUESTS } from '../content/quests.js';
 import { SHOPS } from '../content/shops.js';
 import { SKILLS } from '../content/skills.js';
-import { DIRS, activeEvent, currentDay, distance, entityAt, log, random, tileAt } from './core.js';
+import { DIRS, activeEvent, currentDay, distance, entityAt, log, mitigate, random, tileAt } from './core.js';
 import {
-  ARMOR_SLOTS, countItem, describeGain, gainXp, giveItem, hasItem, isWeapon, skillPoints, takeItem, attackOf,
+  ARMOR_SLOTS, countItem, describeGain, gainXp, giveItem, hasItem, isWeapon, skillPoints, takeItem, attackOf, useItem,
 } from './inventory.js';
 import {
-  AI_BEHAVIOURS, creatureAt, enterMap, isFree, newCreature, spawnCreatures,
+  AI_BEHAVIOURS, creatureAt, creatureTurn, enterMap, isFree, newCreature, spawnCreatures, sweepMarks,
 } from './creatures.js';
 import { castSpell, spellById } from './spells.js';
 
@@ -299,8 +299,8 @@ function spinWheel(s) {
   WHEEL_EFFECTS[wedge.effect](s, wedge);
 }
 
-// Schaden eines Schlags: Angriff minus Panzer der Kreatur (def, seit Tag 7), mindestens 1.
-export const damageTo = (s, type) => Math.max(1, attackOf(s) - (CREATURES[type]?.def ?? 0));
+// Schaden eines Schlags: Angriff minus Panzer der Kreatur (def, seit Tag 7), höchstens die Hälfte abgefangen.
+export const damageTo = (s, type) => mitigate(attackOf(s), CREATURES[type]?.def ?? 0);
 
 function attackCreature(s, c) {
   const def = CREATURES[c.type];
@@ -346,6 +346,7 @@ function endTurn(s) {
   s.turn += 1;
   // In der gemeinsamen Welt bewegt der Server die Kreaturen im Takt, nicht der eigene Zug.
   if (s.shared) return;
+  sweepMarks(s.creatures);
   for (const c of s.creatures) {
     if (c.respawnAt === null) continue;
     if (s.turn >= c.respawnAt && distance(c.spawn, s.player) > 5 && isFree(s, c.spawn.x, c.spawn.y)) {
@@ -358,13 +359,19 @@ function endTurn(s) {
   for (const c of s.creatures) {
     if (c.respawnAt !== null) continue;
     const def = CREATURES[c.type];
-    if (AI_BEHAVIOURS[def.ai](s, c, def)) return;
+    if (creatureTurn(s, c, def)) return;
   }
 }
 
 // Einziger Einstiegspunkt für Spielzüge. Rückgabe: true, wenn eine Runde vergangen ist.
 export function act(s, action) {
   if (action === 'wait') {
+    endTurn(s);
+    return true;
+  }
+  // Trinken (seit dem Rebalance): 'use:<id>' kostet eine Runde, wie ein Schlag. Sonst heilt man sich mitten im Kampf umsonst.
+  if (typeof action === 'string' && action.startsWith('use:')) {
+    if (!useItem(s, action.slice('use:'.length))) return false;
     endTurn(s);
     return true;
   }

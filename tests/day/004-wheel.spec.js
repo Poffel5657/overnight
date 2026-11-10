@@ -28,7 +28,7 @@ test('Neues Spiel beginnt auf Stufe 1 ohne Erfahrung', () => {
   expect(nextLevelXp(s)).toBe(LEVELS[1].xp);
 });
 
-test('Ratten geben 1 XP, Frösche 2, und der Aufstieg stärkt und heilt', () => {
+test('Ratten geben 1 XP, Frösche mehr, und der Aufstieg stärkt und heilt', () => {
   const s = quiet('meadow', 5, 5);
   s.player.weapon = 'stone-spear';
   s.player.hp = 3;
@@ -46,11 +46,12 @@ test('Ratten geben 1 XP, Frösche 2, und der Aufstieg stärkt und heilt', () => 
   expect(s.log.some((l) => l.text.includes('more finished. Level 2'))).toBe(true);
   const frog = foe('frog', 6, 5);
   s.creatures = [frog];
-  act(s, 'right');
-  act(s, 'right');
+  s.player.hp = 99;
+  // Seit dem Rebalance nach Tag 7 ist der Frosch zäher; so viele Stiche, wie seine HP verlangen.
+  for (let i = 0; i < 20 && frog.respawnAt === null; i += 1) act(s, 'right');
   expect(frog.respawnAt).not.toBe(null);
-  expect(s.player.xp).toBe(7);
-  expect(s.stats.xp).toBe(7);
+  expect(s.player.xp).toBe(5 + CREATURES.frog.xp);
+  expect(s.stats.xp).toBe(5 + CREATURES.frog.xp);
 });
 
 test('Stufe 3 gibt einen Angriffspunkt dazu', () => {
@@ -64,13 +65,13 @@ test('Stufe 3 gibt einen Angriffspunkt dazu', () => {
   expect(attackOf(s)).toBe(2);
 });
 
-test('Frösche brauchen mit dem Speer zwei Stiche', () => {
+test('Frösche überstehen einen Stich mit dem Speer', () => {
   const s = quiet('draft', 5, 5);
   s.player.weapon = 'stone-spear';
   const frog = foe('frog', 6, 5);
   s.creatures = [frog];
   act(s, 'right');
-  expect(frog.hp).toBe(1);
+  expect(frog.hp).toBe(CREATURES.frog.hp - attackOf(s));
   expect(frog.respawnAt).toBe(null);
 });
 
@@ -94,7 +95,7 @@ test('Frösche lassen manchmal einen Knopf fallen', () => {
   for (let seed = 1; seed <= 40; seed += 1) {
     const s = quiet('draft', 5, 5, seed);
     s.player.weapon = 'stone-spear';
-    s.player.atk = 5;
+    s.player.atk = CREATURES.frog.hp;
     s.creatures = [foe('frog', 6, 5)];
     act(s, 'right');
     buttons += s.player.bag.filter((id) => id === 'button').length;
@@ -149,7 +150,7 @@ test('Jedes Feld des Rads wirkt', () => {
   expect(visitor.once).toBe(true);
   // Besucher kommen nach dem Sieg nicht wieder.
   s.player.weapon = 'stone-spear';
-  s.player.atk = 5;
+  s.player.atk = CREATURES.frog.hp;
   act(s, ['right', 'left', 'down', 'up'][[[1, 0], [-1, 0], [0, 1], [0, -1]]
     .findIndex(([dx, dy]) => visitor.x === 5 + dx && visitor.y === 5 + dy)]);
   expect(s.creatures).toHaveLength(0);

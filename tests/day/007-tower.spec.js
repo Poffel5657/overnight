@@ -150,7 +150,7 @@ test('WARD hält drei Bisse ab, auch Bisse aus der gemeinsamen Welt; MEND heilt 
   expect(s.player.hp).toBe(s.player.maxHp);
   expect(s.player.ward).toBe(0);
   takeBite(s, 'frog');
-  expect(s.player.hp).toBe(s.player.maxHp - 2);
+  expect(s.player.hp).toBe(s.player.maxHp - CREATURES.frog.atk);
   expect(act(s, 'cast:mend')).toBe(true);
   expect(s.player.hp).toBe(s.player.maxHp);
   expect(act(s, 'cast:mend')).toBe(false);
@@ -159,11 +159,24 @@ test('WARD hält drei Bisse ab, auch Bisse aus der gemeinsamen Welt; MEND heilt 
   expect(isAttack(s, 'cast:ward')).toBe(false);
 });
 
+test('Ein Boss zerbricht WARD mit einem einzigen Biss', () => {
+  const s = quiet('meadow', 8, 5);
+  s.player.bag.push('tome-ward', 'ink');
+  s.player.maxHp = 99;
+  s.player.hp = 99;
+  act(s, 'cast:ward');
+  takeBite(s, 'great-cog');
+  expect(s.player.hp).toBe(s.player.maxHp);
+  expect(s.player.ward).toBe(0);
+  takeBite(s, 'great-cog');
+  expect(s.player.hp).toBeLessThan(s.player.maxHp);
+});
+
 test('Great Cog: gepanzert, festgeschraubt, Zähne reichen in gerader Linie zwei Felder', () => {
   const def = CREATURES['great-cog'];
   const s = quiet('clocktower', 15, 3);
   const cog = place(s, 'great-cog', 15, 5);
-  expect(damageTo(s, 'great-cog')).toBe(Math.max(1, attackOf(s) - def.def));
+  expect(damageTo(s, 'great-cog')).toBe(Math.max(Math.ceil(attackOf(s) / 2), attackOf(s) - def.def));
   // Schräg daneben ist man sicher, egal in welcher Runde.
   s.player.x = 16;
   s.player.y = 4;
@@ -194,25 +207,30 @@ test('Great Cog: gepanzert, festgeschraubt, Zähne reichen in gerader Linie zwei
   expect(MAPS.clocktower.spawns.some((sp) => sp.type === 'great-cog')).toBe(true);
 });
 
-test('Kuckuck spuckt nur bei freier Linie und weicht aus, wenn man nah kommt', () => {
+test('Kuckuck spuckt nur bei freier Linie, pickt daneben und flattert jede zweite Runde weg', () => {
   const def = { ...CREATURES.cuckoo, hitChance: 1 };
   const s = quiet('clocktower', 12, 7);
   const bird = place(s, 'cuckoo', 12, 3);
   s.player.hp = 50;
   AI_BEHAVIOURS.aim(s, bird, def);
-  expect(s.player.hp).toBe(50 - Math.max(1, def.atk));
+  expect(s.player.hp).toBe(50 - def.atk);
   // Etwas dazwischen: kein Schuss.
   place(s, 'page', 12, 5);
   s.player.hp = 50;
   AI_BEHAVIOURS.aim(s, bird, def);
   expect(s.player.hp).toBe(50);
-  // Daneben: Er weicht aus, statt zu picken.
+  // Daneben (seit dem Rebalance): Er pickt, und nur in geraden Runden flattert er danach weg.
   s.creatures = [bird];
   bird.x = 12;
   bird.y = 6;
+  s.turn = 1;
+  AI_BEHAVIOURS.aim(s, bird, def);
+  expect(Math.abs(bird.x - 12) + Math.abs(bird.y - 7)).toBe(1);
+  expect(s.player.hp).toBe(50 - def.atk);
+  s.turn = 2;
   AI_BEHAVIOURS.aim(s, bird, def);
   expect(Math.abs(bird.x - 12) + Math.abs(bird.y - 7)).toBe(2);
-  expect(s.player.hp).toBe(50);
+  expect(s.player.hp).toBe(50 - 2 * def.atk);
 });
 
 test('Tintenkrähen picken und flattern weg; vier verjagte Krähen bringen den Federmantel', () => {
@@ -221,7 +239,7 @@ test('Tintenkrähen picken und flattern weg; vier verjagte Krähen bringen den F
   const crow = place(s, 'crow', 6, 3);
   s.player.hp = 50;
   AI_BEHAVIOURS.swoop(s, crow, def);
-  expect(s.player.hp).toBe(48);
+  expect(s.player.hp).toBe(50 - def.atk);
   expect(Math.abs(crow.x - 6) + Math.abs(crow.y - 4)).toBe(2);
   expect(MAPS.draft.spawns.filter((sp) => sp.type === 'crow')).toHaveLength(2);
 

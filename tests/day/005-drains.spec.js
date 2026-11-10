@@ -102,9 +102,10 @@ test('Die Truhe gibt einmal einen Durchschlag, der angelegt wird und schützt', 
   act(s, 'down');
   expect(s.log.at(-1).text).toContain('empty');
   expect(countItem(s, 'colander')).toBe(1);
-  expect(damageFrom(s, CREATURES.frog)).toBe(1);
+  // Abwehr 1 zieht einen Punkt ab, aber nie mehr als die Hälfte eines Schlags (Rebalance nach Tag 7).
+  expect(damageFrom(s, CREATURES.frog)).toBe(Math.max(Math.ceil(CREATURES.frog.atk / 2), CREATURES.frog.atk - 1));
   expect(damageFrom(s, CREATURES.rat)).toBe(1);
-  expect(damageFrom(s, CREATURES['crumb-heap'])).toBe(4);
+  expect(damageFrom(s, CREATURES['crumb-heap'])).toBe(CREATURES['crumb-heap'].atk - 1);
 });
 
 test('Drei Knöpfe werden an der Werkbank zu Knopfpanzer, zwei reichen nicht', () => {

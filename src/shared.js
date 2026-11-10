@@ -3,7 +3,7 @@ import { MAPS } from '../content/world.js';
 import { CREATURES } from '../content/creatures.js';
 import { WHEEL } from '../content/wheel.js';
 import { DIRS, distance } from './core.js';
-import { AI_BEHAVIOURS, creatureAt, hurtPlayer, isFree, newCreature, spawnCreatures } from './creatures.js';
+import { AI_BEHAVIOURS, creatureAt, creatureTurn, hurtPlayer, isFree, newCreature, spawnCreatures, sweepMarks } from './creatures.js';
 
 // Seit Tag 6. Der Server (worker/presence.js) importiert das über src/game.js, führt pro Karte eine Welt mit
 // createWorld() und rechnet sie im Takt mit stepWorld(). Dafür nutzt er dieselben AI_BEHAVIOURS:
@@ -13,6 +13,9 @@ import { AI_BEHAVIOURS, creatureAt, hurtPlayer, isFree, newCreature, spawnCreatu
 
 // Nach einem Sieg kommen Bosse in der gemeinsamen Welt nach dieser Zahl Takte wieder, damit Spätere sie auch treffen.
 export const WORLD_BOSS_RESPAWN = 900;
+// Ein Boss, den so viele Takte lang niemand trifft, ist wieder heil (seit dem Rebalance). Sonst legt man ihn allein,
+// indem man ohnmächtig wird, zurückläuft und weiterhaut. Etwa 18 Sekunden: genug für eine Trinkpause, nicht für den Weg vom Bett.
+export const WORLD_BOSS_REST = 30;
 
 export function createWorld(mapId, seed = 1) {
   let next = 0;
@@ -26,12 +29,21 @@ const nearest = (c, players) => players.reduce((best, p) => (!best || distance(c
 export function stepWorld(world, players) {
   const bites = [];
   world.turn += 1;
+  sweepMarks(world.creatures);
   const base = { map: world.map, turn: world.turn, seed: world.seed, flags: {}, creatures: world.creatures, others: players };
   for (const c of world.creatures) {
     if (c.respawnAt === null || world.turn < c.respawnAt) continue;
     const view = { ...base, player: { x: -99, y: -99 } };
     if (players.every((p) => distance(c.spawn, p) > 5) && isFree(view, c.spawn.x, c.spawn.y)) {
       Object.assign(c, { x: c.spawn.x, y: c.spawn.y, hp: CREATURES[c.type].hp, respawnAt: null });
+      delete world.hitters[c.id];
+    }
+  }
+  for (const c of world.creatures) {
+    const def = CREATURES[c.type];
+    if (!def?.boss || c.respawnAt !== null || c.hp >= def.hp) continue;
+    if (world.turn - (world.lastHit?.[c.id] ?? 0) > WORLD_BOSS_REST) {
+      c.hp = def.hp;
       delete world.hitters[c.id];
     }
   }
@@ -47,14 +59,18 @@ export function stepWorld(world, players) {
       others: players.filter((p) => p !== target),
       onHurt: () => bites.push({ id: target.id, type: c.type }),
     };
-    AI_BEHAVIOURS[def.ai](view, c, def);
+    creatureTurn(view, c, def);
     world.seed = view.seed;
   }
+  // Neue Markierungen von Flächenangriffen bekommen hier ihre id (das Verhalten kennt den Zähler nicht).
+  for (const c of world.creatures) if (!c.id) c.id = `c${world.next++}`;
   return bites;
 }
 
 // Browser: Wäre dieser Zug ein Angriff? Für die Abklingzeiten in der gemeinsamen Welt.
 export function isAttack(s, action) {
+  // Trinken (seit dem Rebalance) hat dieselbe Abklingzeit wie ein Schlag.
+  if (typeof action === 'string' && action.startsWith('use:')) return true;
   const dir = DIRS[action];
   return Boolean(dir && creatureAt(s, s.player.x + dir[0], s.player.y + dir[1]));
 }
@@ -65,6 +81,7 @@ export function hitWorld(world, id, dmg, player) {
   if (!c || distance(c, player) !== 1) return null;
   const def = CREATURES[c.type];
   c.hp -= dmg;
+  (world.lastHit ??= {})[c.id] = world.turn;
   const hitters = (world.hitters[c.id] ??= []);
   if (!hitters.includes(player.id)) hitters.push(player.id);
   if (c.hp > 0) return { killed: false };

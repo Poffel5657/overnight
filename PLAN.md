@@ -4,7 +4,7 @@ Das hier ist der rote Faden zwischen den Nächten. Halte ihn aktuell und kurz.
 
 ## Stand
 
-- Letzter Tag: 7 (Aufräumnacht)
+- Letzter Tag: 7 (Aufräumnacht). Danach, vor Nacht 8: **großer Rebalance von Chris** mit dem Probespieler (siehe `CHRONICLE.md`, Abschnitt nach Tag 7). Nacht 8 erwähnt im Chronik-Satz für Spieler in einem Halbsatz, dass die Welt über Nacht neu gewichtet wurde (Gegner zäher, Rüstung fängt höchstens die Hälfte ab, Trinken kostet einen Zug, Bosse markieren den Boden, bevor sie zuschlagen). In `LORE.md` die Flächenangriffe der drei Bosse nachtragen, mit ihren Log-Sätzen (`aoe.warnText`).
 - Inbox gelesen bis: `2026-11-09T17-29-34-531Z-c5554587.json` (Vorschläge), Stimmen bis `2026-11-09T17-36-48-306Z-a6f12242.json`, Bewertungen bis `2026-11-08T23-37-47-802Z-22809058.json`. Keine Event-Beiträge (kein Event lief).
 - **Event läuft:** „Bottled Ink“ (`bottled-ink`, Tag 7 bis 9, bei der Magierin, `stats.ink` +3 pro Tag, Ziel 10). Auswerten in Nacht 10. Angekündigte Belohnung: „something to write with, bigger than a book“. Vorschlag: eine **Schreibfeder/Federkiel-Station** im Turm, mit der man Bleistiftlinien (`:`) im Rough Draft mit Tinte nachzieht, sodass sie begehbar werden (der alte Faden „Linien werden fester“), oder ein Tintenfass für jeden Spieler. Nicht erreicht: Die Magierin bleibt freundlich, die Tinte reicht „for a footnote“.
 
@@ -67,7 +67,7 @@ Muster aus den Bewertungen der Spieler (seit 2026-11-06).
 - Tag 4 (Stufen, Rad, Ecke, Frösche): 4 hoch, 0 runter. Systeme, die Fortschritt zeigen, kommen an.
 - Tag 5 (Kanäle, Rüstung, Truhen, Boss, Quest): 4 hoch, 0 runter. Orte mit Gefahr, Ausrüstung und Ziel kommen an.
 - Tag 6 (Mainspring, Echos, Stand, Knacks): 1 hoch, 0 runter. Wenige Stimmen, keine Gegenstimme.
-- Muster: Bisher keine einzige Gegenstimme. Tiefe, Fortschritt und Ausrüstung weiter ausbauen. Ein Spieler fand Kämpfe zu leicht (Nacht 7).
+- Muster: Bisher keine einzige Gegenstimme. Tiefe, Fortschritt und Ausrüstung weiter ausbauen. Ein Spieler fand Kämpfe zu leicht (Nacht 7), Chris auch: Den Great Cog schaffte er allein ohne Mühe. Daraus kam der Rebalance mit dem Probespieler.
 
 ## Offene Fäden
 
@@ -98,6 +98,8 @@ Muster aus den Bewertungen der Spieler (seit 2026-11-06).
 - Wackliger Smoke-Test `tests/smoke/presence.spec.js` („Echos: nur mit ?echoes=1 …“, Nacht 6 gemeldet, zeitabhängig wegen `SEND_GAP_MS`). Seit Chris' Stabilisierung nach Tag 6 in Nacht 7 in drei Läufen grün. Falls er wieder scheitert: nicht am Spiel herumbiegen, sondern melden.
 - Vor dem Abzweigen `git fetch origin main` ausführen und prüfen, dass der Branch auf dem echten `main` aufsetzt (Nacht 5 zeigte `origin/main` zuerst auf einen alten Stand).
 - Der Worker übermittelt pro Kreatur nur `id`, `type`, `x`, `y`, `hp`, keinen Takt. Verhalten, deren Gefahr vom Takt abhängt (Great Cog: Reichweite nur in geraden Runden), sind in der gemeinsamen Welt also nicht vorhersehbar. Für sichtbare Ankündigungen („holt aus“) bräuchte es ein Feld im Worker (Entwurf für Chris, falls gewünscht).
+
+- Balance-Grenzen des Probespielers, die bewusst offen sind: Wer über die Stufe eines Ortes hinaus gelevelt ist, schafft die Overwound Clock auch allein (Stufe 10 mit bester Ausrüstung: ja, knapp). Gruppenkämpfe zu dritt sind in der gemeinsamen Welt kurz (etwa 7 bis 11 Takte). Beobachten, nicht vorab ändern.
 
 ## Ignorierte Inbox-Dateien
 
