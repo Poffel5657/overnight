@@ -12,7 +12,7 @@ export const MAPS = {
       '    T....,.......,.T     ',
       '   T...###.........,.T   ',
       '  T....#B#.........~~.T  ',
-      '  T.,..#.#........s~~~T  ',
+      '  T.,..#.#........s~~vT  ',  // v: Trittstein aus der Ecke hinter dem Teich (Einbahn nach unten)
       '  T....#.#.........~~.T  ',
       '  .....#.#.....,......T  ',
       '   T....................  ',
@@ -335,7 +335,8 @@ export const MAPS = {
     ],
   },
   // Tag 7 (Gewinner von Zettel 6): der krumme Turm der Magierin, hinter einer Tür in den nördlichen Bäumen der Wiese.
-  // Hinter den Löchern im Boden (h) liegt eine Nische, die man nur mit HOP erreicht.
+  // Hinter den Löchern im Boden (h) liegt eine Nische, die man nur mit HOP erreicht. Hinaus geht es auch ohne
+  // Tinte über das schräge Brett (<, Einbahn nach links).
   tower: {
     name: 'The Crooked Tower',
     tiles: [
@@ -343,7 +344,7 @@ export const MAPS = {
       '  kbbbbllllbbbbk ',
       '  kllllllllllhlk ',
       ' klllllllllllhlk ',
-      ' klllllllllllhlk ',
+      ' klllllllllll<lk ',
       ' kllllllllllkkkk ',
       '  kllllllllllk   ',
       '  kllllllllllk   ',
@@ -401,6 +402,7 @@ export const MAPS = {
   },
   // Tag 7 (Vorschlag: ein Boss, den man zusammen besiegt, im Uhrturm): drinnen dreht sich der Great Cog.
   // Kuckucke spucken aus der Ferne. Auf der Insel aus Zahnrädern steht eine Truhe, die man nur mit HOP erreicht.
+  // Hinaus führt die Messingrutsche ({, Einbahn nach links).
   clocktower: {
     name: 'The Clock Tower',
     tiles: [
@@ -409,7 +411,7 @@ export const MAPS = {
       'Moo%oooooooooooooooM',
       'MooooooooooooooooooM',
       'MoooogggggoooooooooM',
-      'ooooogooogoooooooooM',
+      'ooooo{ooogoooooooooM',
       'MoooogggggoooooooooM',
       'MooooooooooooooooooM',
       'Moo%oooooooooooo%ooM',

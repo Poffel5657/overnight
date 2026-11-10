@@ -400,7 +400,8 @@ export function act(s, action) {
     return true;
   }
   const tile = tileAt(s.map, x, y);
-  if (!tile.walkable) {
+  // Einbahnfelder (oneWay) lassen sich nur in ihrer Richtung betreten.
+  if (!tile.walkable && tile.oneWay !== action) {
     if (tile.bump) log(s, tile.bump);
     return false;
   }

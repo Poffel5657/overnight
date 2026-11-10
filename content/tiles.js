@@ -1,6 +1,8 @@
 // Geländetypen: Schlüssel ist das Zeichen in den Kartenzeilen aus world.js.
 // bump = Meldung beim Dagegenlaufen, wenn das Feld nicht begehbar ist.
 // low (seit Tag 7): tief genug, dass man mit dem Zauber HOP darüber springen kann.
+// oneWay (seit Tag 7, Wartung): Einbahnfeld. Betreten nur in dieser Richtung (up/down/left/right), sonst wie
+// nicht begehbar. Führt aus HOP-Nischen heraus, damit niemand ohne Tinte festsitzt.
 export const TILES = {
   ' ': {
     name: 'nothing', glyph: ' ', fg: '#000000', bg: '#07070f', walkable: false,
@@ -80,5 +82,19 @@ export const TILES = {
   'g': {
     name: 'turning gears', glyph: '*', fg: '#b58b45', bg: '#120d07', walkable: false, low: true,
     bump: 'Gears, turning just below the floor. Too wide to step over. A hop, maybe.',
+  },
+  // Wartung nach Tag 7: Trittstein aus der Ecke hinter dem Teich (nur mit HOP erreichbar).
+  'v': {
+    name: 'mossy stone', glyph: 'v', fg: '#8fbf8a', bg: '#14304a', walkable: false, low: true, oneWay: 'down',
+    bump: 'A mossy stone, sloped towards the meadow. From the far bank you could slip down it. Back up, not a chance.',
+  },
+  // Wartung nach Tag 7: Rutschen aus den HOP-Nischen. Hinaus geht es immer, hinein nur mit HOP.
+  '<': {
+    name: 'slanted board', glyph: '<', fg: '#b49be0', bg: '#130f1a', walkable: false, low: true, oneWay: 'left',
+    bump: 'A loose board, tilted the wrong way for you. From the other side you could slide down it. Up, never.',
+  },
+  '{': {
+    name: 'brass chute', glyph: '<', fg: '#f2c56b', bg: '#120d07', walkable: false, low: true, oneWay: 'left',
+    bump: 'A brass chute, polished by the gears. Sliding off the island is easy. Climbing up it is not.',
   },
 };
