@@ -6,22 +6,22 @@
 //   { ballot: 3, options: [{ text: 'A town of steam and gears…', votes: 4, won: true }, …] }
 //   text wie auf dem alten Zettel, votes aus den gezählten Dateien, won genau einmal true.
 export const BALLOT = {
-  day: 7,
+  day: 8,
   options: [
-    { id: 'deep-pond', since: 5, text: 'The pond gets deeper. Someone finally invents swimming.' },
     { id: 'hedge-maze', since: 6, text: 'A hedge maze grows off the meadow. Something with hooves guards the middle.' },
     { id: 'deeper-drains', since: 7, text: 'The drains go down another floor, and something worse than crumbs lives there.' },
-    { id: 'first-trade', since: 7, text: 'Learn a trade: dig ore from the gear pits of Mainspring and work it at the bench.' },
     { id: 'standing-stones', since: 7, text: 'A ring of odd stones turns up in the Rough Draft. Nobody knows what it does.' },
+    { id: 'hut-grows', since: 8, text: 'Your hut grows a roof, a proper door and an upstairs. The workbench moves in.' },
+    { id: 'fourth-spell', since: 8, text: 'A fourth spellbook hides somewhere in the world. The Mage would love to read it.' },
   ],
   lastResult: {
-    ballot: 6,
+    ballot: 7,
     options: [
-      { text: 'Your hut grows a roof and an upstairs overnight. The workbench moves in.', votes: 0, won: false },
-      { text: 'A band of very small miners plays very loud music. Listening makes you brave.', votes: 0, won: false },
       { text: 'The pond gets deeper. Someone finally invents swimming.', votes: 0, won: false },
-      { text: 'A crooked tower where a mage takes apprentices and teaches spells from dusty tomes.', votes: 3, won: true },
-      { text: 'A hedge maze grows off the meadow. Something with hooves guards the middle.', votes: 1, won: false },
+      { text: 'A hedge maze grows off the meadow. Something with hooves guards the middle.', votes: 0, won: false },
+      { text: 'The drains go down another floor, and something worse than crumbs lives there.', votes: 0, won: false },
+      { text: 'Learn a trade: dig ore from the gear pits of Mainspring and work it at the bench.', votes: 0, won: true },
+      { text: 'A ring of odd stones turns up in the Rough Draft. Nobody knows what it does.', votes: 0, won: false },
     ],
   },
 };

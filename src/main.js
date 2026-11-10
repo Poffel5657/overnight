@@ -4,7 +4,7 @@ import {
   takeBite, skillPoints, questProgress, knownSpells, spellById,
 } from './game.js';
 import { createRenderer } from './render.js';
-import { XP_CELLS, bagCounts, bar, el, openShop, setupWindows, xpProgress } from './windows.js';
+import { XP_CELLS, bagCounts, bar, el, openBench, openShop, setupWindows, xpProgress } from './windows.js';
 import { loadSave, saveKey, writeSave } from './save.js';
 import { setupSuggestions } from './suggest.js';
 import { setupVoting } from './vote.js';
@@ -282,6 +282,7 @@ function run(action) {
   presence.moved();
   if (state.outbox?.length) presence.send(state.outbox.splice(0));
   openShop();
+  openBench();
 }
 
 // Chatnachrichten als Sprechblase über der Figur, die sie geschrieben hat. Chat und Echos haben

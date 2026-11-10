@@ -17,8 +17,8 @@ export const MAPS = {
       '  .....#.#.....,......T  ',
       '   T....................  ',
       '   T..,..........,....T  ',
-      '    TT...........,..TT   ',
-      '      TTTTTTTTTTTTTT     ',
+      '    TT......ee...,..TT   ',  // Tag 8: der Rand rückt ein
+      '      TTTeeeeeeeeTTT     ',
     ],
     entities: [
       {
@@ -39,6 +39,8 @@ export const MAPS = {
           'There is a gate in the western trees now. It ticks. I went through. There is a whole town in there, and a Mayor, who wound me up.',
           'A tower grew in the northern trees overnight. Crooked. There is a Mage in it who says ink is the only thing that lasts. She looked worried saying it.',
           'Mainspring opened its clock tower. Something big in there turns and turns. Take friends. Take several.',
+          'The south edge of the meadow is rubbed out. A whole row of trees, gone in the night. There is a Surveyor down there now, measuring what is left.',
+          'Mainspring has everyone digging in its gear pits. Brass ore, they say. The workbench by your hut has never been so busy.',
         ],
         // Einmalige Bemerkung, sobald der Spieler den Gegenstand trägt.
         itemLines: {
@@ -47,6 +49,8 @@ export const MAPS = {
           'drain-hook': "That came out of the sump? Then the sump is a little emptier. Good. I never liked the sump.",
           'tome-ward': 'A spellbook? In my meadow? Well. Ward the hut while you are at it.',
           wrench: 'A wrench from Mainspring. They make tools over there that actually fit your hand. Show-offs.',
+          'brass-axe': 'An axe! Please do not point it at the trees. We have fewer of those than yesterday.',
+          'surveyor-boots': 'Those are the Surveyor\'s boots. If she gave you those, she trusts your feet.',
         },
       },
       {
@@ -89,11 +93,30 @@ export const MAPS = {
         down: { map: 'drains', x: 2, y: 2 },
         downText: 'You lean in for a drink you do not need, and keep leaning. Splash. You are in the drains.',
       },
+      // Tag 8: Der Südrand der Wiese ist über Nacht ausradiert. Die Vermesserin misst, was übrig ist.
+      {
+        id: 'surveyor', kind: 'npc', name: 'The Surveyor', glyph: 'U', color: '#9fd0ee', x: 8, y: 10,
+        lines: [
+          'Twenty-five paces, east to west. I measure it every night. Last night the last pace was shorter.',
+          'I am the Surveyor. Somebody has to know how big things are, before they are smaller.',
+          'The south row of trees is rubbed out. Not cut. Rubbed. You can tell by the crumbs.',
+          'Mites crawl out of the rubbed bits. Little grey grubs. They chew at the edges.',
+          'Brass holds. Pegs of it, driven in at the corners, and a line stays where it is put. Mostly.',
+          'Mainspring digs ore out of its gear pits. I have never seen anything so happy to be dug.',
+        ],
+        itemLines: {
+          pick: 'A pick! Good. Ore makes brass, brass makes pegs, pegs make edges stay put.',
+          'brass-ore': 'Ore. Two lumps make a peg at any workbench. The one by your hut will do.',
+          'springsteel-sword': 'Springsteel. That blade would hold a straight line all by itself.',
+        },
+      },
     ],
     spawns: [
       { type: 'rat', x: 18, y: 9 },
       { type: 'rat', x: 6, y: 9 },
       { type: 'rat', x: 16, y: 3 },
+      { type: 'mite', x: 13, y: 9 },
+      { type: 'mite', x: 16, y: 10 },
     ],
   },
   // Tag 2: Der erste Ort hinter der Wiese, erreichbar durch die Tür in der Lücke im Osten.
@@ -296,8 +319,14 @@ export const MAPS = {
           'The mice in the Winding Yard were meant to carry springs to me. Now they just carry them.',
           'There is something big in the yard. Wound far too tight. I would not go alone. Go with an Echo or two.',
           'The Great Cog in the tower is bolted down, armoured, and its teeth reach two squares. Stand off the straight lines.',
+          'The gear pits are full of brass ore. The veins shine, by the edges. Somebody left an old pick by the pit up here.',
+          'My bench is just there. It makes the same things as the one on the meadow, only with more brass in them.',
         ],
         itemLines: {
+          pick: 'That old pick! Walk into the shiny veins by the pits. Two strikes a night each, then they need to grow back.',
+          'brass-ore': 'Ore! Bring it to my bench, just there. Brass wants to be something. An axe, a plate, a peg.',
+          springsteel: 'Springsteel from the deep veins? Three of those and a little ore make a blade worth having.',
+          'brass-axe': 'You made that? With a spring in the handle? I may have to hire you.',
           wrench: 'Treat that wrench well. It has opinions about bolts.',
           'stone-spear': 'A spear made of a rock and a stick? Charming. Primitive, but charming.',
         },
@@ -313,6 +342,7 @@ export const MAPS = {
         ],
         itemLines: {
           'cog-tooth': 'Is that a tooth of the Great Cog? The clocks all skipped last night. Civic thanks, citizen. Quietly.',
+          'brass-plate': 'Mainspring brass, worn proudly! Civic pride looks good on you, citizen.',
         },
       },
       // Tag 7: Der Uhrturm hat eine Tür. Drinnen dreht sich der Great Cog (Vorschlag: ein Boss für eine Gruppe).
@@ -324,6 +354,39 @@ export const MAPS = {
       {
         id: 'yard-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 22, y: 6,
         text: 'THE WINDING YARD. Loose mice. One loose clock. Visit in company.',
+      },
+      // Tag 8: Bergbau (Gewinner von Zettel 7). Adern an den Zahnradgruben, eine alte Spitzhacke, eine zweite Werkbank.
+      {
+        id: 'pit-sign', kind: 'sign', name: 'Sign', glyph: '?', color: '#e6e3d3', x: 6, y: 2,
+        text: 'GEAR PITS. Brass ore in the shiny veins. Bring a pick. Two strikes per vein per night. Fingers out of the gears.',
+      },
+      {
+        id: 'old-pick', kind: 'pickup', item: 'pick', name: "Miner's pick", glyph: 'Γ', color: '#c8ccd4', x: 7, y: 3,
+        text: 'An old pick leans against the pit rail. Nobody seems to own it. It seems to own you, a little.',
+      },
+      {
+        id: 'tinker-bench', kind: 'bench', name: "Tinker's bench", glyph: 'π', color: '#c9a04f', x: 2, y: 2,
+        text: "The Tinker's bench, covered in tiny screws. It has nothing to work on.",
+      },
+      {
+        id: 'vein-pit', kind: 'vein', name: 'Ore vein', glyph: '*', color: '#f2c56b', x: 6, y: 3, ore: 'brass-ore', amount: 2,
+        text: 'You swing the pick. A lump of brass ore clinks loose.',
+        dryText: 'The vein is worked out for tonight. It glints, a little sulkily. Try again tomorrow.',
+      },
+      {
+        id: 'vein-south', kind: 'vein', name: 'Ore vein', glyph: '*', color: '#f2c56b', x: 4, y: 10, ore: 'brass-ore', amount: 2,
+        text: 'You swing the pick. A lump of brass ore clinks loose.',
+        dryText: 'The vein is worked out for tonight. It glints, a little sulkily. Try again tomorrow.',
+      },
+      {
+        id: 'vein-square', kind: 'vein', name: 'Ore vein', glyph: '*', color: '#f2c56b', x: 18, y: 9, ore: 'brass-ore', amount: 2,
+        text: 'You swing the pick. A lump of brass ore clinks loose.',
+        dryText: 'The vein is worked out for tonight. It glints, a little sulkily. Try again tomorrow.',
+      },
+      {
+        id: 'vein-yard', kind: 'vein', name: 'Ore vein', glyph: '*', color: '#f2c56b', x: 26, y: 4, ore: 'brass-ore', amount: 2,
+        text: 'You swing the pick in the Winding Yard. A lump of brass ore clinks loose. Something large ticks nearby.',
+        dryText: 'The vein is worked out for tonight. It glints, a little sulkily. Try again tomorrow.',
       },
     ],
     spawns: [
@@ -432,6 +495,17 @@ export const MAPS = {
         id: 'gear-chest', kind: 'chest', item: 'brass-greaves', name: 'Chest', glyph: '■', openGlyph: '□', color: '#c49a6c', x: 8, y: 5,
         text: 'You open the chest on the island of gears. Brass greaves, still warm from the machinery.',
         emptyText: 'The chest is empty. The gears go on turning round it, unimpressed.',
+      },
+      // Tag 8: tiefe Adern mit Federstahl. Erst ab dem Rang Pitworker (content/trades.js).
+      {
+        id: 'deep-vein-north', kind: 'vein', deep: true, name: 'Deep vein', glyph: '*', color: '#9fd0ee', x: 4, y: 2, ore: 'springsteel', amount: 1,
+        text: 'You swing hard. A sliver of springsteel twangs out of the deep vein.',
+        dryText: 'The deep vein has given what it will tonight. It hums, very faintly, about tomorrow.',
+      },
+      {
+        id: 'deep-vein-south', kind: 'vein', deep: true, name: 'Deep vein', glyph: '*', color: '#9fd0ee', x: 16, y: 9, ore: 'springsteel', amount: 1,
+        text: 'You swing hard. A sliver of springsteel twangs out of the deep vein. A cuckoo glares.',
+        dryText: 'The deep vein has given what it will tonight. It hums, very faintly, about tomorrow.',
       },
     ],
     spawns: [

@@ -1,8 +1,11 @@
-// Fenster [ CHARA ], [ BAG ] und [ SHOP ] und die Balken der Leiste unter der Karte.
+// Fenster [ CHARA ], [ BAG ], [ SHOP ] und [ WORKBENCH ] (seit Tag 8) und die Balken der Leiste unter der Karte.
 // In der Aufräumnacht 7 aus src/main.js gelöst; main.js ruft setupWindows() einmal auf.
 import {
-  attackOf, buy, countItem, defenseOf, equip, learnSkill, nextLevelXp, skillPoints, ARMOR_SLOTS,
+  attackOf, buy, canCraft, countItem, craft, defenseOf, equip, hasItem, learnSkill, miningRank, miningStrikes, nextLevelXp,
+  nextMiningRank, recipeNeeds, skillPoints, ARMOR_SLOTS,
 } from './game.js';
+import { RECIPES } from '../content/recipes.js';
+import { MINING } from '../content/trades.js';
 import { ITEMS } from '../content/items.js';
 import { SHOPS } from '../content/shops.js';
 import { SKILLS } from '../content/skills.js';
@@ -132,6 +135,20 @@ function drawChara() {
     row.append(el('span', 'gear-text', skill.text));
     return row;
   }));
+
+  // Berufe (seit Tag 8): Rang als Kästchen, Titel, Schläge bis zum nächsten Rang.
+  const rank = miningRank(state);
+  const strikes = miningStrikes(state);
+  const nextRank = nextMiningRank(state);
+  const trade = el('li', 'gear-row');
+  trade.dataset.trade = 'mining';
+  trade.append(el('span', 'gear-kind pips', '■'.repeat(rank + 1) + '□'.repeat(MINING.ranks.length - rank - 1)));
+  trade.lastChild.setAttribute('aria-label', `rank ${rank + 1} of ${MINING.ranks.length}`);
+  trade.append(el('span', 'gear-name', `${MINING.name}: ${MINING.ranks[rank].title}`));
+  trade.append(el('span', 'gear-done', nextRank ? `${strikes}/${nextRank.at} to ${nextRank.title}` : `${strikes} strikes`));
+  const hint = hasItem(state, MINING.tool) ? MINING.text : `${MINING.text} First you need a pick: one lies by the gear pits of Mainspring.`;
+  trade.append(el('span', 'gear-text', hint));
+  $('chara-trades').replaceChildren(trade);
 }
 
 function drawBag() {
@@ -174,6 +191,39 @@ function drawBag() {
 export function drawWindows() {
   if ($('chara-dialog').open) drawChara();
   if ($('bag-dialog').open) drawBag();
+  if ($('bench-dialog').open) drawBench();
+}
+
+// Fenster [ WORKBENCH ] (seit Tag 8): alle Rezepte, zuerst was geht. Bei den anderen steht, was fehlt.
+function drawBench() {
+  const ready = [];
+  const later = [];
+  for (const recipe of RECIPES) {
+    const ok = canCraft(state, recipe);
+    const button = windowButton('Make', () => craft(state, recipe.id), 'bench-status');
+    button.disabled = !ok;
+    const row = gearRow('', recipe.makes, button);
+    row.dataset.recipe = recipe.id;
+    const needs = recipeNeeds(state, recipe).map((n) => {
+      return el('span', n.have >= n.need ? 'need-ok' : 'need-missing', `${n.need}× ${ITEMS[n.id].name} (${Math.min(n.have, n.need)}/${n.need})`);
+    });
+    const line = el('span', 'gear-needs');
+    needs.forEach((part, i) => { if (i) line.append(' + '); line.append(part); });
+    button.after(line);
+    (ok ? ready : later).push(row);
+  }
+  $('bench-ready').replaceChildren(...ready);
+  $('bench-later').replaceChildren(...later);
+  $('bench-none').hidden = ready.length > 0;
+}
+
+export function openBench() {
+  if (!state.openBench) return;
+  state.openBench = null;
+  $('bench-status').textContent = '';
+  for (const id of ['chara-dialog', 'bag-dialog', 'shop-dialog']) if ($(id).open) $(id).close();
+  drawBench();
+  if (!$('bench-dialog').open) $('bench-dialog').showModal();
 }
 
 // Fenster [ SHOP ] (seit Tag 6): öffnet sich, wenn man in einen Stand läuft (state.openShop).
@@ -241,7 +291,7 @@ export function setupWindows(options) {
     button.addEventListener('click', () => button.closest('dialog').close());
   }
   // Ein Klick neben das Fenster schließt es, wie man es von Spielen kennt.
-  for (const id of ['chara-dialog', 'bag-dialog', 'shop-dialog']) {
+  for (const id of ['chara-dialog', 'bag-dialog', 'shop-dialog', 'bench-dialog']) {
     $(id).addEventListener('click', (event) => { if (event.target === $(id)) $(id).close(); });
   }
   document.addEventListener('keydown', (event) => {

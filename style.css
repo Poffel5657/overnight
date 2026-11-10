@@ -204,6 +204,10 @@ canvas {
 .gear-done { margin-left: auto; color: var(--good); font-size: 17px; }
 .gear-text { flex-basis: 100%; color: var(--muted); font-size: 17px; }
 .pips { color: var(--accent); letter-spacing: 2px; }
+/* Fenster [ WORKBENCH ] (seit Tag 8): Zutaten unter dem Namen, Fehlendes rot. */
+.gear-needs { flex-basis: 100%; font-size: 17px; color: var(--muted); }
+.need-ok { color: var(--good); }
+.need-missing { color: var(--danger); }
 
 /* Fenster [ CHARA ] und [ BAG ]: Titelleiste bleibt beim Scrollen stehen, Wechsel per Reiter. */
 .side-window { width: min(560px, calc(100vw - 24px)); }

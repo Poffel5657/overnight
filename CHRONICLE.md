@@ -193,3 +193,39 @@ Wünsche kamen oft als dünnste Version ins Spiel (ein Ding, das nichts tut; ein
 `tests/play/purpose.spec.js` prüft, dass jeder Gegenstand einen Zweck und einen Fundort hat. Gefunden: der Bleistiftstummel (Tag 4) tut bis heute nichts; er ist jetzt als Andenken für den langen Bogen markiert (`keepsake`). `look.mjs` fand gleich einen veralteten Hilfetext im Fenster BAG („Using … takes no time“), obwohl Trinken seit dem Rebalance einen Zug kostet; korrigiert.
 
 Nachtrag: Die Zeilengrenze (1000, Aufräumnacht 2000, großer Umbau 3000) ist weg, im Workflow wie in den Regeln. Es bleibt bei drei Teilen pro Nacht, auch mehrere Wünsche, aber jeder richtig. Freigabe durch Chris braucht nur noch, was das Grundwesen des Spiels ändert (Look, Zugsystem, gemeinsame Welt, alte Spielstände).
+
+## Tag 8 (2026-11-11): Messing in den Gruben, und eine kürzere Wiese
+
+Keine neuen Vorschläge in der Inbox, deshalb entfällt Teil 1, und Teil 3 fällt größer aus. Die beiden Teile greifen ineinander: Der Bergbau liefert das Messing, mit dem die Vermesserin den ausradierten Rand der Wiese festpflocken will.
+
+**Teil 1, aus den Vorschlägen:** entfällt (keine neuen Vorschläge).
+
+**Teil 2, aus der Abstimmung: ein erster Beruf, Bergbau (`first-trade`).** Zettel 7: keine einzige Stimme (Teich 0, Heckenlabyrinth 0, tiefere Kanäle 0, Beruf 0, Steinkreis 0). Ich habe den Beruf gewählt, weil Berufe in den Nächten 5, 6 und 7 der häufigste Wunsch waren.
+- **Gewünscht:** etwas sammeln, daraus Dinge machen, die man wirklich braucht, und dabei besser werden (Bergbau, Erz aus den Zahnradgruben, an der Werkbank verarbeiten).
+- **Geliefert:**
+  - An den Zahnradgruben von Mainspring liegt eine alte **Spitzhacke** (`Γ`), daneben ein Schild. Vier **Erzadern** (`*`, eine im Winding Yard neben der Overwound Clock) geben jede Nacht zwei Schläge her, also bis zu acht Klumpen **Messingerz** pro Nacht.
+  - **Bergbau als Beruf** (`content/trades.js`): Jeder Schlag zählt. Ränge Novice, Digger (6 Schläge, 25 % Chance auf ein zweites Stück), Pitworker (16, 40 %, öffnet die tiefen Adern), Old Hand (30, 60 %). Aufstieg steht im Log, der Stand im Fenster CHARA unter dem neuen Abschnitt TRADES. Jeder Schlag gibt außerdem 1 XP.
+  - Zwei **tiefe Adern** im Uhrturm geben ab Pitworker **Federstahl** (eine pro Ader und Nacht), mitten zwischen Kuckucken und dem Great Cog.
+  - **Neues Fenster WORKBENCH:** Die Werkbank rät nicht mehr, welches Rezept man meint. Sie zeigt alle Rezepte, oben was schon geht, darunter was fehlt (grün/rot mit Zahlen), Knopf „Make“. Eine zweite Werkbank steht beim Tinker.
+  - Neue Rezepte: **Messingpflock** (2 Erz), **Messingaxt** (3 Erz und eine Feder von den Mäusen, Angriff +5), **Messingplatte** (5 Erz, Abwehr 2), **Federstahlschwert** (3 Federstahl und 2 Erz, Angriff +7, die stärkste Waffe bisher).
+  - Der Tinker erklärt Hacke, Erz und Federstahl und gibt nach „Loose Springs“ jede Nacht „Pit Quota“ (3 Erz für 3 Knöpfe und 5 XP). Keeper und Mayor bemerken Axt und Platte.
+- **Fehlt noch:** weitere Berufe (Kräuter, Alchemie, Schmieden …). Erz hat jetzt fünf Verwendungen; ein zweiter Beruf ist ein eigener Wunsch für später (unter „Ideen für später“), kein laufender Ausbau.
+
+**Teil 3, vom Nightwright: Der Rand rückt ein, und die Vermesserin.**
+- Der lange Bogen wird sichtbar: Die **südliche Baumreihe der Wiese ist ausradiert**, dazu zwei Felder Wiese davor. Der Keeper bemerkt es.
+- Neue Figur **The Surveyor** (`U`) misst die Wiese jede Nacht. Quest **„Pegging the Edge“**: drei Messingpflöcke bringen (der Weg führt über Mainspring, Hacke, Adern und Werkbank), Belohnung **Vermesserstiefel** (Abwehr 2, Füße) und 10 XP. Danach täglich **„Night Survey“**: drei Radiermilben, dafür 2 Knöpfe und 3 XP.
+- Neue Kreatur **Radiermilbe** (`u`, Kleinvieh auf der Wiese), kriecht aus dem ausradierten Rand, lässt manchmal graue Krümel fallen (hilft auch bei den Krümel-Quests von Keeper und Dealer).
+- Warum: Der Bogen hatte bisher nur den Rough Draft berührt. Jetzt verliert die Startwiese selbst ein Stück, und die Spieler können etwas dagegen tun, das mit dem neuen Beruf zusammenhängt.
+
+Außerdem: Der Spielersatz nennt den großen Rebalance von Chris nach Tag 7. Der Hilfetext im Fenster CHARA sagte noch „one point always gets through“; seit dem Rebalance fängt Rüstung höchstens die Hälfte ab. Korrigiert.
+
+Community-Event: „Bottled Ink“ läuft (Tag 7 bis 9). Stand im Inbox-Repo: 2 Beiträge bei Ziel 10. Auswertung in Nacht 10.
+
+Bewertung von Tag 7: keine Bewertungen (0 hoch, 0 runter).
+
+### Balance
+
+`node tests/balance/report.mjs`: Alles passt.
+- Radiermilbe (neu, fodder, Wiese): allein rundenweise 100 % (15 % HP), allein live 100 % (10 % HP).
+- Die Stufe `clocktower` trägt jetzt die Vermesserstiefel (Abwehr 2 statt Gummistiefel): Great Cog zu dritt weiter 100 % bei 33 % HP, allein 0 %; ohne Ausweichen 2 % zu dritt. Kuckuck 100 % (37 % / 16 % HP).
+- Messingaxt (+5) ist so stark wie der Kanalhaken, Messingplatte (2) wie der Federmantel; an den Stufen ändert sich dadurch nichts. Das Federstahlschwert (+7) braucht zwei Nächte Graben bis Pitworker und ein bis zwei weitere für drei Federstahl; es steht deshalb in keiner Stufe. Wer es hat, ist über die Welt hinaus ausgerüstet; das ist der Lohn.
